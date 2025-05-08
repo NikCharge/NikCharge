@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>tqs</groupId>
-    <artifactId>NikCharge</artifactId>
+    <artifactId>Backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>NikCharge</name>
-    <description>NikCharge</description>
+    <name>Backend</name>
+    <description>Backend</description>
     <url/>
     <licenses>
         <license/>
