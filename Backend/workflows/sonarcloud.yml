@@ -4,8 +4,13 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
 
 jobs:
   build:
@@ -30,4 +35,4 @@ jobs:
       - name: Build and analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn clean verify sonar:sonar -Dsonar.projectKey=Backend -Dsonar.organization=NikCharge -Dsonar.host.url=https://sonarcloud.io
+        run: mvn clean verify sonar:sonar -Dsonar.projectKey=nikcharge-backend -Dsonar.organization=NikCharge -Dsonar.host.url=https://sonarcloud.io
