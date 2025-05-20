@@ -6,43 +6,85 @@ import car from "../assets/car.png";
 const Homepage = () => {
     return (
         <div className="homepage">
-            {/* ✅ HEADER */}
+            {/* Header with subtle animation */}
             <header className="header">
-                <img src={logo} alt="NikCharge Logo" className="logo" />
+                <div className="corner-shape"></div>
+                <img src={logo} alt="NikCharge Logo" className="logo animate-fade-in"/>
 
                 <nav className="nav">
-                    <a href="#">Home</a>
-                    <a href="#">About</a>
-                    <a href="#">Search</a>
+                    <a href="#" className="nav-link">Home</a>
+                    <a href="/about" className="nav-link">About</a>
+                    <a href="#" className="nav-link">Locations</a>
                 </nav>
 
-                <button className="login-button">Login / Register</button>
+                <button className="login-button">
+                    <span className="login-text">Login / Register</span>
+                </button>
             </header>
 
-            {/* ✅ MAIN SECTION */}
+            {/* Main section with animated elements */}
             <main className="main-section">
                 <div className="text-section">
-                    <h1>
-                        Your smart <span className="highlight">electric</span><br />
+                    <h1 className="headline animate-slide-up">
+                        Your smart <span className="highlight">electric</span><br/>
                         <span className="highlight">charging network</span>.
                     </h1>
+                    <p className="subheading animate-fade-in">
+                        Find the nearest charging station for your EV with our smart app.
+                    </p>
+                    <div className="cta-buttons">
+                        <button className="cta-button primary">Get Started</button>
+                        <button className="cta-button secondary">Learn More</button>
+                    </div>
                 </div>
                 <div className="image-section">
-                    <img src={car} alt="Car at Charging Station" className="car-image" />
+                    <div className="background-circle"></div>
+                    <img src={car} alt="Car at Charging Station" className="car-image animate-float"/>
                 </div>
             </main>
 
-            {/* ✅ FOOTER */}
+            <div className="white-bar">
+                <div className="features-preview">
+                    <div className="feature-item">
+                        <div className="feature-icon">🔌</div>
+                        <h3>Fast Charging</h3>
+                        <p>Rapid charging solution for all EVs</p>
+                    </div>
+                    <div className="feature-item">
+                        <div className="feature-icon">🗺️</div>
+                        <h3>Smart Location</h3>
+                        <p>Find stations wherever you go</p>
+                    </div>
+                    <div className="feature-item">
+                        <div className="feature-icon">💰</div>
+                        <h3>Cost Effective</h3>
+                        <p>Save money with our innovative app</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Enhanced footer */}
             <footer className="footer">
-                <p>Copyright @ 2025</p>
-                <div className="footer-info">
-                    <img src={logo} alt="NikCharge Logo" className="footer-logo" />
-                    <p>
-                        Universidade de Aveiro<br />
-                        Departamento de Electrónica, Telecomunicações e Informática<br />
-                        Testes de Qualidade de Software<br />
-                        Ana Rita Silva, Ângela Ribeiro, Carolina Silva, Hugo Castro
-                    </p>
+                <div className="footer-content">
+                    <div className="footer-left">
+                        <p className="copyright">© 2025 NikCharge</p>
+                        <div className="social-icons">
+                            <a href="#" className="social-icon">📱</a>
+                            <a href="#" className="social-icon">💻</a>
+                            <a href="#" className="social-icon">📧</a>
+                        </div>
+                    </div>
+
+                    <div className="footer-center">
+                        <img src={logo} alt="NikCharge Logo" className="footer-logo"/>
+                    </div>
+
+                    <div className="footer-right">
+                        <p className="university">Universidade de Aveiro</p>
+                        <p className="department">Departamento de Electrónica, Telecomunicações e Informática</p>
+                        <p className="course">Testes de Qualidade de Software</p>
+                        <p className="authors">Ana Rita Silva, Ângela Ribeiro, Carolina Silva, Hugo Castro</p>
+                    </div>
                 </div>
             </footer>
         </div>
