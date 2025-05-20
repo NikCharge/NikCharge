@@ -48,5 +48,5 @@ jobs:
             -Dsonar.projectKey=nikcharge-backend \
             -Dsonar.organization=NikCharge \
             -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file Backend/pom.xml
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file pom.xml
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
