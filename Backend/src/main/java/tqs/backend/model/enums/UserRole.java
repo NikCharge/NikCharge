@@ -1,7 +1,7 @@
 package tqs.backend.model.enums;
 
 public enum UserRole {
-    USER,
+    CLIENT,
     EMPLOYEE,
     MANAGER
 }
