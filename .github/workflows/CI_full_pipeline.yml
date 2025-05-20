@@ -43,19 +43,19 @@ jobs:
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: test-results
-          path: Backend/target/surefire-reports/
+      # - name: Upload test results
+      #   if: always()
+      #   uses: actions/upload-artifact@v3.1.2
+      #   with:
+      #     name: test-results
+      #     path: Backend/target/surefire-reports/
 
-      - name: Upload JaCoCo Report
-        if: always()
-        uses: actions/upload-artifact@v3.1.2
-        with:
-          name: coverage-report
-          path: Backend/target/site/jacoco/
+      # - name: Upload JaCoCo Report
+      #   if: always()
+      #   uses: actions/upload-artifact@v3.1.2
+      #   with:
+      #     name: coverage-report
+      #     path: Backend/target/site/jacoco/
 
   # cucumber-tests:
   #   name: Run Cucumber Tests
