@@ -21,8 +21,8 @@ public class EvProfile {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "client_id")
+    private Client client;
 
     private Double batteryCapacityKwh;
     private Double fullRangeKm;
