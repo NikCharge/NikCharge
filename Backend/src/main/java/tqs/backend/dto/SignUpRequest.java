@@ -22,11 +22,9 @@ public class SignUpRequest {
 
     @NotNull(message = "Battery capacity is required")
     @Positive(message = "Battery capacity must be a positive number")
-    @Max(value = 200, message = "Battery capacity cannot exceed 200 kWh")
     private Double batteryCapacityKwh;
 
     @NotNull(message = "Full range is required")
     @Positive(message = "Full range must be a positive number")
-    @Max(value = 1000, message = "Full range cannot exceed 1000 km")
     private Double fullRangeKm;
 }
