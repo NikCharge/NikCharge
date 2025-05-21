@@ -18,6 +18,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.http.HttpStatus;
 import tqs.backend.model.enums.UserRole;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import jakarta.validation.Validator;
+import tqs.backend.repository.ClientRepository;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,6 +33,7 @@ import static org.mockito.Mockito.when;
 
 @WebMvcTest(ClientController.class)
 @Import({ ClientControllerTest.MockConfig.class, ClientControllerTest.SecurityConfig.class })
+@ActiveProfiles("test")
 class ClientControllerTest {
 
     @Autowired
@@ -43,6 +50,21 @@ class ClientControllerTest {
         @Bean
         public ClientService clientService() {
             return mock(ClientService.class);
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+            return new BCryptPasswordEncoder();
+        }
+
+        @Bean
+        public Validator validator() {
+            return new LocalValidatorFactoryBean();
+        }
+
+        @Bean
+        public ClientRepository clientRepository() {
+            return mock(ClientRepository.class);
         }
     }
 
