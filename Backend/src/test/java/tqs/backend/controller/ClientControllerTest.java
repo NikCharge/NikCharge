@@ -28,8 +28,6 @@ import tqs.backend.repository.ClientRepository;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @WebMvcTest(ClientController.class)
 @Import({ ClientControllerTest.MockConfig.class, ClientControllerTest.SecurityConfig.class })
@@ -73,11 +71,10 @@ class ClientControllerTest {
     static class SecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            http
-                    .csrf(AbstractHttpConfigurer::disable)
-                    .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/clients/signup").permitAll()
-                            .anyRequest().authenticated());
+            http.csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/clients/signup").permitAll()
+                        .anyRequest().authenticated());
             return http.build();
         }
     }
@@ -104,13 +101,7 @@ class ClientControllerTest {
 
         mockMvc.perform(post("/api/clients/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{" +
-                        "\"name\": \"John Doe\"," +
-                        "\"email\": \"john@example.com\"," +
-                        "\"password\": \"password123\"," +
-                        "\"batteryCapacityKwh\": 50.0," +
-                        "\"fullRangeKm\": 300.0" +
-                        "}"))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("john@example.com"));
     }
@@ -127,21 +118,21 @@ class ClientControllerTest {
         mockMvc.perform(post("/api/clients/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.email").exists());
     }
 
     @Test
     void signUpWithMissingRequiredFields_shouldReturnBadRequest() throws Exception {
         SignUpRequest req = new SignUpRequest();
         req.setName("Test");
-        // Missing email
         req.setPassword("password123");
-        // Missing battery capacity and range
 
         mockMvc.perform(post("/api/clients/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.email").exists());
     }
 
     @Test
@@ -153,19 +144,14 @@ class ClientControllerTest {
         request.setBatteryCapacityKwh(50.0);
         request.setFullRangeKm(300.0);
 
-        when(clientService.signUp(any(SignUpRequest.class))).thenThrow(new RuntimeException("Email already exists"));
+        when(clientService.signUp(any(SignUpRequest.class)))
+                .thenThrow(new RuntimeException("Email already exists"));
 
         mockMvc.perform(post("/api/clients/signup")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{" +
-                        "\"name\": \"John Doe\"," +
-                        "\"email\": \"john@example.com\"," +
-                        "\"password\": \"password123\"," +
-                        "\"batteryCapacityKwh\": 50.0," +
-                        "\"fullRangeKm\": 300.0" +
-                        "}"))
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
-                .andExpect(content().string("Email already exists"));
+                .andExpect(jsonPath("$.error").value("Email already exists"));
     }
 
     @Test
@@ -174,12 +160,13 @@ class ClientControllerTest {
         req.setName("Test");
         req.setEmail("test@mail.com");
         req.setPassword("password123");
-        req.setBatteryCapacityKwh(-1.0); // Invalid negative value
+        req.setBatteryCapacityKwh(-1.0);
         req.setFullRangeKm(300.0);
 
         mockMvc.perform(post("/api/clients/signup")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.batteryCapacityKwh").exists());
     }
 }
