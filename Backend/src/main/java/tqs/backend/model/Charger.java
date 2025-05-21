@@ -1,0 +1,40 @@
+package tqs.backend.model;
+
+import jakarta.persistence.*;
+import tqs.backend.model.enums.ChargerStatus;
+import tqs.backend.model.enums.ChargerType;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import lombok.*;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Charger {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "station_id")
+    private Station station;
+
+    @Enumerated(EnumType.STRING)
+    private ChargerType chargerType;
+
+    @Enumerated(EnumType.STRING)
+    private ChargerStatus status;
+
+    private BigDecimal pricePerKwh;
+    private LocalDateTime lastMaintenance;
+    private String maintenanceNote;
+
+    // Getters and Setters
+}
