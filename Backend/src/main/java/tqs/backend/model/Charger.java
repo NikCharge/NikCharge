@@ -36,5 +36,4 @@ public class Charger {
     private LocalDateTime lastMaintenance;
     private String maintenanceNote;
 
-    // Getters and Setters
 }
