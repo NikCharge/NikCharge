@@ -31,7 +31,7 @@ public class ClientService {
         client.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         client.setBatteryCapacityKwh(request.getBatteryCapacityKwh());
         client.setFullRangeKm(request.getFullRangeKm());
-        client.setRole(UserRole.USER);
+        client.setRole(UserRole.CLIENT);
 
         return clientRepository.save(client);
     }
