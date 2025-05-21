@@ -1,4 +1,15 @@
+version: '3.9'
+
 services:
+  maven-build:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: maven-build
+    working_dir: /app
+    volumes:
+      - ./Backend:/app
+    command: mvn package -DskipTests
+    restart: "no"
+
   postgres:
     image: postgres:15
     container_name: postgres
@@ -17,30 +28,16 @@ services:
       retries: 5
       start_period: 5s
 
-  influxdb:
-    image: influxdb:2.7
-    container_name: influxdb
-    ports:
-      - "8086:8086"
-    volumes:
-      - influxdb_data:/var/lib/influxdb2
-    environment:
-      DOCKER_INFLUXDB_INIT_MODE: setup
-      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUXDB_USER}
-      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD}
-      DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG}
-      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET}
-      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN}
 
   backend:
     build:
       context: ./Backend
       dockerfile: Dockerfile.backend
     depends_on:
+      maven-build:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
-      influxdb:
-        condition: service_started
     ports:
       - "8080:8080"
     environment:
@@ -50,10 +47,6 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
       SPRING_JPA_SHOW_SQL: "true"
       SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
-      INFLUXDB_URL: "http://influxdb:8086"
-      INFLUXDB_TOKEN: "${INFLUXDB_TOKEN}"
-      INFLUXDB_ORG: "${INFLUXDB_ORG}"
-      INFLUXDB_BUCKET: "${INFLUXDB_BUCKET}"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
@@ -65,7 +58,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.frontend
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - ./frontend:/app
     depends_on:
@@ -83,9 +76,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: always
 
-
 volumes:
   postgres_data:
     driver: local
-  influxdb_data:
-    driver: local
+ 
