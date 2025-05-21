@@ -12,6 +12,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 public class Client {
 
     @Id
@@ -29,6 +30,7 @@ public class Client {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL)
-    private EvProfile evProfile;
+    // Fields from EvProfile
+    private Double batteryCapacityKwh;
+    private Double fullRangeKm;
 }
