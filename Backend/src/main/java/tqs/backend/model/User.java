@@ -2,7 +2,6 @@ package tqs.backend.model;
 
 import jakarta.persistence.*;
 import tqs.backend.model.enums.UserRole;
-
 import lombok.*;
 
 @Entity
@@ -29,6 +28,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private EvProfile evProfile;
+    // Fields from EvProfile
+    private Double batteryCapacityKwh;
+    private Double fullRangeKm;
 }
