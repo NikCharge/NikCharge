@@ -1,11 +1,11 @@
 package tqs.backend.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import tqs.backend.model.User;
+import tqs.backend.model.Client;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email);
+public interface ClientRepository extends JpaRepository<Client, Long> {
+    Optional<Client> findByEmail(String email);
     boolean existsByEmail(String email);
 }

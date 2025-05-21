@@ -20,7 +20,7 @@ public class TripPlan {
     private Long id;
 
     @ManyToOne
-    private User user;
+    private Client user;
 
     private String startLocation;
     private String destination;

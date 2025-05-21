@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import "../../css/Homepage.css";
 
@@ -8,14 +9,14 @@ const Header = () => (
         <img src={logo} alt="NikCharge Logo" className="logo animate-fade-in" />
 
         <nav className="nav">
-            <a href="/project2/NikCharge/frontend/public" className="nav-link">Home</a>
-            <a href="/about" className="nav-link">About</a>
-            <a href="#" className="nav-link">Locations</a>
+            <Link to="/" className="nav-link">Home</Link>
+            <Link to="/about" className="nav-link">About</Link>
+            <Link to="#" className="nav-link">Locations</Link>
         </nav>
 
-        <button className="login-button">
+        <Link to="/signup" className="login-button">
             <span className="login-text">Login / Register</span>
-        </button>
+        </Link>
     </header>
 );
 

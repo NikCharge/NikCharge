@@ -2,6 +2,7 @@ package tqs.backend.model;
 
 import jakarta.persistence.*;
 import tqs.backend.model.enums.UserRole;
+
 import lombok.*;
 
 @Entity
@@ -11,7 +12,8 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class User {
+@ToString
+public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

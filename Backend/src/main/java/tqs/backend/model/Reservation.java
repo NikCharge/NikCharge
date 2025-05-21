@@ -22,7 +22,7 @@ public class Reservation {
     private Long id;
 
     @ManyToOne
-    private User user;
+    private Client user;
 
     @ManyToOne
     private Charger charger;
