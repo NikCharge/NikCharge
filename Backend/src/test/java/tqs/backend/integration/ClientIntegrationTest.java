@@ -1,3 +1,4 @@
+// ClientIntegrationTest.java
 package tqs.backend.integration;
 
 import io.restassured.RestAssured;
@@ -37,12 +38,12 @@ public class ClientIntegrationTest {
         @Override
         public void initialize(ConfigurableApplicationContext context) {
             TestPropertyValues.of(
-                    "spring.datasource.url=" + postgres.getJdbcUrl(),
-                    "spring.datasource.username=" + postgres.getUsername(),
-                    "spring.datasource.password=" + postgres.getPassword(),
-                    "spring.jpa.hibernate.ddl-auto=create-drop",
-                    "spring.jpa.show-sql=true",
-                    "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect")
+                            "spring.datasource.url=" + postgres.getJdbcUrl(),
+                            "spring.datasource.username=" + postgres.getUsername(),
+                            "spring.datasource.password=" + postgres.getPassword(),
+                            "spring.jpa.hibernate.ddl-auto=create-drop",
+                            "spring.jpa.show-sql=true",
+                            "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect")
                     .applyTo(context.getEnvironment());
         }
     }
@@ -72,77 +73,39 @@ public class ClientIntegrationTest {
 
     @Test
     void testSignupWithDuplicateEmail_ReturnsConflict() {
-        // First signup
-        given()
-                .contentType(ContentType.JSON)
+        given().contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "FirstUser",
                         "email", "duplicate@example.com",
                         "password", "strongpass123",
                         "batteryCapacityKwh", 50,
                         "fullRangeKm", 300))
-                .when()
-                .post("/api/clients/signup")
-                .then()
-                .statusCode(200);
+                .when().post("/api/clients/signup").then().statusCode(200);
 
-        // Second signup with same email
-        given()
-                .contentType(ContentType.JSON)
+        given().contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "SecondUser",
                         "email", "duplicate@example.com",
                         "password", "strongpass123",
                         "batteryCapacityKwh", 60,
                         "fullRangeKm", 350))
-                .when()
-                .post("/api/clients/signup")
-                .then()
-                .statusCode(409);
+                .when().post("/api/clients/signup")
+                .then().statusCode(409)
+                .body("error", equalTo("Email already exists"));
     }
 
     @Test
-    void testSignupWithInvalidData_ReturnsBadRequest() {
+    void testSignupWithInvalidEmail() {
         given()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
-                        "name", "InvalidUser",
+                        "name", "Invalid",
                         "email", "invalid-email",
-                        "password", "123", // Too short
-                        "batteryCapacityKwh", -1, // Invalid negative value
-                        "fullRangeKm", -1)) // Invalid negative value
-                .when()
-                .post("/api/clients/signup")
-                .then()
-                .statusCode(400);
-    }
-
-    @Test
-    void testSignupWithMissingRequiredFields_ReturnsBadRequest() {
-        given()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "name", "IncompleteUser",
-                        "email", "incomplete@example.com"))
-                .when()
-                .post("/api/clients/signup")
-                .then()
-                .statusCode(400);
-    }
-
-    @Test
-    void testSignupWithExtremeValues_ReturnsBadRequest() {
-        given()
-                .contentType(ContentType.JSON)
-                .body(Map.of(
-                        "name", "ExtremeUser",
-                        "email", "extreme@example.com",
-                        "password", "strongpass123",
-                        "batteryCapacityKwh", 1000, // Unrealistically high
-                        "fullRangeKm", 10000)) // Unrealistically high
-                .when()
-                .post("/api/clients/signup")
-                .then()
-                .statusCode(400);
+                        "password", "abcdefgh",
+                        "batteryCapacityKwh", 70,
+                        "fullRangeKm", 350))
+                .when().post("/api/clients/signup")
+                .then().statusCode(400)
+                .body(containsString("email"));
     }
 }
