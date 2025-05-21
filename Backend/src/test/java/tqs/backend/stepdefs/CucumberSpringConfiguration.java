@@ -6,7 +6,7 @@ import org.springframework.test.context.ActiveProfiles;
 import tqs.backend.BackendApplication;
 
 @CucumberContextConfiguration
-@SpringBootTest(classes = BackendApplication.class)
+@SpringBootTest(classes = BackendApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 public class CucumberSpringConfiguration {
 }

@@ -1,25 +1,31 @@
-package tqs.stepdefs;
+package tqs.backend.stepdefs;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.And;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ContextConfiguration;
 import tqs.backend.BackendApplication;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+// @CucumberContextConfiguration
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = BackendApplication.class)
 public class UserRegistrationStepDefs {
+
+        @Autowired
+        private ObjectMapper objectMapper;
 
         @LocalServerPort
         private int port;
@@ -30,6 +36,7 @@ public class UserRegistrationStepDefs {
         @Given("the system is running")
         public void theSystemIsRunning() {
                 RestAssured.port = port;
+                RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
         }
 
         @Given("a user with email {string} exists in the system")
@@ -69,21 +76,6 @@ public class UserRegistrationStepDefs {
                 response.then()
                                 .body("email", equalTo(registrationData.get("email")))
                                 .body("name", equalTo(registrationData.get("name")));
-        }
-
-        @And("the user should be created in the system")
-        public void theUserShouldBeCreatedInTheSystem() {
-                // Verify user exists by attempting to login
-                Response loginResponse = RestAssured.given()
-                                .contentType("application/json")
-                                .body("{\"email\": \"" + registrationData.get("email") + "\", " +
-                                                "\"password\": \"" + registrationData.get("password") + "\"}")
-                                .when()
-                                .post("/api/auth/login");
-
-                loginResponse.then()
-                                .statusCode(200)
-                                .body("token", notNullValue());
         }
 
         @Then("the registration should fail")

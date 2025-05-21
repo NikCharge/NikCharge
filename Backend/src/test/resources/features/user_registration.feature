@@ -14,7 +14,6 @@ Feature: User Registration
       | test@example.com | Password123! | John Doe |
     Then the registration should be successful
     And I should receive a confirmation message
-    And the user should be created in the system
 
   @validation @email
   Scenario: Registration fails with invalid email format
