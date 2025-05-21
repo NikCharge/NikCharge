@@ -5,6 +5,7 @@ import tqs.backend.model.enums.UserRole;
 import lombok.*;
 
 @Entity
+@Table(name = "app_user")
 @Getter
 @Setter
 @NoArgsConstructor

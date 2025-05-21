@@ -3,6 +3,7 @@ package tqs.backend.model;
 import jakarta.persistence.*;
 
 import java.util.List;
+import tqs.backend.model.enums.ChargerStatus;
 
 import lombok.*;
 
@@ -27,4 +28,21 @@ public class Station {
 
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
     private List<Charger> chargers;
+
+    public void addCharger(Charger charger) {
+        if (this.chargers == null) {
+            this.chargers = new java.util.ArrayList<>();
+        }
+        this.chargers.add(charger);
+        charger.setStation(this); // ensure bidirectional mapping is maintained
+    }
+
+    public long getAvailableChargerCount() {
+        if (this.chargers == null) return 0;
+        return chargers.stream()
+                .filter(charger -> charger.getStatus() == ChargerStatus.AVAILABLE)
+                .count();
+    }
+
+
 }
