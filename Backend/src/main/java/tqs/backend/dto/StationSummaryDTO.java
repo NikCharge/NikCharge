@@ -1,29 +1,27 @@
-// src/main/java/tqs/backend/dto/StationSummaryDTO.java
 package tqs.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import tqs.backend.model.Station;
 import tqs.backend.util.GeoUtils;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class StationSummaryDTO {
-
     private String name;
-    private double distance; // in km
-    private long availableCount;
+    private double distance;
+    private int availableCount;
 
     public static StationSummaryDTO fromStation(Station station, double userLat, double userLng) {
-        double dist = GeoUtils.calculateDistance(userLat, userLng,
-                station.getLatitude(), station.getLongitude());
-
+        double dist = GeoUtils.calculateDistance(
+                userLat, userLng,
+                station.getLatitude(), station.getLongitude()
+        );
         return new StationSummaryDTO(
                 station.getName(),
                 dist,
-                station.getAvailableChargerCount()
+                (int) station.getAvailableChargerCount()
         );
     }
 }
