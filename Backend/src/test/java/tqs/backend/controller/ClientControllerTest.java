@@ -98,7 +98,7 @@ class ClientControllerTest {
         client.setPasswordHash("hashed");
         client.setBatteryCapacityKwh(request.getBatteryCapacityKwh());
         client.setFullRangeKm(request.getFullRangeKm());
-        client.setRole(UserRole.USER);
+        client.setRole(UserRole.CLIENT);
 
         when(clientService.signUp(any(SignUpRequest.class))).thenReturn(client);
 
