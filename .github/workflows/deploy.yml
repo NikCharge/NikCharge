@@ -30,6 +30,8 @@ jobs:
 
       - name: Start Docker Compose Environment
         run: docker compose up -d
+        env:
+            GITHUB_REPOSITORY_OWNER: ${{ env.GITHUB_REPOSITORY_OWNER }}
 
   build:
     name: Docker Build and Push
