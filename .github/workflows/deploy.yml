@@ -33,7 +33,7 @@ jobs:
     needs: acceptance_tests
     runs-on: ubuntu-latest
     env:
-          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner.toLowerCase() }}
+          GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
     steps:
       - uses: actions/checkout@v3
 
