@@ -111,7 +111,6 @@ public class ClientIntegrationTest {
 
     @Test
     void testValidLogin_ReturnsOk() {
-        // First sign up the user
         given().contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "LoginUser",
@@ -122,7 +121,6 @@ public class ClientIntegrationTest {
                 .when().post("/api/clients/signup")
                 .then().statusCode(200);
 
-        // Now login
         given().contentType(ContentType.JSON)
                 .body(Map.of(
                         "email", "loginuser@example.com",
@@ -130,7 +128,8 @@ public class ClientIntegrationTest {
                 .when().post("/api/clients/login")
                 .then().statusCode(200)
                 .body("token", notNullValue())
-                .body("email", equalTo("loginuser@example.com"));
+                .body("email", equalTo("loginuser@example.com"))
+                .body("name", equalTo("LoginUser"));
     }
 
     @Test

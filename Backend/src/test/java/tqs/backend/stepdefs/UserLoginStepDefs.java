@@ -54,7 +54,8 @@ public class UserLoginStepDefs {
     public void iShouldReceiveAnAuthenticationToken() {
         response.then()
                 .body("token", notNullValue())
-                .body("email", equalTo(loginData.get("email")));
+                .body("email", equalTo(loginData.get("email")))
+                .body("name", notNullValue());
     }
 
     @Then("the login should fail with bad request")
