@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Map;
 
+import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -117,12 +118,74 @@ class ClientApiTest {
                 .body(Map.of(
                         "name", "Weak",
                         "email", "weak@example.com",
-                        "password", "123", // Too short
+                        "password", "123",
                         "batteryCapacityKwh", 70,
                         "fullRangeKm", 350))
                 .when()
                 .post("/api/clients/signup")
                 .then()
                 .statusCode(400);
+    }
+
+    @Test
+    void postValidLogin_ReturnsOk() {
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "name", "LoginUser",
+                        "email", "login@example.com",
+                        "password", "abcdefgh",
+                        "batteryCapacityKwh", 70,
+                        "fullRangeKm", 350))
+                .when().post("/api/clients/signup").then().statusCode(200);
+
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "email", "login@example.com",
+                        "password", "abcdefgh"))
+                .when().post("/api/clients/login")
+                .then().statusCode(200)
+                .body("token", notNullValue())
+                .body("email", equalTo("login@example.com"))
+                .body("name", equalTo("LoginUser"));
+    }
+
+    @Test
+    void postLoginWithWrongPassword_ReturnsForbidden() {
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "email", "login@example.com",
+                        "password", "wrongpass"))
+                .when().post("/api/clients/login")
+                .then().statusCode(403);
+    }
+
+    @Test
+    void postLoginWithNonExistentEmail_ReturnsForbidden() {
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "email", "notfound@example.com",
+                        "password", "abcdefgh"))
+                .when().post("/api/clients/login")
+                .then().statusCode(403);
+    }
+
+    @Test
+    void postLoginWithInvalidEmailFormat_ReturnsBadRequest() {
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "email", "invalidemail",
+                        "password", "abcdefgh"))
+                .when().post("/api/clients/login")
+                .then().statusCode(400)
+                .body("error.email", notNullValue());
+    }
+
+    @Test
+    void postLoginWithMissingFields_ReturnsBadRequest() {
+        given().contentType(ContentType.JSON)
+                .body(Map.of("email", "login@example.com"))
+                .when().post("/api/clients/login")
+                .then().statusCode(400)
+                .body("error.password", notNullValue());
     }
 }

@@ -16,7 +16,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.http.HttpStatus;
 import tqs.backend.model.enums.UserRole;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +23,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import jakarta.validation.Validator;
 import tqs.backend.repository.ClientRepository;
+
+import java.util.Map;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -42,6 +44,9 @@ class ClientControllerTest {
 
     @Autowired
     private ClientService clientService;
+
+    @Autowired
+    private ClientRepository clientRepository;
 
     @TestConfiguration
     static class MockConfig {
@@ -73,7 +78,7 @@ class ClientControllerTest {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/clients/signup").permitAll()
+                        .requestMatchers("/api/clients/signup", "/api/clients/login").permitAll()
                         .anyRequest().authenticated());
             return http.build();
         }
@@ -169,4 +174,81 @@ class ClientControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.batteryCapacityKwh").exists());
     }
+
+    @Test
+    void validLogin_shouldReturnOk() throws Exception {
+        // Setup
+        String email = "login@example.com";
+        String rawPassword = "password123";
+
+        Client client = new Client();
+        client.setName("LoginUser");
+        client.setEmail(email);
+        client.setPasswordHash(new BCryptPasswordEncoder().encode(rawPassword));
+
+        when(clientRepository.findByEmail(email)).thenReturn(Optional.of(client));
+
+        Map<String, String> loginRequest = Map.of(
+                "email", email,
+                "password", rawPassword
+        );
+
+        mockMvc.perform(post("/api/clients/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").exists())
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.name").value("LoginUser"));
+    }
+
+    @Test
+    void loginWithWrongPassword_shouldReturnForbidden() throws Exception {
+        String email = "login@example.com";
+
+        Client client = new Client();
+        client.setEmail(email);
+        client.setPasswordHash(new BCryptPasswordEncoder().encode("correctPassword"));
+
+        when(clientRepository.findByEmail(email)).thenReturn(Optional.of(client));
+
+        Map<String, String> loginRequest = Map.of(
+                "email", email,
+                "password", "wrongPassword"
+        );
+
+        mockMvc.perform(post("/api/clients/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Invalid credentials"));
+    }
+
+    @Test
+    void loginWithNonExistentEmail_shouldReturnForbidden() throws Exception {
+        when(clientRepository.findByEmail("nope@example.com")).thenReturn(Optional.empty());
+
+        Map<String, String> loginRequest = Map.of(
+                "email", "nope@example.com",
+                "password", "somepassword"
+        );
+
+        mockMvc.perform(post("/api/clients/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.error").value("Invalid credentials"));
+    }
+
+    @Test
+    void loginWithMissingFields_shouldReturnBadRequest() throws Exception {
+        Map<String, String> loginRequest = Map.of("email", "someone@example.com");
+
+        mockMvc.perform(post("/api/clients/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.password").value("Password is required"));
+    }
+
 }
