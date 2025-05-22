@@ -108,4 +108,71 @@ public class ClientIntegrationTest {
                 .then().statusCode(400)
                 .body(containsString("email"));
     }
+
+    @Test
+    void testValidLogin_ReturnsOk() {
+        // First sign up the user
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "name", "LoginUser",
+                        "email", "loginuser@example.com",
+                        "password", "password123",
+                        "batteryCapacityKwh", 60,
+                        "fullRangeKm", 350))
+                .when().post("/api/clients/signup")
+                .then().statusCode(200);
+
+        // Now login
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "email", "loginuser@example.com",
+                        "password", "password123"))
+                .when().post("/api/clients/login")
+                .then().statusCode(200)
+                .body("token", notNullValue())
+                .body("email", equalTo("loginuser@example.com"));
+    }
+
+    @Test
+    void testLoginWithWrongPassword_ReturnsForbidden() {
+        // Signup first
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "name", "WrongPass",
+                        "email", "wrongpass@example.com",
+                        "password", "correct123",
+                        "batteryCapacityKwh", 55,
+                        "fullRangeKm", 300))
+                .when().post("/api/clients/signup").then().statusCode(200);
+
+        // Attempt login with wrong password
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "email", "wrongpass@example.com",
+                        "password", "wrong123"))
+                .when().post("/api/clients/login")
+                .then().statusCode(403)
+                .body("error", equalTo("Invalid credentials"));
+    }
+
+    @Test
+    void testLoginWithNonExistentEmail_ReturnsForbidden() {
+        given().contentType(ContentType.JSON)
+                .body(Map.of(
+                        "email", "notfound@example.com",
+                        "password", "somepass123"))
+                .when().post("/api/clients/login")
+                .then().statusCode(403)
+                .body("error", equalTo("Invalid credentials"));
+    }
+
+    @Test
+    void testLoginWithMissingFields_ReturnsBadRequest() {
+        given().contentType(ContentType.JSON)
+                .body(Map.of("email", "missing@example.com"))
+                .when().post("/api/clients/login")
+                .then().statusCode(400)
+                .body("error.password", equalTo("Password is required"));
+    }
+
 }

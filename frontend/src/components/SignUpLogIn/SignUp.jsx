@@ -22,6 +22,7 @@ const SignUp = () => {
 
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState(null);
+    const [messageType, setMessageType] = useState(""); // "success" or "error"
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -53,10 +54,27 @@ const SignUp = () => {
 
             const response = await axios.post("http://localhost:8080/api/clients/signup", payload);
             setMessage("Account created successfully!");
+            setMessageType("success");
             console.log(response.data);
         } catch (error) {
             console.error("Signup error:", error);
-            setMessage("Failed to create account. Please try again.");
+            let errorMsg = "Failed to create account. Please try again.";
+
+            if (error.response && error.response.data) {
+                const data = error.response.data;
+
+                if (typeof data === "string") {
+                    errorMsg = data;
+                } else if (typeof data === "object") {
+                    // Combine field-specific errors into one message
+                    errorMsg = Object.entries(data)
+                        .map(([field, msg]) => `${field}: ${msg}`)
+                        .join(" | ");
+                }
+            }
+
+            setMessage(errorMsg);
+            setMessageType("error");
         }
     };
 
@@ -145,7 +163,15 @@ const SignUp = () => {
                     SIGN UP
                 </button>
 
-                {message && <p className="signup-message">{message}</p>}
+                {message && (
+                    <p
+                        className={`signup-message ${
+                            messageType === "success" ? "success-message" : "error-message"
+                        }`}
+                    >
+                        {message}
+                    </p>
+                )}
             </form>
         </div>
     );

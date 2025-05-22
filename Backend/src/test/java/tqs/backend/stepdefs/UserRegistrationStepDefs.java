@@ -33,12 +33,6 @@ public class UserRegistrationStepDefs {
         private Response response;
         private Map<String, String> registrationData;
 
-        @Given("the system is running")
-        public void theSystemIsRunning() {
-                RestAssured.port = port;
-                RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        }
-
         @Given("a user with email {string} exists in the system")
         public void aUserWithEmailExistsInTheSystem(String email) {
                 // Create a test user in the system
