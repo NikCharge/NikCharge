@@ -144,7 +144,9 @@ class ClientApiTest {
                         "password", "abcdefgh"))
                 .when().post("/api/clients/login")
                 .then().statusCode(200)
-                .body("token", notNullValue());
+                .body("token", notNullValue())
+                .body("email", equalTo("login@example.com"))
+                .body("name", equalTo("LoginUser"));
     }
 
     @Test

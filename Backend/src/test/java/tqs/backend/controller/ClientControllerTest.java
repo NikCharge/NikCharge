@@ -182,6 +182,7 @@ class ClientControllerTest {
         String rawPassword = "password123";
 
         Client client = new Client();
+        client.setName("LoginUser");
         client.setEmail(email);
         client.setPasswordHash(new BCryptPasswordEncoder().encode(rawPassword));
 
@@ -197,7 +198,8 @@ class ClientControllerTest {
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.email").value(email));
+                .andExpect(jsonPath("$.email").value(email))
+                .andExpect(jsonPath("$.name").value("LoginUser"));
     }
 
     @Test

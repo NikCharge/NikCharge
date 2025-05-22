@@ -17,10 +17,24 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:8080/api/clients/login", formData);
+            const response = await axios.post("http://localhost:8080/api/clients/login", formData, {
+                withCredentials: true,
+            });
+
+            const clientData = {
+                email: response.data.email,
+                name: response.data.name,
+            };
+
+            localStorage.setItem("client", JSON.stringify(clientData));
             setMessage("Login successful!");
             setMessageType("success");
-            console.log("Login success:", response.data);
+
+            console.log("Login success:", clientData);
+
+            // ✅ This forces the app to fully reload and update the Header
+            window.location.reload();
+
         } catch (error) {
             console.error("Login failed:", error);
             let errorMsg = "Login failed. Please try again.";
@@ -68,6 +82,7 @@ const Login = () => {
                 </div>
 
                 <button type="submit" className="sign-button signup-btn">SIGN IN</button>
+
                 {message && (
                     <p className={`signup-message ${messageType === "success" ? "success-message" : "error-message"}`}>
                         {message}
