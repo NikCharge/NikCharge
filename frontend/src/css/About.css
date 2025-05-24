@@ -1,0 +1,266 @@
+/* About.css */
+
+.about-container {
+    max-width: 100%;
+    overflow-x: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+/* Hero Section */
+.about-hero {
+    background: linear-gradient(135deg, #22c55e, #059669);
+    color: white;
+    padding: 120px 0 80px;
+    text-align: center;
+    position: relative;
+}
+
+.about-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: white;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    z-index: 1;
+}
+
+.about-hero-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 2;
+}
+
+.about-hero h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.about-hero p {
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+/* Common Section Styles */
+.about-vision,
+.about-features,
+.about-values,
+.about-team,
+.about-contact {
+    padding: 80px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.about-section-content {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+}
+
+.about-section-content.reverse {
+    flex-direction: row-reverse;
+}
+
+.about-text {
+    flex: 1;
+}
+
+.about-image {
+    flex: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+h2 {
+    font-size: 36px;
+    margin-bottom: 30px;
+    color: #059669;
+    font-weight: 600;
+}
+
+p {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+/* Features Section */
+.about-features {
+    background-color: #f9fafb;
+    padding: 100px 20px;
+    text-align: center;
+    border-radius: 20px;
+    margin: 40px auto;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.feature-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.feature-card h3 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #059669;
+}
+
+/* Values Section */
+.values-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+    margin-top: 30px;
+}
+
+.value-item h3 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #059669;
+}
+
+/* Team Section */
+.about-team {
+    text-align: center;
+    padding: 100px 20px;
+}
+
+.team-content {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    margin-top: 40px;
+}
+
+.team-image {
+    flex: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.team-info {
+    flex: 1;
+    text-align: left;
+}
+
+/* Contact Section */
+.about-contact {
+    background: linear-gradient(135deg, #22c55e, #059669);
+    color: white;
+    padding: 80px 20px;
+    text-align: center;
+    border-radius: 20px;
+    margin: 40px auto 80px;
+}
+
+.contact-content {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.about-contact h2 {
+    color: white;
+}
+
+.contact-button {
+    background: white;
+    color: #059669;
+    border: none;
+    padding: 15px 35px;
+    font-size: 18px;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 30px;
+}
+
+.contact-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .about-section-content,
+    .about-section-content.reverse,
+    .team-content {
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .about-image,
+    .team-image {
+        width: 100%;
+    }
+
+    .values-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .about-hero h1 {
+        font-size: 36px;
+    }
+
+    .about-hero p {
+        font-size: 18px;
+    }
+
+    h2 {
+        font-size: 30px;
+    }
+
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .about-hero {
+        padding: 100px 0 60px;
+    }
+
+    .about-vision,
+    .about-features,
+    .about-values,
+    .about-team,
+    .about-contact {
+        padding: 60px 15px;
+    }
+}
