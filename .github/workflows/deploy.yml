@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  GITHUB_REPOSITORY_OWNER: nikcharge
+  GITHUB_REPOSITORY_OWNER: nikcharge-backend
 
 jobs:
   acceptance_tests:
