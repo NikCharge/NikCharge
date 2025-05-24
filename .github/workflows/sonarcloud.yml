@@ -1,43 +1,38 @@
-name: SonarCloud analysis
-
+name: SonarCloud
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches:
+      - main
+      - develop
   pull_request:
-    branches: [ "main", "develop" ]
-  workflow_dispatch:
-
-permissions:
-  pull-requests: read
-
+    types: [opened, synchronize, reopened]
 jobs:
-  Analysis:
+  build:
+    name: Build and analyze
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v3
         with:
-          java-version: '21'
-          distribution: 'temurin'
-
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: 21
+          distribution: 'zulu' # Alternative distribution options are available.
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-
-      - name: Build and analyze with SonarCloud
-        working-directory: ./Backend
-        run: mvn verify sonar:sonar -Dsonar.projectKey=nikcharge-backend -Dsonar.organization=NikCharge -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} #
+        run: cd Backend && mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=nikcharge-backend
