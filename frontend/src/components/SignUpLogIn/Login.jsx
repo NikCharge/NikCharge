@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "../../css/SignUpLogIn.css";
 
 const Login = () => {
@@ -8,6 +9,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
     const [messageType, setMessageType] = useState("");
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -18,23 +20,21 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await axios.post("http://localhost:8080/api/clients/login", formData, {
-                withCredentials: true,
+                withCredentials: true
             });
 
             const clientData = {
                 email: response.data.email,
                 name: response.data.name,
+                batteryCapacityKwh: response.data.batteryCapacityKwh,
+                fullRangeKm: response.data.fullRangeKm
             };
 
             localStorage.setItem("client", JSON.stringify(clientData));
             setMessage("Login successful!");
             setMessageType("success");
 
-            console.log("Login success:", clientData);
-
-            // ✅ This forces the app to fully reload and update the Header
-            window.location.reload();
-
+            navigate("/dashboard", { replace: true });
         } catch (error) {
             console.error("Login failed:", error);
             let errorMsg = "Login failed. Please try again.";
@@ -82,7 +82,6 @@ const Login = () => {
                 </div>
 
                 <button type="submit" className="sign-button signup-btn">SIGN IN</button>
-
                 {message && (
                     <p className={`signup-message ${messageType === "success" ? "success-message" : "error-message"}`}>
                         {message}
