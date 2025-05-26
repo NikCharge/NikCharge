@@ -5,16 +5,10 @@ FROM openjdk:21-jdk
 ARG JAR_FILE=target/*.jar
 
 # Copia o JAR gerado para dentro do container
-COPY ${JAR_FILE} app.jar
+COPY target/Backend-0.0.1-SNAPSHOT.jar app.jar
 
 # Expõe a porta do Spring Boot (necessária para o NGINX fazer proxy)
 EXPOSE 8080
-
-# Expõe a porta de debugging (útil se usares o modo remoto)
-EXPOSE 5005
-
-# Habilita o debug remoto via JDWP
-ENV JAVA_TOOL_OPTIONS="-Xdebug -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
 
 # Comando para executar a app e garantir que logs vão para o STDOUT
 CMD ["sh", "-c", "java -jar /app.jar 2>&1 | tee /proc/1/fd/1"]
