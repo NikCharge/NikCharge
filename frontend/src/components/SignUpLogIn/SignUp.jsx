@@ -9,6 +9,7 @@ import {
     FaEye,
     FaEyeSlash,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import "../../css/SignUpLogIn.css";
 
 const SignUp = () => {
@@ -23,6 +24,7 @@ const SignUp = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState(null);
     const [messageType, setMessageType] = useState(""); // "success" or "error"
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -56,6 +58,12 @@ const SignUp = () => {
             setMessage("Account created successfully!");
             setMessageType("success");
             console.log(response.data);
+
+            // Delay briefly, then redirect to login
+            setTimeout(() => {
+                navigate("/login");
+            }, 1500);
+
         } catch (error) {
             console.error("Signup error:", error);
             let errorMsg = "Failed to create account. Please try again.";
@@ -66,7 +74,6 @@ const SignUp = () => {
                 if (typeof data === "string") {
                     errorMsg = data;
                 } else if (typeof data === "object") {
-                    // Combine field-specific errors into one message
                     errorMsg = Object.entries(data)
                         .map(([field, msg]) => `${field}: ${msg}`)
                         .join(" | ");

@@ -1,6 +1,6 @@
 import React from "react";
 import car from "../../assets/car.png";
-import "../../css/Homepage.css";
+import "../../css/pages/Homepage.css";
 
 const HeroSection = () => (
     <main className="main-section">
