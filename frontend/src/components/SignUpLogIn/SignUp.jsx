@@ -54,16 +54,10 @@ const SignUp = () => {
                 fullRangeKm: parseFloat(formData.fullRange),
             };
 
-            const response = await axios.post("http://localhost:8080/api/clients/signup", payload);
+            const response = await axios.post("/api/clients/signup", payload);
             setMessage("Account created successfully!");
             setMessageType("success");
             console.log(response.data);
-
-            // Delay briefly, then redirect to login
-            setTimeout(() => {
-                navigate("/login");
-            }, 1500);
-
         } catch (error) {
             console.error("Signup error:", error);
             let errorMsg = "Failed to create account. Please try again.";
@@ -91,7 +85,7 @@ const SignUp = () => {
 
             <form onSubmit={handleSubmit} className="auth-form">
                 <div className="form-input-wrapper icon-wrapper">
-                    <FaUser className="input-icon"/>
+                    <FaUser className="input-icon" />
                     <input
                         type="text"
                         name="name"
@@ -104,7 +98,7 @@ const SignUp = () => {
                 </div>
 
                 <div className="form-input-wrapper icon-wrapper">
-                    <FaEnvelope className="input-icon"/>
+                    <FaEnvelope className="input-icon" />
                     <input
                         type="email"
                         name="email"
@@ -117,7 +111,7 @@ const SignUp = () => {
                 </div>
 
                 <div className="form-input-wrapper icon-wrapper password-wrapper">
-                    <FaLock className="input-icon"/>
+                    <FaLock className="input-icon" />
                     <input
                         type={showPassword ? "text" : "password"}
                         name="password"
@@ -132,7 +126,7 @@ const SignUp = () => {
                         className="password-toggle-icon"
                         onClick={() => setShowPassword(!showPassword)}
                     >
-                        {showPassword ? <FaEyeSlash/> : <FaEye/>}
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
                 </div>
 
@@ -140,7 +134,7 @@ const SignUp = () => {
 
                 <div className="form-row">
                     <div className="form-input-wrapper icon-wrapper half-width wide-battery">
-                        <FaCarBattery className="input-icon"/>
+                        <FaCarBattery className="input-icon" />
                         <input
                             type="number"
                             name="batteryCapacity"
@@ -153,7 +147,7 @@ const SignUp = () => {
                     </div>
 
                     <div className="form-input-wrapper icon-wrapper half-width">
-                        <FaRoad className="input-icon"/>
+                        <FaRoad className="input-icon" />
                         <input
                             type="number"
                             name="fullRange"
@@ -172,9 +166,8 @@ const SignUp = () => {
 
                 {message && (
                     <p
-                        className={`signup-message ${
-                            messageType === "success" ? "success-message" : "error-message"
-                        }`}
+                        className={`signup-message ${messageType === "success" ? "success-message" : "error-message"
+                            }`}
                     >
                         {message}
                     </p>
