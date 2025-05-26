@@ -1,16 +1,6 @@
-
 version: '3.9'
 
 services:
-  maven-build:
-    image: maven:3.9-eclipse-temurin-21
-    container_name: maven-build
-    working_dir: /app
-    volumes:
-      - ./Backend:/app
-    command: mvn package -DskipTests
-    restart: "no"
-
   postgres:
     image: postgres:15
     container_name: postgres
@@ -24,16 +14,25 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}" ]
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
       interval: 10s
       retries: 5
       start_period: 5s
 
+  maven-build:
+    image: maven:3.9-eclipse-temurin-21
+    container_name: maven-build
+    working_dir: /app
+    volumes:
+      - ./Backend:/app
+    command: mvn package -DskipTests
+    restart: "no"
+
   backend:
-    image: ghcr.io/nikcharge/backend:latest
     build:
       context: ./Backend
       dockerfile: Dockerfile.backend
+    image: ghcr.io/nikcharge/backend:latest
     depends_on:
       maven-build:
         condition: service_completed_successfully
@@ -42,31 +41,32 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres:5432/admin"
-      SPRING_DATASOURCE_USERNAME: "${POSTGRES_USER}"
-      SPRING_DATASOURCE_PASSWORD: "${POSTGRES_PASSWORD}"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/admin
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
       SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
       retries: 3
       start_period: 10s
 
-frontend:
-    image: ghcr.io/nikcharge/frontend:latest
+  frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.frontend
+      target: ${NODE_ENV} # --> "development" ou "production"
       args:
-        - NODE_ENV=${NODE_ENV}  
+        - NODE_ENV=${NODE_ENV}
+    image: ghcr.io/nikcharge/frontend:latest
     environment:
-      - NODE_ENV=${NODE_ENV}    
+      - NODE_ENV=${NODE_ENV}
     ports:
       - "3000:3000"
     volumes:
-      - ./frontend:/app         
+      - ./frontend:/app
       - /app/node_modules
     depends_on:
       - backend
@@ -80,11 +80,9 @@ frontend:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/frontend.prod.conf:/etc/nginx/conf.d/default.conf:ro
     restart: always
-
 
 volumes:
   postgres_data:
     driver: local
- 
