@@ -20,14 +20,24 @@
 
     <properties>
         <java.version>21</java.version>
-        <sonar.projectKey>nikcharge-backend</sonar.projectKey>
-        <sonar.organization>NikCharge</sonar.organization>
+        <sonar.organization>nikcharge-backend</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <junit-jupiter.version>5.12.0</junit-jupiter.version>
     </properties>
 
     <dependencies>
         <!-- Spring Boot core -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.influxdb</groupId>
+            <artifactId>influxdb-client-java</artifactId>
+            <version>6.10.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>

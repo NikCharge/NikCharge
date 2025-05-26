@@ -1,3 +1,4 @@
+
 version: '3.9'
 
 services:
@@ -29,6 +30,7 @@ services:
       start_period: 5s
 
   backend:
+    image: ghcr.io/nikcharge/backend:latest
     build:
       context: ./Backend
       dockerfile: Dockerfile.backend
@@ -52,14 +54,20 @@ services:
       retries: 3
       start_period: 10s
 
-  frontend:
+frontend:
+    image: ghcr.io/nikcharge/frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile.frontend
+      args:
+        - NODE_ENV=${NODE_ENV}  
+    environment:
+      - NODE_ENV=${NODE_ENV}    
     ports:
-      - "3000:80"
+      - "3000:3000"
     volumes:
-      - ./frontend:/app
+      - ./frontend:/app         
+      - /app/node_modules
     depends_on:
       - backend
 
@@ -74,6 +82,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     restart: always
+
 
 volumes:
   postgres_data:
