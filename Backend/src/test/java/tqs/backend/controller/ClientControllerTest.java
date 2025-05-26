@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ClientController.class)
-@Import({ClientControllerTest.MockConfig.class, ClientControllerTest.SecurityConfig.class})
+@Import({ ClientControllerTest.MockConfig.class, ClientControllerTest.SecurityConfig.class })
 @ActiveProfiles("test")
 class ClientControllerTest {
 
@@ -97,8 +97,8 @@ class ClientControllerTest {
         when(clientService.signUp(any(SignUpRequest.class))).thenReturn(client);
 
         mockMvc.perform(post("/api/clients/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("john@example.com"));
     }
@@ -108,8 +108,8 @@ class ClientControllerTest {
         SignUpRequest req = new SignUpRequest("Test", "invalid-email", "password123", 45.0, 300.0);
 
         mockMvc.perform(post("/api/clients/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.email").exists());
     }
@@ -121,8 +121,8 @@ class ClientControllerTest {
         req.setPassword("password123");
 
         mockMvc.perform(post("/api/clients/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.email").exists());
     }
@@ -135,8 +135,8 @@ class ClientControllerTest {
                 .thenThrow(new RuntimeException("Email already exists"));
 
         mockMvc.perform(post("/api/clients/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("Email already exists"));
     }
@@ -146,8 +146,8 @@ class ClientControllerTest {
         SignUpRequest req = new SignUpRequest("Test", "test@mail.com", "password123", -1.0, 300.0);
 
         mockMvc.perform(post("/api/clients/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.batteryCapacityKwh").exists());
     }
@@ -157,8 +157,8 @@ class ClientControllerTest {
         SignUpRequest req = new SignUpRequest("Test", "test@mail.com", "password123", 50.0, -100.0);
 
         mockMvc.perform(post("/api/clients/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(req)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.fullRangeKm").exists());
     }
@@ -181,12 +181,11 @@ class ClientControllerTest {
 
         Map<String, String> loginRequest = Map.of(
                 "email", email,
-                "password", rawPassword
-        );
+                "password", rawPassword);
 
         mockMvc.perform(post("/api/clients/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(email))
                 .andExpect(jsonPath("$.name").value("LoginUser"))
@@ -207,8 +206,8 @@ class ClientControllerTest {
         Map<String, String> loginRequest = Map.of("email", email, "password", "wrongPassword");
 
         mockMvc.perform(post("/api/clients/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("Invalid credentials"));
     }
@@ -219,12 +218,11 @@ class ClientControllerTest {
 
         Map<String, String> loginRequest = Map.of(
                 "email", "nope@example.com",
-                "password", "somepassword"
-        );
+                "password", "somepassword");
 
         mockMvc.perform(post("/api/clients/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.error").value("Invalid credentials"));
     }
@@ -234,8 +232,8 @@ class ClientControllerTest {
         Map<String, String> loginRequest = Map.of("email", "someone@example.com");
 
         mockMvc.perform(post("/api/clients/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.password").exists());
     }
@@ -245,8 +243,8 @@ class ClientControllerTest {
         Map<String, String> loginRequest = Map.of("email", "invalid@", "password", "pass123");
 
         mockMvc.perform(post("/api/clients/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.email").exists());
     }
@@ -268,8 +266,8 @@ class ClientControllerTest {
         ClientResponse updatedData = new ClientResponse("new@example.com", "New Name", 60.0, 350.0);
 
         mockMvc.perform(put("/api/clients/{email}", existingEmail)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedData)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updatedData)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("new@example.com"))
                 .andExpect(jsonPath("$.name").value("New Name"))
@@ -285,8 +283,8 @@ class ClientControllerTest {
         ClientResponse updateData = new ClientResponse(email, "Name", 55.0, 310.0);
 
         mockMvc.perform(put("/api/clients/{email}", email)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateData)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateData)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Client not found"));
     }

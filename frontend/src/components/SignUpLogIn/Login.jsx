@@ -19,7 +19,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:8080/api/clients/login", formData, {
+            const response = await axios.post("/api/clients/login", formData, {
                 withCredentials: true
             });
 
