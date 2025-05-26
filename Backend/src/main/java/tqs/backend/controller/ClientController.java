@@ -74,7 +74,7 @@ public class ClientController {
     }
 
     @PutMapping("/{email}")
-    public ResponseEntity<?> updateClient(@PathVariable String email, @RequestBody ClientResponse updateData) {
+    public ResponseEntity<Object> updateClient(@PathVariable String email, @RequestBody ClientResponse updateData) {
         Optional<Client> clientOpt = clientRepository.findByEmail(email);
         if (clientOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Client not found"));
