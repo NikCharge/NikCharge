@@ -17,6 +17,8 @@ import java.util.Map;
 @RequestMapping("/api/stations")
 public class StationController {
 
+    private static final String ERROR_KEY = "error";
+
     private final StationService stationService;
 
     public StationController(StationService stationService) {
@@ -30,21 +32,23 @@ public class StationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getStationById(@PathVariable Long id) {
+    public ResponseEntity<Object> getStationById(@PathVariable Long id) {
         Station station = stationService.getStationById(id);
         if (station == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Station not found"));
+                    .body(Map.of(ERROR_KEY, "Station not found"));
         }
         return ResponseEntity.ok(station);
     }
 
     @PostMapping
-    public ResponseEntity<?> createStation(@Valid @RequestBody StationRequest request, BindingResult bindingResult) {
+    public ResponseEntity<Object> createStation(@Valid @RequestBody StationRequest request, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-            return ResponseEntity.badRequest().body(Map.of("error", errors));
+            bindingResult.getFieldErrors().forEach(error ->
+                    errors.put(error.getField(), error.getDefaultMessage())
+            );
+            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, errors));
         }
 
         try {
@@ -53,9 +57,10 @@ public class StationController {
         } catch (RuntimeException e) {
             if ("Station already exists at this location".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("error", "Station already exists at this location"));
+                        .body(Map.of(ERROR_KEY, "Station already exists at this location"));
             }
-            return ResponseEntity.badRequest().body(Map.of("error", "Unexpected error: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of(ERROR_KEY, "Unexpected error: " + e.getMessage()));
         }
     }
 }
