@@ -1,0 +1,198 @@
+.map-container {
+    width: 100%;
+    height: 520px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 4px solid #059669;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.map-display {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    overflow: hidden;
+}
+
+/* Map Background Pattern */
+.map-background {
+    position: absolute;
+    inset: 0;
+    opacity: 0.3;
+}
+
+.grid-pattern {
+    width: 100%;
+    height: 100%;
+}
+
+/* River/Road Line */
+.river-line {
+    position: absolute;
+    left: 45%;
+    top: 0;
+    width: 8%;
+    height: 100%;
+    background: linear-gradient(180deg, #bfdbfe 0%, #93c5fd 100%);
+    opacity: 0.6;
+    transform: rotate(15deg);
+    border-radius: 20px;
+    transform-origin: center;
+}
+
+/* Map Controls */
+.map-controls {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: #059669;
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.map-icon {
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #059669;
+}
+
+/* Station Markers */
+.station-marker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    z-index: 5;
+}
+
+.marker-number {
+    width: 32px;
+    height: 32px;
+    background: #059669;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+    transition: all 0.2s ease;
+}
+
+.station-marker:hover .marker-number {
+    transform: scale(1.1);
+    box-shadow: 0 6px 12px rgba(5, 150, 105, 0.4);
+}
+
+.marker-tooltip {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0.25rem;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 20;
+}
+
+.station-marker:hover .marker-tooltip {
+    opacity: 1;
+}
+
+/* Map Attribution */
+.map-attribution {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    backdrop-filter: blur(4px);
+}
+
+.leaflet-map {
+    width: 100%;
+    height: 100%;
+}
+
+.user-marker-icon {
+    filter: hue-rotate(210deg); /* makes it blue */
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .map-container {
+        height: 350px;
+        border-width: 3px;
+    }
+
+    .map-controls {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .map-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .marker-number {
+        width: 28px;
+        height: 28px;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .map-container {
+        height: 300px;
+        border-width: 2px;
+    }
+
+    .map-controls {
+        top: 0.5rem;
+        left: 0.5rem;
+        padding: 0.3rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .map-icon {
+        width: 18px;
+        height: 18px;
+    }
+
+    .marker-number {
+        width: 26px;
+        height: 26px;
+        font-size: 0.75rem;
+    }
+
+    .map-attribution {
+        bottom: 0.5rem;
+        right: 0.5rem;
+        font-size: 0.7rem;
+    }
+}
