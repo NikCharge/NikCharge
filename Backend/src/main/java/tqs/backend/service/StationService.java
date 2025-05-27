@@ -30,18 +30,6 @@ public class StationService {
         return stationRepository.findById(id).orElse(null);
     }
 
-    public Station saveStation(Station station) {
-        boolean exists = stationRepository
-                .findByLatitudeAndLongitude(station.getLatitude(), station.getLongitude())
-                .isPresent();
-
-        if (exists) {
-            throw new IllegalArgumentException("Station with these coordinates already exists");
-        }
-
-        return stationRepository.save(station);
-    }
-
     public Station createStationFromRequest(StationRequest req) {
         Optional<Station> existing = stationRepository.findByLatitudeAndLongitude(req.getLatitude(),
                 req.getLongitude());
