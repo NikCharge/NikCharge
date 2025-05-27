@@ -1,13 +1,14 @@
 package tqs.backend.dto;
 
 import lombok.*;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 @Getter
 @Setter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignUpRequest {
     @NotBlank(message = "Name is required")
     private String name;
