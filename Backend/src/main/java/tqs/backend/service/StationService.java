@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Station;
 import tqs.backend.repository.StationRepository;
-import java.util.Optional;
 
+import java.util.Optional;
 import java.util.List;
 
 @Service
@@ -31,10 +31,11 @@ public class StationService {
     }
 
     public Station createStationFromRequest(StationRequest req) {
-        Optional<Station> existing = stationRepository.findByLatitudeAndLongitude(req.getLatitude(),
-                req.getLongitude());
+        Optional<Station> existing = stationRepository.findByLatitudeAndLongitude(
+                req.getLatitude(), req.getLongitude());
+
         if (existing.isPresent()) {
-            throw new RuntimeException("Station already exists at this location");
+            throw new IllegalStateException("Station already exists at this location");
         }
 
         Station station = Station.builder()

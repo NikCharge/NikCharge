@@ -169,4 +169,19 @@ class StationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Station 1"));
     }
+
+    @Test
+    void unexpectedExceptionDuringCreation_shouldReturnBadRequest() throws Exception {
+        StationRequest req = new StationRequest("Unexpected", "Rua", "Lisboa", 38.7169, -9.1399);
+
+        StationRepository repository = stationService.getStationRepository();
+        when(repository.findByLatitudeAndLongitude(req.getLatitude(), req.getLongitude()))
+                .thenThrow(new RuntimeException("Database connection error"));
+
+        mockMvc.perform(post("/api/stations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(req)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Unexpected error: Database connection error"));
+    }
 }
