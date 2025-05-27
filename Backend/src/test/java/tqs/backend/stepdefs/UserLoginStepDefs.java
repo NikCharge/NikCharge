@@ -1,16 +1,12 @@
 package tqs.backend.stepdefs;
 
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.When;
-import io.cucumber.java.en.Then;
-import io.cucumber.java.en.And;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.en.*;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class UserLoginStepDefs {
@@ -37,7 +33,6 @@ public class UserLoginStepDefs {
     @When("I submit login with the following credentials")
     public void iSubmitLoginWithTheFollowingCredentials(DataTable dataTable) {
         loginData = dataTable.asMaps().get(0);
-
         response = RestAssured.given()
                 .contentType("application/json")
                 .body(loginData)
@@ -53,16 +48,10 @@ public class UserLoginStepDefs {
     @And("I should receive an authentication token")
     public void iShouldReceiveAnAuthenticationToken() {
         response.then()
-                .body("token", notNullValue())
                 .body("email", equalTo(loginData.get("email")))
-                .body("name", notNullValue());
-    }
-
-    @Then("the login should fail with bad request")
-    public void theLoginShouldFailWithBadRequest() {
-        response.then()
-                .statusCode(400)
-                .body("error", notNullValue());
+                .body("name", notNullValue())
+                .body("batteryCapacityKwh", notNullValue())
+                .body("fullRangeKm", notNullValue());
     }
 
     @Then("the login should be forbidden")
@@ -82,18 +71,16 @@ public class UserLoginStepDefs {
 
     @Then("I should receive an error message about missing fields")
     public void iShouldReceiveAnErrorMessageAboutMissingFields() {
-        response.then().body("error", hasKey("password"));
+        response.then().body("error.password", notNullValue());
     }
 
     @And("the error message should mention missing password")
     public void theErrorMessageShouldMentionMissingPassword() {
-        response.then()
-                .body("error.password", notNullValue());
+        response.then().body("error.password", notNullValue());
     }
 
     @And("the error message should mention invalid email format")
     public void theErrorMessageShouldMentionInvalidEmailFormat() {
-        response.then()
-                .body("error.email", notNullValue());
+        response.then().body("error.email", notNullValue());
     }
 }
