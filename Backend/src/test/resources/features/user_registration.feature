@@ -1,4 +1,4 @@
-@registration @auth
+@SCRUM-17 @registration @auth
 Feature: User Registration
   As a new user
   I want to create an account
@@ -7,7 +7,7 @@ Feature: User Registration
   Background:
     Given the system is running
 
-  @happy-path @smoke
+  @SCRUM-63 @happy-path @smoke
   Scenario: Successful user registration with valid data
     When I submit registration with the following details
       | email    | password | name  |
@@ -15,7 +15,7 @@ Feature: User Registration
     Then the registration should be successful
     And I should receive a confirmation message
 
-  @validation @email
+  @SCRUM-65 @validation @email
   Scenario: Registration fails with invalid email format
     When I submit registration with the following details
       | email    | password | name  |
@@ -23,7 +23,7 @@ Feature: User Registration
     Then the registration should fail
     And I should receive an error message about invalid email format
 
-  @validation @password
+  @SCRUM-64 @validation @password
   Scenario: Registration fails with weak password
     When I submit registration with the following details
       | email    | password | name  |
@@ -31,7 +31,7 @@ Feature: User Registration
     Then the registration should fail
     And I should receive an error message about password requirements
 
-  @validation @duplicate
+  @SCRUM-66 @validation @duplicate
   Scenario: Registration fails with existing email
     Given a user with email "existing@example.com" exists in the system
     When I submit registration with the following details

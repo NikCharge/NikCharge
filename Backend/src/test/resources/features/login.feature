@@ -1,4 +1,4 @@
-@auth @login
+@SCRUM-38 @auth @login
 Feature: User Login
   As a registered user
   I want to log into the system
@@ -7,7 +7,7 @@ Feature: User Login
   Background:
     Given the system is running
 
-  @happy-path @smoke
+  @SCRUM-84 @happy-path @smoke
   Scenario: Successful login with valid credentials
     Given a user with email "user@example.com" exists in the system
     When I submit login with the following credentials
@@ -16,7 +16,7 @@ Feature: User Login
     Then the login should be successful
     And I should receive an authentication token
 
-  @invalid-password
+  @SCRUM-85 @invalid-password
   Scenario: Login fails with wrong password
     Given a user with email "wrongpass@example.com" exists in the system
     When I submit login with the following credentials
@@ -25,7 +25,7 @@ Feature: User Login
     Then the login should be forbidden
     And I should receive an error message about invalid credentials
 
-  @non-existent-user
+  @SCRUM-86 @non-existent-user
   Scenario: Login fails with non-existent email
     When I submit login with the following credentials
       | email              | password       |
@@ -33,7 +33,7 @@ Feature: User Login
     Then the login should be forbidden
     And I should receive an error message about invalid credentials
 
-  @missing-fields
+  @SCRUM-87 @missing-fields
   Scenario: Login fails with missing password
     When I submit login with the following credentials
       | email              |

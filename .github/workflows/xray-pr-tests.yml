@@ -1,0 +1,36 @@
+name: Xray PR Tests
+
+on:
+  pull_request:
+    branches:
+      - development
+    paths:
+      - 'Backend/**'
+      - '.github/workflows/xray-pr-tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Run Tests and Xray Integration
+      working-directory: Backend
+      env:
+        XRAY_CLIENT_ID: ${{ secrets.XRAY_CLIENT_ID }}
+        XRAY_CLIENT_SECRET: ${{ secrets.XRAY_CLIENT_SECRET }}
+        JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        PROJECT_KEY: ${{ secrets.PROJECT_KEY }}
+        CREATE_TEST_EXECUTION: "true"  # Cria Test Execution em PRs
+      run: |
+        chmod +x scripts/xray-integration.sh
+        ./scripts/xray-integration.sh 
