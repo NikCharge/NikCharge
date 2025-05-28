@@ -60,7 +60,7 @@ if [ "$CREATE_TEST_EXECUTION" = "true" ]; then
         exit 1
     fi
 
-    TEST_EXECUTION_KEY=$(echo $TEST_EXECUTION_RESPONSE | grep -o '"key":"[^"]*' | cut -d'"' -f4)
+    TEST_EXECUTION_KEY="SCRUM-99"
     echo "✅ Test Execution criado: $TEST_EXECUTION_KEY"
 else
     echo "ℹ️ Pulando criação de Test Execution (CREATE_TEST_EXECUTION=false)"
@@ -68,7 +68,13 @@ fi
 
 # Importar resultados dos testes
 echo "📤 Importando resultados dos testes..."
-IMPORT_RESPONSE=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $XRAY_TOKEN" -X POST --data @target/cucumber-reports/cucumber.json "https://xray.cloud.getxray.app/api/v2/import/execution/cucumber")
+echo "📤 Importando resultados para a Test Execution existente: $TEST_EXECUTION_KEY"
+IMPORT_RESPONSE=$(curl -s \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $XRAY_TOKEN" \
+  -X POST \
+  --data @target/cucumber-reports/cucumber.json \
+  "https://xray.cloud.getxray.app/api/v2/import/execution/cucumber?testExecutionKey=$TEST_EXECUTION_KEY")
 
 if [[ $IMPORT_RESPONSE == *"error"* ]]; then
     echo "❌ Erro ao importar resultados: $IMPORT_RESPONSE"
