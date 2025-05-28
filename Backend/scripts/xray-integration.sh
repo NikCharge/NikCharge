@@ -33,7 +33,6 @@ echo "🚀 Iniciando pipeline de testes e integração com Xray..."
 
 # Gerar relatório de testes
 echo "📊 Gerando relatório de testes..."
-cd ..  # Mudar para o diretório do projeto
 mvn verify
 
 # Verificar se o relatório foi gerado
