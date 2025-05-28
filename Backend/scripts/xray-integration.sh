@@ -1,12 +1,16 @@
 #!/bin/bash
 
 # Verificar se o arquivo .env existe e carregar as variáveis
-if [ -f ../../.env ]; then
-    source ../../.env
-else
-    echo "Arquivo .env não encontrado!"
-    exit 1
-fi
+#if [ -f ../../.env ]; then
+#    source ../../.env
+#else
+#    echo "Arquivo .env não encontrado!"
+#    exit 1
+#fi
+
+# Variáveis de ambiente já estão configuradas via GitHub Actions
+echo "Usando variáveis de ambiente da pipeline."
+
 
 # Verificar se todas as variáveis necessárias estão definidas
 if [ -z "$XRAY_CLIENT_ID" ] || [ -z "$XRAY_CLIENT_SECRET" ] || [ -z "$JIRA_USER_EMAIL" ] || [ -z "$JIRA_API_TOKEN" ] || [ -z "$PROJECT_KEY" ]; then
