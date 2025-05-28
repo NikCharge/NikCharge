@@ -1,4 +1,4 @@
-@edit @profile
+@SCRUM-18 @edit @profile
 Feature: Edit User Profile
   As a registered user
   I want to update my profile information
@@ -7,7 +7,7 @@ Feature: Edit User Profile
   Background:
     Given the system is running
 
-  @happy-path
+  @SCRUM-80 @happy-path
   Scenario: Successfully update user profile
     Given a user with email "edituser@example.com" exists in the system
     When I update the profile for "edituser@example.com" with the following data
@@ -16,7 +16,7 @@ Feature: Edit User Profile
     Then the profile should be updated successfully
     And the response should contain the updated profile data
 
-  @not-found
+  @SCRUM-81 @not-found
   Scenario: Attempt to update a non-existent user
     When I update the profile for "ghost@example.com" with the following data
       | name     | email            | batteryCapacityKwh | fullRangeKm |
