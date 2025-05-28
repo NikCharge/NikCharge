@@ -10,7 +10,7 @@
 
 # Variáveis de ambiente já estão configuradas via GitHub Actions
 echo "Usando variáveis de ambiente da pipeline."
-
+cd "$(dirname "$0")"/..
 
 # Verificar se todas as variáveis necessárias estão definidas
 if [ -z "$XRAY_CLIENT_ID" ] || [ -z "$XRAY_CLIENT_SECRET" ] || [ -z "$JIRA_USER_EMAIL" ] || [ -z "$JIRA_API_TOKEN" ] || [ -z "$PROJECT_KEY" ]; then
