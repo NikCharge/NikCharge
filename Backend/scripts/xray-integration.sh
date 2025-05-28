@@ -50,38 +50,20 @@ if [ -z "$XRAY_TOKEN" ]; then
     exit 1
 fi
 
-# Encontrar a User Story relacionada
-echo "🔍 Procurando User Story relacionada..."
-USER_STORY=$(curl -s -H "Authorization: Bearer $XRAY_TOKEN" "https://xray.cloud.getxray.app/api/v2/export/cucumber?keys=$PROJECT_KEY-11")
 
-if [ -z "$USER_STORY" ]; then
-    echo "❌ Erro: User Story não encontrada"
-    exit 1
-fi
+if [ "$CREATE_TEST_EXECUTION" = "true" ]; then
+    echo "📝 Criando novo Test Execution..."
+    TEST_EXECUTION_RESPONSE=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $XRAY_TOKEN" -X POST --data "{\"project\":\"$PROJECT_KEY\",\"summary\":\"Test Execution $(date +%Y-%m-%d)\",\"description\":\"Test Execution gerado automaticamente\"}" https://xray.cloud.getxray.app/api/v2/import/execution)
 
-# Encontrar Test Execution existente
-echo "🔍 Procurando Test Execution existente..."
-TEST_EXECUTION=$(curl -s -H "Authorization: Bearer $XRAY_TOKEN" "https://xray.cloud.getxray.app/api/v2/export/cucumber?keys=$PROJECT_KEY-75")
-
-if [ -z "$TEST_EXECUTION" ]; then
-    if [ "$CREATE_TEST_EXECUTION" = "true" ]; then
-        echo "📝 Criando novo Test Execution..."
-        TEST_EXECUTION_RESPONSE=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $XRAY_TOKEN" -X POST --data "{\"project\":\"$PROJECT_KEY\",\"summary\":\"Test Execution $(date +%Y-%m-%d)\",\"description\":\"Test Execution gerado automaticamente\"}" https://xray.cloud.getxray.app/api/v2/import/execution)
-        
-        if [[ $TEST_EXECUTION_RESPONSE == *"error"* ]]; then
-            echo "❌ Erro ao criar Test Execution: $TEST_EXECUTION_RESPONSE"
-            exit 1
-        fi
-        
-        TEST_EXECUTION_KEY=$(echo $TEST_EXECUTION_RESPONSE | grep -o '"key":"[^"]*' | cut -d'"' -f4)
-        echo "✅ Test Execution criado: $TEST_EXECUTION_KEY"
-    else
-        echo "ℹ️ Pulando criação de Test Execution (CREATE_TEST_EXECUTION=false)"
-        exit 0
+    if [[ $TEST_EXECUTION_RESPONSE == *"error"* ]]; then
+        echo "❌ Erro ao criar Test Execution: $TEST_EXECUTION_RESPONSE"
+        exit 1
     fi
+
+    TEST_EXECUTION_KEY=$(echo $TEST_EXECUTION_RESPONSE | grep -o '"key":"[^"]*' | cut -d'"' -f4)
+    echo "✅ Test Execution criado: $TEST_EXECUTION_KEY"
 else
-    TEST_EXECUTION_KEY="$PROJECT_KEY-75"
-    echo "✅ Test Execution encontrado: $TEST_EXECUTION_KEY"
+    echo "ℹ️ Pulando criação de Test Execution (CREATE_TEST_EXECUTION=false)"
 fi
 
 # Importar resultados dos testes
@@ -94,4 +76,7 @@ if [[ $IMPORT_RESPONSE == *"error"* ]]; then
 fi
 
 echo "✅ Pipeline concluído com sucesso!"
-echo "📊 Test Execution: $TEST_EXECUTION_KEY"
+if [ -n "$TEST_EXECUTION_KEY" ]; then
+    echo "📊 Test Execution: $TEST_EXECUTION_KEY"
+fi
+
