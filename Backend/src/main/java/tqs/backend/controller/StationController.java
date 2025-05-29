@@ -5,6 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Station;
 import tqs.backend.service.StationService;
@@ -63,4 +65,15 @@ public class StationController {
                     .body(Map.of(ERROR_KEY, "Unexpected error: " + e.getMessage()));
         }
     }
+
+   @GetMapping("/{id}/details")
+    public ResponseEntity<Object> getStationDetails(@PathVariable Long id) {
+        StationDetailsDTO dto = stationService.getStationDetails(id);
+        if (dto == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Station not found"));
+        }
+        return ResponseEntity.ok(dto);
+    }
+
 }
