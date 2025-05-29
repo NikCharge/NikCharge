@@ -50,18 +50,25 @@ if [ -z "$XRAY_TOKEN" ]; then
     exit 1
 fi
 
-TEST_EXECUTION_KEY="SCRUM-99"
-echo "ℹ️ Usando Test Execution existente: $TEST_EXECUTION_KEY"
 
+if [ "$CREATE_TEST_EXECUTION" = "true" ]; then
+    echo "📝 Criando novo Test Execution..."
+    TEST_EXECUTION_RESPONSE=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $XRAY_TOKEN" -X POST --data "{\"project\":\"$PROJECT_KEY\",\"summary\":\"Test Execution $(date +%Y-%m-%d)\",\"description\":\"Test Execution gerado automaticamente\"}" https://xray.cloud.getxray.app/api/v2/import/execution)
+
+    if [[ $TEST_EXECUTION_RESPONSE == *"error"* ]]; then
+        echo "❌ Erro ao criar Test Execution: $TEST_EXECUTION_RESPONSE"
+        exit 1
+    fi
+
+    TEST_EXECUTION_KEY=$(echo $TEST_EXECUTION_RESPONSE | grep -o '"key":"[^"]*' | cut -d'"' -f4)
+    echo "✅ Test Execution criado: $TEST_EXECUTION_KEY"
+else
+    echo "ℹ️ Pulando criação de Test Execution (CREATE_TEST_EXECUTION=false)"
+fi
 
 # Importar resultados dos testes
-echo "📤 Importando resultados para a Test Execution existente: $TEST_EXECUTION_KEY"
-IMPORT_RESPONSE=$(curl -s \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $XRAY_TOKEN" \
-  -X POST \
-  --data @target/cucumber-reports/cucumber.json \
-  "https://xray.cloud.getxray.app/api/v2/import/execution/cucumber?testExecutionKey=$TEST_EXECUTION_KEY")
+echo "📤 Importando resultados dos testes..."
+IMPORT_RESPONSE=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $XRAY_TOKEN" -X POST --data @target/cucumber-reports/cucumber.json "https://xray.cloud.getxray.app/api/v2/import/execution/cucumber")
 
 if [[ $IMPORT_RESPONSE == *"error"* ]]; then
     echo "❌ Erro ao importar resultados: $IMPORT_RESPONSE"
@@ -72,4 +79,3 @@ echo "✅ Pipeline concluído com sucesso!"
 if [ -n "$TEST_EXECUTION_KEY" ]; then
     echo "📊 Test Execution: $TEST_EXECUTION_KEY"
 fi
-
