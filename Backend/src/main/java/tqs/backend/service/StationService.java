@@ -48,4 +48,26 @@ public class StationService {
 
         return stationRepository.save(station);
     }
+
+    public List<Station> getStationsNear(double lat, double lng, double radiusKm) {
+        return stationRepository.findAll().stream()
+                .filter(s -> {
+                    double distance = haversine(lat, lng, s.getLatitude(), s.getLongitude());
+                    s.setDistance(distance); // se tiveres um campo transient `distance`
+                    return distance <= radiusKm;
+                })
+                .toList();
+    }
+
+    private double haversine(double lat1, double lon1, double lat2, double lon2) {
+        final int R = 6371; // Raio da Terra em km
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
 }
