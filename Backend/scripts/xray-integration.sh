@@ -52,22 +52,16 @@ fi
 
 
 if [ "$CREATE_TEST_EXECUTION" = "true" ]; then
-    echo "📝 Criando novo Test Execution..."
-    TEST_EXECUTION_RESPONSE=$(curl -s -H "Content-Type: application/json" -H "Authorization: Bearer $XRAY_TOKEN" -X POST --data "{\"project\":\"$PROJECT_KEY\",\"summary\":\"Test Execution $(date +%Y-%m-%d)\",\"description\":\"Test Execution gerado automaticamente\"}" https://xray.cloud.getxray.app/api/v2/import/execution)
-
-    if [[ $TEST_EXECUTION_RESPONSE == *"error"* ]]; then
-        echo "❌ Erro ao criar Test Execution: $TEST_EXECUTION_RESPONSE"
-        exit 1
-    fi
-
-    TEST_EXECUTION_KEY="SCRUM-99"
-    echo "✅ Test Execution criado: $TEST_EXECUTION_KEY"
+  # Usar uma Test Execution fixa para pushes
+  TEST_EXECUTION_KEY="SCRUM-99"
+  echo "ℹ️ Usando Test Execution existente: $TEST_EXECUTION_KEY"
 else
-    echo "ℹ️ Pulando criação de Test Execution (CREATE_TEST_EXECUTION=false)"
+  echo "ℹ️ Pulando importação (CREATE_TEST_EXECUTION=false)"
+  exit 0
 fi
 
+
 # Importar resultados dos testes
-echo "📤 Importando resultados dos testes..."
 echo "📤 Importando resultados para a Test Execution existente: $TEST_EXECUTION_KEY"
 IMPORT_RESPONSE=$(curl -s \
   -H "Content-Type: application/json" \
