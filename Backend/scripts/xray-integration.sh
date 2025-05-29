@@ -50,15 +50,8 @@ if [ -z "$XRAY_TOKEN" ]; then
     exit 1
 fi
 
-
-if [ "$CREATE_TEST_EXECUTION" = "true" ]; then
-  # Usar uma Test Execution fixa para pushes
-  TEST_EXECUTION_KEY="SCRUM-99"
-  echo "ℹ️ Usando Test Execution existente: $TEST_EXECUTION_KEY"
-else
-  echo "ℹ️ Pulando importação (CREATE_TEST_EXECUTION=false)"
-  exit 0
-fi
+TEST_EXECUTION_KEY="SCRUM-99"
+echo "ℹ️ Usando Test Execution existente: $TEST_EXECUTION_KEY"
 
 
 # Importar resultados dos testes
