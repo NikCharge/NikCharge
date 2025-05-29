@@ -40,3 +40,9 @@ Feature: User Login
       | missing@example.com |
     Then the login should fail
     And I should receive an error message about missing fields
+
+  @SCRUM-101 @missing-fields
+  Scenario: test
+    When x
+    Then x
+    And x
