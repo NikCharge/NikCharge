@@ -30,6 +30,4 @@ public class ChargingSession {
     private BigDecimal totalCost;
 
     private boolean paid;
-
-    // Getters and Setters
 }
