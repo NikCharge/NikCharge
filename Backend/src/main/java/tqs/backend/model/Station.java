@@ -35,4 +35,7 @@ public class Station {
 
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
     private List<Charger> chargers;
+
+    @Transient
+    private Double distance;
 }

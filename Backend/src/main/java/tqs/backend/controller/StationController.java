@@ -26,9 +26,18 @@ public class StationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Station>> getAllStations() {
-        List<Station> stations = stationService.getAllStations();
-        return ResponseEntity.ok(stations);
+    public ResponseEntity<List<Station>> getStations(
+            @RequestParam(required = false) Double lat,
+            @RequestParam(required = false) Double lng,
+            @RequestParam(defaultValue = "10") Double radiusKm
+    ) {
+        if (lat != null && lng != null) {
+            List<Station> nearbyStations = stationService.getStationsNear(lat, lng, radiusKm);
+            return ResponseEntity.ok(nearbyStations);
+        } else {
+            List<Station> stations = stationService.getAllStations();
+            return ResponseEntity.ok(stations);
+        }
     }
 
     @GetMapping("/{id}")
