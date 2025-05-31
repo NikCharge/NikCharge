@@ -15,10 +15,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
+import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.dto.StationRequest;
+import tqs.backend.model.Charger;
 import tqs.backend.model.Station;
+import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.StationRepository;
 import tqs.backend.service.StationService;
+import tqs.backend.dto.ChargerDTO;
+
+import tqs.backend.model.enums.ChargerStatus;
+import tqs.backend.model.enums.ChargerType;
+
+import java.math.BigDecimal;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,8 +61,8 @@ class StationControllerTest {
         }
 
         @Bean
-        public StationService stationService(StationRepository stationRepository) {
-            return new StationService(stationRepository);
+        public StationService stationService(StationRepository stationRepository, ChargerRepository chargerRepository) {
+            return new StationService(stationRepository, chargerRepository);
         }
 
         @Bean
@@ -184,4 +194,45 @@ class StationControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Unexpected error: Database connection error"));
     }
+
+       @Test
+void getStationDetails_shouldReturnStationWithChargers() throws Exception {
+    long stationId = 1L;
+
+    StationDetailsDTO dto = StationDetailsDTO.builder()
+            .id(stationId)
+            .name("Station D")
+            .address("Rua Z")
+            .city("Lisboa")
+            .latitude(38.722)
+            .longitude(-9.139)
+            .chargers(List.of(
+                    ChargerDTO.builder()
+                            .id(1L)
+                            .chargerType(ChargerType.DC_FAST)
+                            .status(ChargerStatus.AVAILABLE)
+                            .pricePerKwh(BigDecimal.valueOf(0.30))
+                            .build(),
+                    ChargerDTO.builder()
+                            .id(2L)
+                            .chargerType(ChargerType.AC_STANDARD)
+                            .status(ChargerStatus.IN_USE)
+                            .pricePerKwh(BigDecimal.valueOf(0.20))
+                            .build()
+            ))
+            .build();
+
+    when(stationService.getStationDetails(stationId)).thenReturn(dto);
+
+    mockMvc.perform(get("/api/stations/{id}/details", stationId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("Station D"))
+            .andExpect(jsonPath("$.address").value("Rua Z"))
+            .andExpect(jsonPath("$.chargers").isArray())
+            .andExpect(jsonPath("$.chargers.length()").value(2))
+            .andExpect(jsonPath("$.chargers[0].chargerType").value("DC_FAST"))
+            .andExpect(jsonPath("$.chargers[0].status").value("AVAILABLE"))
+            .andExpect(jsonPath("$.chargers[0].pricePerKwh").value(0.30));
 }
+}
+

@@ -27,7 +27,7 @@ public class SecurityConfig {
                                                 .requestMatchers(
                             "/api/clients/**",
                             "/api/stations/**",          // cobre POST, GET, etc. para /api/stations
-                            "/api/stations/*/details",   // explicitamente para o endpoint de detalhes
+                            "/api/stations/*/details",  
                             "/api/chargers/**",
                             "/swagger-ui/**",
                             "/v3/api-docs/**",
