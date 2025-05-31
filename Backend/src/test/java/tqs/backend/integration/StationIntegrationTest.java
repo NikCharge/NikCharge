@@ -23,7 +23,6 @@ import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ChargerType;
 
 import java.math.BigDecimal;
-import java.util.Map;
 import java.util.*;
 
 import static io.restassured.RestAssured.given;
@@ -193,4 +192,46 @@ public class StationIntegrationTest {
                 .body("chargers[0].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")))
                 .body("chargers[1].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")));
         }
+
+        // ---------- DELETE STATION TESTS ----------
+
+        @Test
+        void testDeleteExistingStation_ReturnsNoContent() {
+        // Criar estação para garantir que existe
+        var payload = Map.of(
+                "name", "ToDelete",
+                "address", "Rua Delete",
+                "city", "Delete City",
+                "latitude", 45.0,
+                "longitude", -10.0
+        );
+
+        int stationId = given().contentType(ContentType.JSON)
+                .body(payload)
+                .when().post("/api/stations")
+                .then().statusCode(200)
+                .extract().path("id");
+
+        // Deletar estação criada
+        given()
+                .when().delete("/api/stations/{id}", stationId)
+                .then().statusCode(204);
+
+        // Confirmar que foi removida (retorna 404)
+        given()
+                .when().get("/api/stations/{id}", stationId)
+                .then().statusCode(404);
+        }
+
+        @Test
+        void testDeleteNonExistingStation_ReturnsNotFound() {
+        int nonExistingId = 99999;
+
+        given()
+                .when().delete("/api/stations/{id}", nonExistingId)
+                .then()
+                .statusCode(404)
+                .body("error", equalTo("Station not found"));
+        }
+
 }
