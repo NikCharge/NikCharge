@@ -2,8 +2,12 @@ package tqs.backend.integration;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import tqs.backend.repository.ChargerRepository;
+import tqs.backend.repository.StationRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -13,8 +17,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import tqs.backend.model.Charger;
+import tqs.backend.model.Station;
+import tqs.backend.model.enums.ChargerStatus;
+import tqs.backend.model.enums.ChargerType;
 
+import java.math.BigDecimal;
 import java.util.Map;
+import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
@@ -52,6 +62,12 @@ public class StationIntegrationTest {
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
+
+        @Autowired
+        private StationRepository stationRepository;
+
+        @Autowired
+        private ChargerRepository chargerRepository;
 
     // ---------- CREATE STATION TESTS ----------
 
@@ -132,4 +148,49 @@ public class StationIntegrationTest {
                 .then().statusCode(200)
                 .body("name", equalTo("Unique"));
     }
+
+        @Test
+        void testGetStationDetails_ReturnsStationWithChargers() {
+        // Step 1: Create station via API
+        var stationPayload = Map.of(
+                "name", "Station D",
+                "address", "Rua Z",
+                "city", "Lisboa",
+                "latitude", 38.722,
+                "longitude", -9.139
+        );
+
+        int stationId = given().contentType(ContentType.JSON)
+                .body(stationPayload)
+                .when().post("/api/stations")
+                .then().statusCode(200)
+                .extract().path("id");
+
+        // Step 2: Add chargers via repository
+        Station station = stationRepository.findById((long) stationId).orElseThrow();
+
+        Charger c1 = Charger.builder()
+                .station(station)
+                .chargerType(ChargerType.DC_FAST)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.30))
+                .build();
+
+        Charger c2 = Charger.builder()
+                .station(station)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.IN_USE)
+                .pricePerKwh(BigDecimal.valueOf(0.20))
+                .build();
+
+        chargerRepository.saveAll(List.of(c1, c2));
+
+        // Step 3: Call the endpoint
+        given().when().get("/api/stations/{id}/details", stationId)
+                .then().statusCode(200)
+                .body("name", equalTo("Station D"))
+                .body("chargers.size()", equalTo(2))
+                .body("chargers[0].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")))
+                .body("chargers[1].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")));
+        }
 }
