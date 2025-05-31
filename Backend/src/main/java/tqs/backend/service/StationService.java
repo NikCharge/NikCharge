@@ -31,6 +31,10 @@ public class StationService {
         return stationRepository;
     }
 
+    public ChargerRepository getChargerRepository(){
+        return chargerRepository;
+    }
+
     public List<Station> getAllStations() {
         return stationRepository.findAll();
     }

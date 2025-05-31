@@ -60,6 +60,11 @@ class StationControllerTest {
             return mock(StationRepository.class);
         }
 
+         @Bean
+        public ChargerRepository chargerRepository() {
+            return mock(ChargerRepository.class);
+        }
+
         @Bean
         public StationService stationService(StationRepository stationRepository, ChargerRepository chargerRepository) {
             return new StationService(stationRepository, chargerRepository);
@@ -78,7 +83,8 @@ class StationControllerTest {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/clients/**", "/api/stations/**").permitAll()
+                            .requestMatchers("/api/clients/**", "/api/stations/**",  "/api/stations/*/details",  
+                            "/api/chargers/**").permitAll()
                             .anyRequest().authenticated());
             return http.build();
         }
@@ -196,43 +202,51 @@ class StationControllerTest {
     }
 
        @Test
-void getStationDetails_shouldReturnStationWithChargers() throws Exception {
-    long stationId = 1L;
+        void getStationDetails_shouldReturnStationWithChargers() throws Exception {
+        long stationId = 1L;
 
-    StationDetailsDTO dto = StationDetailsDTO.builder()
-            .id(stationId)
-            .name("Station D")
-            .address("Rua Z")
-            .city("Lisboa")
-            .latitude(38.722)
-            .longitude(-9.139)
-            .chargers(List.of(
-                    ChargerDTO.builder()
-                            .id(1L)
-                            .chargerType(ChargerType.DC_FAST)
-                            .status(ChargerStatus.AVAILABLE)
-                            .pricePerKwh(BigDecimal.valueOf(0.30))
-                            .build(),
-                    ChargerDTO.builder()
-                            .id(2L)
-                            .chargerType(ChargerType.AC_STANDARD)
-                            .status(ChargerStatus.IN_USE)
-                            .pricePerKwh(BigDecimal.valueOf(0.20))
-                            .build()
-            ))
-            .build();
+        Station station = Station.builder()
+                .id(stationId)
+                .name("Station D")
+                .address("Rua Z")
+                .city("Lisboa")
+                .latitude(38.722)
+                .longitude(-9.139)
+                .build();
 
-    when(stationService.getStationDetails(stationId)).thenReturn(dto);
+        List<Charger> chargers = List.of(
+                Charger.builder()
+                        .id(1L)
+                        .station(station)
+                        .chargerType(ChargerType.DC_FAST)
+                        .status(ChargerStatus.AVAILABLE)
+                        .pricePerKwh(BigDecimal.valueOf(0.30))
+                        .build(),
+                Charger.builder()
+                        .id(2L)
+                        .station(station)
+                        .chargerType(ChargerType.AC_STANDARD)
+                        .status(ChargerStatus.IN_USE)
+                        .pricePerKwh(BigDecimal.valueOf(0.20))
+                        .build()
+        );
 
-    mockMvc.perform(get("/api/stations/{id}/details", stationId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("Station D"))
-            .andExpect(jsonPath("$.address").value("Rua Z"))
-            .andExpect(jsonPath("$.chargers").isArray())
-            .andExpect(jsonPath("$.chargers.length()").value(2))
-            .andExpect(jsonPath("$.chargers[0].chargerType").value("DC_FAST"))
-            .andExpect(jsonPath("$.chargers[0].status").value("AVAILABLE"))
-            .andExpect(jsonPath("$.chargers[0].pricePerKwh").value(0.30));
-}
+        StationRepository stationRepository = stationService.getStationRepository();
+        ChargerRepository chargerRepository = stationService.getChargerRepository();
+
+        when(stationRepository.findById(stationId)).thenReturn(Optional.of(station));
+        when(chargerRepository.findByStationId(stationId)).thenReturn(chargers);
+
+        mockMvc.perform(get("/api/stations/{id}/details", stationId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Station D"))
+                .andExpect(jsonPath("$.address").value("Rua Z"))
+                .andExpect(jsonPath("$.chargers").isArray())
+                .andExpect(jsonPath("$.chargers.length()").value(2))
+                .andExpect(jsonPath("$.chargers[0].chargerType").value("DC_FAST"))
+                .andExpect(jsonPath("$.chargers[0].status").value("AVAILABLE"))
+                .andExpect(jsonPath("$.chargers[0].pricePerKwh").value(0.30));
+        }
+
 }
 
