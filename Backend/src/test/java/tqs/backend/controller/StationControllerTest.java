@@ -16,14 +16,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Charger;
 import tqs.backend.model.Station;
 import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.StationRepository;
 import tqs.backend.service.StationService;
-import tqs.backend.dto.ChargerDTO;
 
 import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ChargerType;
