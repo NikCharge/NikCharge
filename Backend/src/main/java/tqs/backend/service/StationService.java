@@ -20,13 +20,11 @@ public class StationService {
     private final StationRepository stationRepository;
     private final ChargerRepository chargerRepository;
 
-    public StationService(StationRepository stationRepository) {
+    public StationService(StationRepository stationRepository, ChargerRepository chargerRepository) {
         this.stationRepository = stationRepository;
-        this.chargerRepository = null;
+        this.chargerRepository = chargerRepository;
     }
-
-
-
+    
     
     // For testing purposes
     public StationRepository getStationRepository() {

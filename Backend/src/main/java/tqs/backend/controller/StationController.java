@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import tqs.backend.dto.StationDTO;
 import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Station;
@@ -28,10 +29,21 @@ public class StationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Station>> getAllStations() {
-        List<Station> stations = stationService.getAllStations();
+    public ResponseEntity<List<StationDTO>> getAllStations() {
+        List<StationDTO> stations = stationService.getAllStations()
+            .stream()
+            .map(station -> StationDTO.builder()
+                    .id(station.getId())
+                    .name(station.getName())
+                    .city(station.getCity())
+                    .latitude(station.getLatitude())
+                    .longitude(station.getLongitude())
+                    .build()
+            ).toList();
+
         return ResponseEntity.ok(stations);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Object> getStationById(@PathVariable Long id) {

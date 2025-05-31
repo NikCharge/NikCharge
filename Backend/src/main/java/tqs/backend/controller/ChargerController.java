@@ -3,6 +3,8 @@ package tqs.backend.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import tqs.backend.dto.ChargerCreationRequest;
 import tqs.backend.model.Charger;
 import tqs.backend.service.ChargerService;
 
@@ -17,9 +19,15 @@ public class ChargerController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addCharger(@RequestBody Charger charger, @RequestBody Long stationId) {
+    public ResponseEntity<?> addCharger(@RequestBody ChargerCreationRequest request) {
         try {
-            Charger created = chargerService.addCharger(stationId, charger);
+            Charger charger = Charger.builder()
+                    .chargerType(request.getChargerType())
+                    .status(request.getStatus())
+                    .pricePerKwh(request.getPricePerKwh())
+                    .build();
+
+            Charger created = chargerService.addCharger(request.getStationId(), charger);
             return ResponseEntity.ok(created);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(
