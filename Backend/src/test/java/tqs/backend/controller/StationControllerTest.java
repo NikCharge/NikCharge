@@ -15,6 +15,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doNothing;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
 
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Charger;
@@ -32,6 +36,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -51,6 +57,7 @@ class StationControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    
     @TestConfiguration
     static class MockConfig {
         @Bean
@@ -245,6 +252,34 @@ class StationControllerTest {
                 .andExpect(jsonPath("$.chargers[0].status").value("AVAILABLE"))
                 .andExpect(jsonPath("$.chargers[0].pricePerKwh").value(0.30));
         }
+
+        @Test
+        void deleteExistingStation_shouldReturnNoContent() throws Exception {
+        long stationId = 1L;
+
+        StationRepository stationRepository = stationService.getStationRepository();
+
+        when(stationRepository.existsById(stationId)).thenReturn(true);
+        doNothing().when(stationRepository).deleteById(stationId);
+
+        mockMvc.perform(delete("/api/stations/{id}", stationId))
+                .andExpect(status().isNoContent());
+        }
+
+        @Test
+        void deleteNonExistingStation_shouldReturnNotFound() throws Exception {
+        long stationId = 999L;
+
+        StationRepository stationRepository = stationService.getStationRepository();
+
+        when(stationRepository.existsById(stationId)).thenReturn(false);
+
+        mockMvc.perform(delete("/api/stations/{id}", stationId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Station not found"));
+        }
+
+
 
 }
 

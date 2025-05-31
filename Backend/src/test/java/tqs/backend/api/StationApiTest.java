@@ -173,4 +173,49 @@ class StationApiTest {
                 .body("chargers[0].status", anyOf(equalTo("AVAILABLE"), equalTo("IN_USE"), equalTo("MAINTENANCE")));
         }
 
+        @Test
+        @DisplayName("DELETE /api/stations/{id} - Delete existing station returns 204")
+        void deleteExistingStation_ReturnsNoContent() {
+        var station = Map.of(
+                "name", "Station To Delete",
+                "address", "Rua Delete",
+                "city", "Coimbra",
+                "latitude", 40.207,
+                "longitude", -8.429
+        );
+
+        int id = given().contentType(ContentType.JSON).body(station)
+                .when().post("/api/stations")
+                .then().statusCode(200)
+                .extract().path("id");
+
+        given()
+                .when()
+                .delete("/api/stations/" + id)
+                .then()
+                .statusCode(204);
+
+        // Verifica que ao tentar buscar a estação deletada retorna 404
+        given()
+                .when()
+                .get("/api/stations/" + id)
+                .then()
+                .statusCode(404)
+                .body("error", equalTo("Station not found"));
+        }
+
+        @Test
+        @DisplayName("DELETE /api/stations/{id} - Deleting non-existing station returns 404")
+        void deleteNonExistingStation_ReturnsNotFound() {
+        long nonExistingId = 999999L;
+
+        given()
+                .when()
+                .delete("/api/stations/" + nonExistingId)
+                .then()
+                .statusCode(404)
+                .body("error", notNullValue());
+        }
+
+
         }
