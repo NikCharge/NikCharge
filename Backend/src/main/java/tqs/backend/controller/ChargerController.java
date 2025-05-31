@@ -1,6 +1,8 @@
 package tqs.backend.controller;
 
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,5 +37,29 @@ public class ChargerController {
             );
         }
     }
+
+    // GET /api/chargers
+    @GetMapping
+    public ResponseEntity<?> getAllChargers() {
+        return ResponseEntity.ok(chargerService.getAllChargers());
+    }
+
+    // GET /api/chargers/station/{stationId}
+    @GetMapping("/station/{stationId}")
+    public ResponseEntity<?> getChargersByStation(@PathVariable Long stationId) {
+        return ResponseEntity.ok(chargerService.getChargersForStation(stationId));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCharger(@PathVariable Long id) {
+        try {
+            chargerService.deleteCharger(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
 }
  

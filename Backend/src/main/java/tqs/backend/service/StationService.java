@@ -91,4 +91,12 @@ public class StationService {
             .build();
 }
 
+    public void deleteStation(Long id) {
+        if (!stationRepository.existsById(id)) {
+            throw new IllegalArgumentException("Station not found");
+        }
+        stationRepository.deleteById(id);
+    }
+
+
 }

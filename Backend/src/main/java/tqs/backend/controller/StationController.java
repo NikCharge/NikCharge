@@ -88,4 +88,14 @@ public class StationController {
         return ResponseEntity.ok(dto);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteStation(@PathVariable Long id) {
+        try {
+            stationService.deleteStation(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }

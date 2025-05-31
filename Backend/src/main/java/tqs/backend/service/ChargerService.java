@@ -30,4 +30,17 @@ public class ChargerService {
     public List<Charger> getChargersForStation(Long stationId) {
         return chargerRepository.findByStationId(stationId);
     }
+
+    public List<Charger> getAllChargers() {
+        return chargerRepository.findAll();
+    }
+
+    public void deleteCharger(Long id) {
+        if (!chargerRepository.existsById(id)) {
+            throw new IllegalArgumentException("Charger not found");
+        }
+        chargerRepository.deleteById(id);
+    }
+        
+
 }
