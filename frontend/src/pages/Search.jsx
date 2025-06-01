@@ -4,17 +4,71 @@ import Header from "../components/global/Header.jsx";
 import Footer from "../components/global/Footer.jsx";
 import FiltersPanel from "../components/SearchPage/FiltersPanel.jsx";
 import MapDisplay from "../components/SearchPage/MapDisplay.jsx";
+import StationList from "../components/SearchPage/StationList.jsx";
+import { MdMap, MdList } from "react-icons/md";
+
+// Distância entre dois pontos geográficos
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = value => (value * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+
+    return d < 1 ? `${Math.round(d * 1000)}m` : `${d.toFixed(1)}km`;
+};
 
 const Search = () => {
     const [stations, setStations] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
+    const [viewMode, setViewMode] = useState("map");
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/stations")
-            .then(res => res.json())
-            .then(data => setStations(data))
-            .catch(err => console.error("Failed to fetch stations", err));
-    }, []);
+        const fetchData = async () => {
+            try {
+                const baseRes = await fetch("http://localhost:8080/api/stations");
+                const baseStations = await baseRes.json();
+
+                const detailedStations = await Promise.all(
+                    baseStations.map(async (station) => {
+                        const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details`);
+                        const details = await detailsRes.json();
+
+                        let distance = "–";
+                        if (userLocation?.lat && userLocation?.lng) {
+                            distance = calculateDistance(
+                                userLocation.lat,
+                                userLocation.lng,
+                                details.latitude,
+                                details.longitude
+                            );
+                        }
+
+                        return {
+                            ...details,
+                            imageUrl: station.imageUrl || null,
+                            distance,
+                            availableChargers: details.chargers.filter(c => c.status === "AVAILABLE").length
+                        };
+                    })
+                );
+
+                setStations(detailedStations);
+            } catch (error) {
+                console.error("Erro ao buscar estações:", error);
+            }
+        };
+
+        if (userLocation?.lat && userLocation?.lng) {
+            fetchData();
+        }
+    }, [userLocation]);
 
     return (
         <div className="search">
@@ -23,9 +77,32 @@ const Search = () => {
                 <div className="search-header">
                     <h1>Search for stations</h1>
                     <p>{stations.length} station{stations.length !== 1 && "s"} found</p>
+
+                    <div className="view-toggle">
+                        <button
+                            className={viewMode === "map" ? "active" : ""}
+                            onClick={() => setViewMode("map")}
+                        >
+                            <MdMap size={20} />
+                            <span>Map</span>
+                        </button>
+                        <button
+                            className={viewMode === "list" ? "active" : ""}
+                            onClick={() => setViewMode("list")}
+                        >
+                            <MdList size={20} />
+                            <span>List</span>
+                        </button>
+                    </div>
                 </div>
+
                 <FiltersPanel setUserLocation={setUserLocation} />
-                <MapDisplay stations={stations} userLocation={userLocation} />
+
+                {viewMode === "map" ? (
+                    <MapDisplay stations={stations} userLocation={userLocation} />
+                ) : (
+                    <StationList stations={stations} onStationClick={(station) => console.log(station)} />
+                )}
             </main>
             <Footer />
         </div>

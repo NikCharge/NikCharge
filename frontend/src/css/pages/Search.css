@@ -4,7 +4,7 @@ html, body, #root {
 
 .search {
     width: 100vw;
-    min-height: 100vh;
+    min-height: 150vh;
     display: flex;
     flex-direction: column;
     background: #f8fcfb;
@@ -46,6 +46,36 @@ html, body, #root {
     font-size: 1rem;
     font-weight: 500;
 }
+
+.view-toggle {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.view-toggle button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 2px solid #059669;
+    background: white;
+    color: #059669;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.view-toggle button:hover {
+    background: #e6f7f3;
+}
+
+.view-toggle .active {
+    background: #059669;
+    color: white;
+}
+
 
 @media (max-width: 768px) {
     .search-main {
