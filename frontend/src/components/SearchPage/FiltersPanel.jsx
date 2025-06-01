@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../css/SearchPage/FiltersPanel.css";
 import { MapPin, Calendar, ChevronDown } from "lucide-react";
 
-const FiltersPanel = ({ setUserLocation }) => {
-    const [selectedChargerTypes, setSelectedChargerTypes] = useState(['Fast (DC)', 'Ultra-fast (DC)']);
+const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedChargerTypes }) => {
     const [locationText, setLocationText] = useState("Detecting location...");
     const [currentTime, setCurrentTime] = useState("");
 
@@ -68,7 +67,10 @@ const FiltersPanel = ({ setUserLocation }) => {
                     >
                         Fast (DC)
                     </button>
-                    <button className="charger-btn disabled" disabled>
+                   <button
+                        onClick={() => toggleChargerType('Standard (AC)')}
+                        className={`charger-btn ${selectedChargerTypes.includes('Standard (AC)') ? 'active' : ''}`}
+                    >
                         Standard (AC)
                     </button>
                     <button
