@@ -1,6 +1,6 @@
 package tqs.backend.controller;
 
-
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -21,7 +21,7 @@ public class ChargerController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addCharger(@RequestBody ChargerCreationRequest request) {
+    public ResponseEntity<Object> addCharger(@RequestBody ChargerCreationRequest request) {
         try {
             Charger charger = Charger.builder()
                     .chargerType(request.getChargerType())
@@ -32,26 +32,22 @@ public class ChargerController {
             Charger created = chargerService.addCharger(request.getStationId(), charger);
             return ResponseEntity.ok(created);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(
-                    java.util.Map.of("error", e.getMessage())
-            );
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    // GET /api/chargers
     @GetMapping
-    public ResponseEntity<?> getAllChargers() {
+    public ResponseEntity<List<Charger>> getAllChargers() {
         return ResponseEntity.ok(chargerService.getAllChargers());
     }
 
-    // GET /api/chargers/station/{stationId}
     @GetMapping("/station/{stationId}")
-    public ResponseEntity<?> getChargersByStation(@PathVariable Long stationId) {
+    public ResponseEntity<List<Charger>> getChargersByStation(@PathVariable Long stationId) {
         return ResponseEntity.ok(chargerService.getChargersForStation(stationId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteCharger(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteCharger(@PathVariable Long id) {
         try {
             chargerService.deleteCharger(id);
             return ResponseEntity.noContent().build();
@@ -59,7 +55,4 @@ public class ChargerController {
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         }
     }
-
-
 }
- 

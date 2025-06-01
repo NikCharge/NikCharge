@@ -44,7 +44,6 @@ public class StationController {
         return ResponseEntity.ok(stations);
     }
 
-
     @GetMapping("/{id}")
     public ResponseEntity<Object> getStationById(@PathVariable Long id) {
         Station station = stationService.getStationById(id);
@@ -56,13 +55,17 @@ public class StationController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createStation(@Valid @RequestBody StationRequest request, BindingResult bindingResult) {
+    public ResponseEntity<Object> createStation(
+            @Valid @RequestBody StationRequest request,
+            BindingResult bindingResult
+    ) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
                     errors.put(error.getField(), error.getDefaultMessage())
             );
-            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, errors));
+            return ResponseEntity.badRequest()
+                    .body(Map.of(ERROR_KEY, errors));
         }
 
         try {
@@ -78,23 +81,26 @@ public class StationController {
         }
     }
 
-   @GetMapping("/{id}/details")
+    @GetMapping("/{id}/details")
     public ResponseEntity<Object> getStationDetails(@PathVariable Long id) {
         StationDetailsDTO dto = stationService.getStationDetails(id);
         if (dto == null) {
+            // Usar ERROR_KEY em vez de literal "error"
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Station not found"));
+                    .body(Map.of(ERROR_KEY, "Station not found"));
         }
         return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteStation(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteStation(@PathVariable Long id) {
         try {
             stationService.deleteStation(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+            // Usar ERROR_KEY em vez de literal "error"
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(ERROR_KEY, e.getMessage()));
         }
     }
 
