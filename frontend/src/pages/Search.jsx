@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import "../css/pages/Search.css";
 import Header from "../components/global/Header.jsx";
 import Footer from "../components/global/Footer.jsx";
@@ -28,6 +28,7 @@ const Search = () => {
     const [stations, setStations] = useState([]);
     const [userLocation, setUserLocation] = useState(null);
     const [viewMode, setViewMode] = useState("map");
+    const [selectedChargerTypes, setSelectedChargerTypes] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -70,6 +71,26 @@ const Search = () => {
         }
     }, [userLocation]);
 
+    const filteredStations = useMemo(() => {
+        const typeMap = {
+            "DC_FAST": "Fast (DC)",
+            "DC_ULTRA_FAST": "Ultra-fast (DC)",
+            "AC_STANDARD": "Standard (AC)"
+        };
+
+        // Se nenhum filtro foi selecionado, retorna todas as estações
+        if (selectedChargerTypes.length === 0) return stations;
+
+        // Caso contrário, aplica o filtro por tipo
+        return stations.filter(station =>
+            station.chargers.some(charger =>
+                selectedChargerTypes.includes(typeMap[charger.chargerType])
+            )
+        );
+    }, [stations, selectedChargerTypes]);
+
+
+
     return (
         <div className="search">
             <Header />
@@ -96,13 +117,20 @@ const Search = () => {
                     </div>
                 </div>
 
-                <FiltersPanel setUserLocation={setUserLocation} />
+                <FiltersPanel
+                    setUserLocation={setUserLocation}
+                    selectedChargerTypes={selectedChargerTypes}
+                    setSelectedChargerTypes={setSelectedChargerTypes}
+                />
 
-                {viewMode === "map" ? (
-                    <MapDisplay stations={stations} userLocation={userLocation} />
+                
+
+               {viewMode === "map" ? (
+                    <MapDisplay stations={filteredStations} userLocation={userLocation} />
                 ) : (
-                    <StationList stations={stations} onStationClick={(station) => console.log(station)} />
+                    <StationList stations={filteredStations} onStationClick={(station) => console.log(station)} />
                 )}
+
             </main>
             <Footer />
         </div>

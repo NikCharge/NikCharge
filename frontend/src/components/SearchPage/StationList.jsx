@@ -46,7 +46,10 @@ const StationList = ({ stations, onStationClick }) => {
                     key={station.id}
                     onClick={() => onStationClick && onStationClick(station)}
                 >
-                    <div className="station-status-tag">
+                    <div
+                        className="station-status-tag"
+                        style={{ backgroundColor: station.availableChargers > 0 ? "#059669" : "#dc2626" }}
+                    >
                         {station.availableChargers > 0 ? "Disponível" : "Indisponível"}
                     </div>
 
@@ -60,8 +63,9 @@ const StationList = ({ stations, onStationClick }) => {
                         <div className="station-icon-fallback">
                             <MdEvStation
                                 size={48}
-                                color={getColorFromId(station.id)}
+                                color={station.availableChargers > 0 ? getColorFromId(station.id) : "#dc2626"}
                             />
+
                         </div>
                     )}
 
