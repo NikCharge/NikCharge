@@ -34,7 +34,7 @@ class StationServiceTest {
         StationDetailsDTO result = stationService.getStationDetails(stationId);
 
         // Then
-        assertThat(result).isNull(); // cobre o if (station == null) return null;
+        assertThat(result).isNull();
         verify(stationRepository, times(1)).findById(stationId);
         verifyNoMoreInteractions(stationRepository);
         verifyNoInteractions(chargerRepository);
