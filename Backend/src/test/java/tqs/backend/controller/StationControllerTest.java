@@ -2,6 +2,8 @@ package tqs.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Validator;
+
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -20,8 +22,10 @@ import static org.mockito.Mockito.doNothing;
 
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Charger;
+import tqs.backend.model.Discount;
 import tqs.backend.model.Station;
 import tqs.backend.repository.ChargerRepository;
+import tqs.backend.repository.DiscountRepository;
 import tqs.backend.repository.StationRepository;
 import tqs.backend.service.StationService;
 
@@ -29,7 +33,6 @@ import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ChargerType;
 
 import java.math.BigDecimal;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -61,14 +64,19 @@ class StationControllerTest {
             return mock(StationRepository.class);
         }
 
-         @Bean
+        @Bean
         public ChargerRepository chargerRepository() {
             return mock(ChargerRepository.class);
         }
 
         @Bean
-        public StationService stationService(StationRepository stationRepository, ChargerRepository chargerRepository) {
-            return new StationService(stationRepository, chargerRepository);
+        public DiscountRepository discountRepository() {
+            return mock(DiscountRepository.class);
+        }
+
+        @Bean
+        public StationService stationService(StationRepository stationRepository, ChargerRepository chargerRepository, DiscountRepository discountRepository) {
+            return new StationService(stationRepository, chargerRepository, discountRepository);
         }
 
         @Bean
@@ -84,8 +92,8 @@ class StationControllerTest {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/clients/**", "/api/stations/**",  "/api/stations/*/details",  
-                            "/api/chargers/**").permitAll()
+                            .requestMatchers("/api/clients/**", "/api/stations/**", "/api/stations/search" , "/api/stations/*/details",  
+                            "/api/chargers/**",                             "/api/discounts/**").permitAll()
                             .anyRequest().authenticated());
             return http.build();
         }
@@ -274,6 +282,47 @@ class StationControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Station not found"));
         }
+
+        @Test
+        @DisplayName("GET /api/stations/search - Should include discount tag when active")
+        void searchStations_withActiveDiscount_shouldIncludeDiscountTag() throws Exception {
+                // Simula estação real
+                Station station = Station.builder()
+                        .id(1L)
+                        .name("Station Discount")
+                        .latitude(37.019)
+                        .longitude(-7.93)
+                        .build();
+
+                // Simula desconto real
+                Discount discount = Discount.builder()
+                        .station(station)
+                        .chargerType(ChargerType.AC_STANDARD)
+                        .dayOfWeek(1)
+                        .startHour(14)
+                        .endHour(18)
+                        .discountPercent(15.0)
+                        .active(true)
+                        .build();
+
+                // Mocka os repositórios
+                StationRepository stationRepo = stationService.getStationRepository();
+                DiscountRepository discountRepo = stationService.getDiscountRepository();
+
+                when(stationRepo.findAll()).thenReturn(List.of(station));
+                when(discountRepo.findByActiveTrueAndDayOfWeekAndStartHourLessThanEqualAndEndHourGreaterThanEqualAndChargerType(
+                        1, 15, 15, ChargerType.AC_STANDARD)).thenReturn(List.of(discount));
+
+                // Chama o endpoint real
+                mockMvc.perform(get("/api/stations/search")
+                                .param("dayOfWeek", "1")
+                                .param("hour", "15")
+                                .param("chargerType", "AC_STANDARD")
+                                .accept(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].name").value("Station Discount"))
+                        .andExpect(jsonPath("$[0].discountTag").value("15% off"));
+                }
 
 
 

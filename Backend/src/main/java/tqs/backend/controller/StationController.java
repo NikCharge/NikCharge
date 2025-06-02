@@ -10,6 +10,7 @@ import tqs.backend.dto.StationDTO;
 import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Station;
+import tqs.backend.model.enums.ChargerType;
 import tqs.backend.service.StationService;
 
 import java.util.HashMap;
@@ -98,10 +99,20 @@ public class StationController {
             stationService.deleteStation(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
-            // Usar ERROR_KEY em vez de literal "error"
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of(ERROR_KEY, e.getMessage()));
         }
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Map<String, Object>>> searchStations(
+            @RequestParam int dayOfWeek,
+            @RequestParam int hour,
+            @RequestParam ChargerType chargerType
+    ) {
+        List<Map<String, Object>> results = stationService.searchStationsWithDiscount(dayOfWeek, hour, chargerType);
+        return ResponseEntity.ok(results);
+    }
+
 
 }

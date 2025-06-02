@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.repository.ChargerRepository;
+import tqs.backend.repository.DiscountRepository;
 import tqs.backend.repository.StationRepository;
 
 import java.util.Optional;
@@ -16,12 +17,13 @@ class StationServiceTest {
     private StationRepository stationRepository;
     private ChargerRepository chargerRepository;
     private StationService stationService;
+    private DiscountRepository discountRepository;
 
     @BeforeEach
     void setup() {
         stationRepository = mock(StationRepository.class);
         chargerRepository = mock(ChargerRepository.class);
-        stationService = new StationService(stationRepository, chargerRepository);
+        stationService = new StationService(stationRepository, chargerRepository, discountRepository);
     }
 
     @Test
