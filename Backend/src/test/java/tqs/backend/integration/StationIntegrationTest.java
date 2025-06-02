@@ -3,6 +3,7 @@ package tqs.backend.integration;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import tqs.backend.repository.ChargerRepository;
+import tqs.backend.repository.DiscountRepository;
 import tqs.backend.repository.StationRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,11 +19,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import tqs.backend.model.Charger;
+import tqs.backend.model.Discount;
 import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ChargerType;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static io.restassured.RestAssured.given;
@@ -67,6 +70,9 @@ public class StationIntegrationTest {
 
         @Autowired
         private ChargerRepository chargerRepository;
+
+        @Autowired
+        private DiscountRepository discountRepository;
 
     // ---------- CREATE STATION TESTS ----------
 
@@ -232,6 +238,70 @@ public class StationIntegrationTest {
                 .then()
                 .statusCode(404)
                 .body("error", equalTo("Station not found"));
+        }
+
+        @Test
+        void testSearchStationsWithActiveDiscount_shouldIncludeDiscountTag() {
+        // 1. Criar estação via API
+        var stationPayload = Map.of(
+                "name", "Station With Discount",
+                "address", "Rua Teste",
+                "city", "Test City",
+                "latitude", 38.5,
+                "longitude", -9.1
+        );
+
+        int stationId = given()
+                .contentType(ContentType.JSON)
+                .body(stationPayload)
+                .when()
+                .post("/api/stations")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("id");
+
+        // 2. Criar carregador via repositório com ChargerType AC_STANDARD
+        Station station = stationRepository.findById((long) stationId).orElseThrow();
+
+        Charger charger = Charger.builder()
+                .station(station)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.25))
+                .build();
+
+        chargerRepository.save(charger);
+
+        // 3. Criar desconto ativo via repositório
+        Discount discount = Discount.builder()
+                .station(station)
+                .chargerType(ChargerType.AC_STANDARD)
+                .dayOfWeek(LocalDateTime.now().getDayOfWeek().getValue()) // pega dia da semana atual (1=segunda)
+                .startHour(10)
+                .endHour(20)
+                .discountPercent(20.0)
+                .active(true)
+                .build();
+
+        discountRepository.save(discount);
+
+        // 4. Chamar endpoint de busca passando dia/hora dentro do intervalo do desconto
+        int dayOfWeek = LocalDateTime.now().getDayOfWeek().getValue();
+        int hour = 15;
+
+        given()
+                .accept(ContentType.JSON)
+                .queryParam("dayOfWeek", dayOfWeek)
+                .queryParam("hour", hour)
+                .queryParam("chargerType", "AC_STANDARD")
+                .when()
+                .get("/api/stations/search")
+                .then()
+                .statusCode(200)
+                .body("size()", greaterThanOrEqualTo(1))
+                .body("[0].name", equalTo("Station With Discount"))
+                .body("[0].discountTag", equalTo("20% off"));
         }
 
 }

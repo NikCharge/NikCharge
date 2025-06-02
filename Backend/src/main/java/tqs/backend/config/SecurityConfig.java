@@ -26,9 +26,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                                                 .requestMatchers(
                             "/api/clients/**",
-                            "/api/stations/**",          // cobre POST, GET, etc. para /api/stations
+                            "/api/stations/**",
                             "/api/stations/*/details",  
+                            "/api/stations/search",         
                             "/api/chargers/**",
+                            "/api/discounts/**",
                             "/swagger-ui/**",
                             "/v3/api-docs/**",
                             "/swagger-ui.html"

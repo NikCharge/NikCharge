@@ -232,6 +232,63 @@ class StationApiTest {
                 .body("error", equalTo("Station not found")); // cobre Map.of(ERROR_KEY, ...)
         }
 
+        @Test
+        @DisplayName("GET /api/stations/search - Shows discount tag when active")
+        void searchStations_WithActiveDiscount_ShowsDiscountTag() {
+        // Criar estação
+        var station = Map.of(
+                "name", "Station Discount",
+                "address", "Rua Desconto",
+                "city", "Faro",
+                "latitude", 37.019,
+                "longitude", -7.930
+        );
+
+        int stationId = given().contentType(ContentType.JSON).body(station)
+                .when().post("/api/stations")
+                .then().statusCode(200)
+                .extract().path("id");
+
+        // Criar carregador
+        var charger = Map.of(
+                "stationId", stationId,
+                "chargerType", "AC_STANDARD",
+                "status", "AVAILABLE",
+                "pricePerKwh", 0.25
+        );
+
+        given().contentType(ContentType.JSON).body(charger)
+                .when().post("/api/chargers")
+                .then().statusCode(anyOf(is(200), is(201)));
+
+        // Criar desconto ativo: Segunda-feira 14h-18h com 15% desconto
+        var discount = Map.of(
+                "stationId", stationId,
+                "chargerType", "AC_STANDARD",
+                "dayOfWeek", 1,  // Monday
+                "startHour", 14,
+                "endHour", 18,
+                "discountPercent", 15.0,
+                "active", true
+        );
+
+        given().contentType(ContentType.JSON).body(discount)
+                .when().post("/api/discounts")
+                .then().statusCode(200);
+
+        // Simula uma pesquisa em segunda-feira às 15h com tipo AC_STANDARD
+        given()
+                .queryParam("dayOfWeek", 1)
+                .queryParam("hour", 15)
+                .queryParam("chargerType", "AC_STANDARD")
+                .when()
+                .get("/api/stations/search")
+                .then()
+                .statusCode(200)
+                .body("name", hasItem("Station Discount"))
+                .body("find { it.name == 'Station Discount' }.discountTag", equalTo("15% off"));
+
+        }
 
 
         }
