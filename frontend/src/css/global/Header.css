@@ -1,0 +1,280 @@
+/* Header container */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 3rem;
+    background-color: rgba(29, 182, 144, 0.95);
+    width: 100%;
+    min-height: 90px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.logo {
+    height: 50px;
+    transform: scale(1.5);
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.15);
+}
+
+.nav {
+    display: flex;
+    gap: 3.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 0.5rem 0.75rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.login-button-wrapper {
+    position: relative;
+}
+
+.login-button {
+    background-color: #0e6355;
+    border: none;
+    padding: 1rem 1.8rem;
+    color: #fff;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1.1rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-button:hover {
+    background-color: #0a574a;
+    transform: translateY(-2px);
+}
+
+.user-dropdown {
+    background: white;
+    position: absolute;
+    top: 120%;
+    right: 0;
+    min-width: 280px;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 99;
+    color: #333;
+}
+
+.user-dropdown h3 {
+    margin-bottom: 0.5rem;
+}
+
+.car-stats {
+    font-size: 0.9rem;
+    margin: 0.5rem 0 1rem;
+}
+
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.edit-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-field label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+}
+
+.edit-input {
+    padding: 0.5rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 0.9rem;
+    background-color: white !important;
+    color: black;
+}
+
+.edit-input.disabled {
+    background-color: #f5f5f5 !important;
+}
+
+.edit-btn {
+    background-color: #0e6355;
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+.logout-btn {
+    background-color: #d62828;
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    border-radius: 5px;
+    font-weight: 600;
+}
+
+/* Dropdown wrapper */
+.login-button-wrapper {
+    position: relative;
+}
+
+/* Toggle button (already defined, but re-adding for context) */
+.login-button {
+    background-color: #0e6355;
+    border: none;
+    padding: 1rem 1.8rem;
+    color: #fff;
+    border-top-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1.1rem;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-button:hover {
+    background-color: #0a574a;
+    transform: translateY(-2px);
+}
+
+/* Dropdown container */
+.user-dropdown {
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background-color: white;
+    color: #333;
+    min-width: 280px;
+    padding: 1rem 1.2rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    z-index: 99;
+}
+
+/* Profile summary */
+.user-dropdown p {
+    margin: 0.3rem 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.user-dropdown .email {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+/* Stats */
+.car-stats {
+    font-size: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    margin: 0.5rem 0 1rem;
+    color: #444;
+}
+
+/* Buttons */
+.edit-btn,
+.logout-btn {
+    width: 100%;
+    padding: 0.6rem;
+    margin-top: 0.5rem;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.edit-btn {
+    background-color: #0e6355;
+    color: white;
+}
+
+.edit-btn:hover {
+    background-color: #0c574b;
+}
+
+.logout-btn {
+    background-color: #d62828;
+    color: white;
+}
+
+.logout-btn:hover {
+    background-color: #c51f1f;
+}
+
+/* Form in edit mode */
+.edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.edit-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.edit-input {
+    padding: 0.45rem;
+    font-size: 0.9rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.edit-input.disabled {
+    background-color: #f3f3f3;
+    color: #999;
+    cursor: not-allowed;
+}

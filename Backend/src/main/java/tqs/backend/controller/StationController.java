@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import tqs.backend.dto.StationDTO;
+import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Station;
 import tqs.backend.service.StationService;
@@ -26,18 +29,19 @@ public class StationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Station>> getStations(
-            @RequestParam(required = false) Double lat,
-            @RequestParam(required = false) Double lng,
-            @RequestParam(defaultValue = "10") Double radiusKm
-    ) {
-        if (lat != null && lng != null) {
-            List<Station> nearbyStations = stationService.getStationsNear(lat, lng, radiusKm);
-            return ResponseEntity.ok(nearbyStations);
-        } else {
-            List<Station> stations = stationService.getAllStations();
-            return ResponseEntity.ok(stations);
-        }
+    public ResponseEntity<List<StationDTO>> getAllStations() {
+        List<StationDTO> stations = stationService.getAllStations()
+            .stream()
+            .map(station -> StationDTO.builder()
+                    .id(station.getId())
+                    .name(station.getName())
+                    .city(station.getCity())
+                    .latitude(station.getLatitude())
+                    .longitude(station.getLongitude())
+                    .build()
+            ).toList();
+
+        return ResponseEntity.ok(stations);
     }
 
     @GetMapping("/{id}")
@@ -51,13 +55,17 @@ public class StationController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> createStation(@Valid @RequestBody StationRequest request, BindingResult bindingResult) {
+    public ResponseEntity<Object> createStation(
+            @Valid @RequestBody StationRequest request,
+            BindingResult bindingResult
+    ) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
                     errors.put(error.getField(), error.getDefaultMessage())
             );
-            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, errors));
+            return ResponseEntity.badRequest()
+                    .body(Map.of(ERROR_KEY, errors));
         }
 
         try {
@@ -72,4 +80,28 @@ public class StationController {
                     .body(Map.of(ERROR_KEY, "Unexpected error: " + e.getMessage()));
         }
     }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<Object> getStationDetails(@PathVariable Long id) {
+        StationDetailsDTO dto = stationService.getStationDetails(id);
+        if (dto == null) {
+            // Usar ERROR_KEY em vez de literal "error"
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(ERROR_KEY, "Station not found"));
+        }
+        return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteStation(@PathVariable Long id) {
+        try {
+            stationService.deleteStation(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            // Usar ERROR_KEY em vez de literal "error"
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(ERROR_KEY, e.getMessage()));
+        }
+    }
+
 }

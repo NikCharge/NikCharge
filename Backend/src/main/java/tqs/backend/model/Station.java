@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import lombok.*;
 
 @Entity
@@ -34,6 +36,7 @@ public class Station {
     private Double longitude;
 
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Charger> chargers;
 
     @Transient
