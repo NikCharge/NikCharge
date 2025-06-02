@@ -7,6 +7,8 @@ import tqs.backend.model.enums.ChargerType;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.*;
 
 @Entity
@@ -24,6 +26,7 @@ public class Charger {
 
     @ManyToOne
     @JoinColumn(name = "station_id")
+    @JsonBackReference
     private Station station;
 
     @Enumerated(EnumType.STRING)
