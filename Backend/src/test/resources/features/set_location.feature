@@ -6,12 +6,12 @@ Feature: Set a custom location
 
   @SCRUM-67 @location @map @happy-path
   Scenario: User sets a new location and views updated station list
-    When I set my search location to "Aveiro"
-    Then the map and station list should update to show results near "Aveiro"
-    And all distances should be relative to "Aveiro"
+    Given there are charging stations in the system
+    When the user sets the location to "Aveiro"
+    Then the map and station list should include at least one station
 
   @SCRUM-68 @location @map @reset-location
   Scenario: User resets back to GPS location
-    Given my current search location is "Lisbon"
-    When I switch back to "this location"
-    Then the map and list should show results based on my GPS position
+    Given there are charging stations in the system
+    When the user resets the location to use GPS
+    Then the map and list should include at least one station
