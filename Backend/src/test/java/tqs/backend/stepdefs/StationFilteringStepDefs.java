@@ -3,11 +3,9 @@ package tqs.backend.stepdefs;
 import io.cucumber.java.en.*;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import tqs.backend.model.enums.ChargerType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -15,7 +13,6 @@ import static org.hamcrest.Matchers.*;
 public class StationFilteringStepDefs {
 
     private Response response;
-    private String filterType;
 
     @Given("there are multiple stations with chargers of various types")
     public void setupStationsWithVariousChargers() {
@@ -25,8 +22,6 @@ public class StationFilteringStepDefs {
 
     @When("I filter stations by charger type {string}")
     public void iFilterByChargerType(String chargerType) {
-        this.filterType = chargerType;
-
         response = RestAssured.given()
                 .queryParam("lat", 40.6333)
                 .queryParam("lng", -8.659)
@@ -45,7 +40,7 @@ public class StationFilteringStepDefs {
 
             List<String> types = chargers.stream()
                     .map(c -> c.get("chargerType").toString())
-                    .collect(Collectors.toList());
+                    .toList();
 
             assertThat(
                     "Each station should contain the expected charger type",
