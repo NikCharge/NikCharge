@@ -74,6 +74,13 @@ const StationList = ({ stations, onStationClick }) => {
                         <h3>{station.name}</h3>
                         <p>{station.availableChargers} available charging stations</p>
                     </div>
+                    {station.discount && (
+                        <div className="station-discount-tag">
+                            -{station.discount}% OFF
+                        </div>
+                    )}
+
+
                 </button>
             ))}
         </div>
