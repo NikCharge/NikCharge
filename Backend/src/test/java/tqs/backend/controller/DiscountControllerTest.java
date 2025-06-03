@@ -143,8 +143,7 @@ class DiscountControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isNotFound())
-                .andExpect(status().reason("Station not found"));
-    }
+                .andExpect(jsonPath("$.message").value("Station not found"));    }
 
     @Test
     void getAllDiscounts_ReturnsList() throws Exception {
@@ -202,8 +201,7 @@ class DiscountControllerTest {
 
         mockMvc.perform(get("/api/discounts/{id}", discountId))
                 .andExpect(status().isNotFound())
-                .andExpect(status().reason("Discount not found"));
-    }
+                .andExpect(jsonPath("$.message").value("Discount not found"));    }
 
     @Test
     void updateDiscount_ValidRequest_ReturnsUpdated() throws Exception {
@@ -267,7 +265,7 @@ class DiscountControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isNotFound())
-                .andExpect(status().reason("Discount not found"));
+                .andExpect(jsonPath("$.message").value("Discount not found"));    
     }
 
     @Test
@@ -288,6 +286,5 @@ class DiscountControllerTest {
 
         mockMvc.perform(delete("/api/discounts/{id}", discountId))
                 .andExpect(status().isNotFound())
-                .andExpect(status().reason("Discount not found"));
+                .andExpect(jsonPath("$.message").value("Discount not found"));    }
     }
-}
