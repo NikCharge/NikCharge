@@ -1,14 +1,23 @@
-# Usa uma imagem oficial do OpenJDK
+# Etapa 1: builder com Maven para compilar o projeto
+FROM maven:3.9-eclipse-temurin-21 AS builder
+
+WORKDIR /app
+
+# Copia os arquivos para o container de build
+COPY . .
+
+# Empacota a aplicação sem correr testes
+RUN mvn clean package -DskipTests
+
+# Etapa 2: imagem final leve com apenas o JAR
 FROM openjdk:21-jdk
 
-# Define o argumento para o caminho do JAR
-ARG JAR_FILE=target/*.jar
+WORKDIR /app
 
-# Copia o JAR gerado para dentro do container
-COPY target/Backend-0.0.1-SNAPSHOT.jar app.jar
+# Copia o JAR da build anterior
+COPY --from=builder /app/target/Backend-0.0.1-SNAPSHOT.jar app.jar
 
-# Expõe a porta do Spring Boot (necessária para o NGINX fazer proxy)
 EXPOSE 8080
 
-# Comando para executar a app e garantir que logs vão para o STDOUT
-CMD ["sh", "-c", "java -jar /app.jar 2>&1 | tee /proc/1/fd/1"]
+# Executa a aplicação e envia logs para STDOUT
+CMD ["sh", "-c", "java -jar /app/app.jar 2>&1 | tee /proc/1/fd/1"]
