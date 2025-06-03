@@ -10,11 +10,9 @@ import static org.hamcrest.Matchers.*;
 public class LocationStepDefs {
 
     private Response response;
-    private String currentLocation;
 
     @When("I set my search location to {string}")
     public void iSetSearchLocation(String location) {
-        currentLocation = location;
         response = RestAssured.given()
                 .queryParam("location", location)
                 .when()
@@ -35,13 +33,12 @@ public class LocationStepDefs {
 
     @Given("my current search location is {string}")
     public void givenCurrentLocation(String location) {
-        currentLocation = location;
+        // noop – semantic placeholder
     }
 
     @When("I switch back to {string}")
     public void iSwitchBack(String option) {
         if ("this location".equalsIgnoreCase(option)) {
-            // Simula reset para coordenadas de GPS (por ex., Lisboa)
             response = RestAssured.given()
                     .queryParam("lat", 38.7169)
                     .queryParam("lng", -9.1399)
