@@ -1,32 +1,23 @@
-@station @view
-Feature: Station View
+@SCRUM-13 @filtering @chargers
+Feature: Filter stations by charger type
   As a user
-  I want to view station information
-  So that I can see details about charging stations
+  I want to filter by charger type
+  So that I only see availability for the type my EV supports
 
   Background:
-    Given the system is running
+    Given there are multiple stations with chargers of various types
 
-  @happy-path
-  Scenario: View all stations
-    Given a station with id 1 exists in the system
-    When I request the list of stations
-    Then I should receive a list of stations
+  @SCRUM-122 @ac-only
+  Scenario: Filter stations with Standard (AC) chargers
+    When I filter stations by charger type "AC_STANDARD"
+    Then I should only see stations that have "AC_STANDARD" chargers
 
-  @happy-path
-  Scenario: View a specific station
-    Given a station with id 1 exists in the system
-    When I request the station with id 1
-    Then I should receive the station details for id 1
+  @SCRUM-123 @dc-fast
+  Scenario: Filter stations with Fast (DC) chargers
+    When I filter stations by charger type "DC_FAST"
+    Then I should only see stations that have "DC_FAST" chargers
 
-  @not-found
-  Scenario: View a non-existent station
-    When I request the station with id 999
-    Then the station view should fail with status 404
-    And I should receive an error message about station not found
-
-  @happy-path @filtering
-  Scenario: Filter stations by charger type and availability
-    Given three stations with two of type "DC_FAST", one available and one in use, and one of a different type
-    When I fetch and filter stations for charger type "DC_FAST"
-    Then only the available station with type "DC_FAST" is selected
+  @SCRUM-124 @ultra-dc
+  Scenario: Filter stations with Ultra-fast (DC) chargers
+    When I filter stations by charger type "DC_ULTRA_FAST"
+    Then I should only see stations that have "DC_ULTRA_FAST" chargers
