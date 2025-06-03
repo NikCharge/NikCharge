@@ -27,7 +27,8 @@ const Login = () => {
                 email: response.data.email,
                 name: response.data.name,
                 batteryCapacityKwh: response.data.batteryCapacityKwh,
-                fullRangeKm: response.data.fullRangeKm
+                fullRangeKm: response.data.fullRangeKm,
+                role: response.data.role
             };
 
             localStorage.setItem("client", JSON.stringify(clientData));
