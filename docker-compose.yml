@@ -1,21 +1,21 @@
 version: '3.9'
 
 services:
-  maven-build:
-    image: maven:3.9-eclipse-temurin-21
-    container_name: maven-build
-    working_dir: /app
-    volumes:
-      - ./Backend:/app
-    command: mvn package -DskipTests
-    restart: "no"
+  # maven-build:
+  #   image: maven:3.9-eclipse-temurin-21
+  #   container_name: maven-build
+  #   working_dir: /app
+  #   volumes:
+  #     - ./Backend:/app
+  #   command: mvn package -DskipTests
+  #   restart: "no"
 
   postgres:
     image: postgres:15
     container_name: postgres
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -34,8 +34,8 @@ services:
       context: ./Backend
       dockerfile: Dockerfile.backend
     depends_on:
-      maven-build:
-        condition: service_completed_successfully
+      # maven-build:
+      #   condition: service_completed_successfully
       postgres:
         condition: service_healthy
     ports:
@@ -58,8 +58,12 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.frontend
-    ports:
-      - "3000:80"
+      args:
+        - NODE_ENV=${NODE_ENV}
+    environment:
+      - NODE_ENV=${NODE_ENV}
+    volumes:
+      - /app/node_modules
     depends_on:
       - backend
 
@@ -78,4 +82,3 @@ services:
 volumes:
   postgres_data:
     driver: local
- 

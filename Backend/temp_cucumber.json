@@ -1,0 +1,204 @@
+[
+  {
+    "name": "Edit User Profile",
+    "uri": "features/edit_profile.feature",
+    "id": "edit-user-profile",
+    "keyword": "Feature",
+    "elements": [
+      {
+        "start_timestamp": "2025-05-27T20:21:28.860Z",
+        "line": 11,
+        "name": "Successfully update user profile",
+        "description": "",
+        "id": "edit-user-profile;successfully-update-user-profile",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "result": {
+              "duration": 214332202,
+              "status": "passed"
+            },
+            "line": 12,
+            "name": "a user with email \"edituser@example.com\" exists in the system",
+            "match": {
+              "arguments": [
+                {
+                  "val": "\"edituser@example.com\"",
+                  "offset": 18
+                }
+              ],
+              "location": "tqs.backend.stepdefs.UserRegistrationStepDefs.aUserWithEmailExistsInTheSystem(java.lang.String)"
+            },
+            "keyword": "Given "
+          },
+          {
+            "result": {
+              "duration": 111487127,
+              "status": "passed"
+            },
+            "line": 13,
+            "name": "I update the profile for \"edituser@example.com\" with the following data",
+            "match": {
+              "arguments": [
+                {
+                  "val": "\"edituser@example.com\"",
+                  "offset": 25
+                }
+              ],
+              "location": "tqs.backend.stepdefs.UserProfileStepDefs.iUpdateTheProfileForWithTheFollowingData(java.lang.String,io.cucumber.datatable.DataTable)"
+            },
+            "rows": [
+              {
+                "cells": [
+                  "name",
+                  "email",
+                  "batteryCapacityKwh",
+                  "fullRangeKm"
+                ]
+              },
+              {
+                "cells": [
+                  "New Name",
+                  "newuser@example.com",
+                  "85",
+                  "420"
+                ]
+              }
+            ],
+            "keyword": "When "
+          },
+          {
+            "result": {
+              "duration": 1763772,
+              "status": "passed"
+            },
+            "line": 16,
+            "name": "the profile should be updated successfully",
+            "match": {
+              "location": "tqs.backend.stepdefs.UserProfileStepDefs.theProfileShouldBeUpdatedSuccessfully()"
+            },
+            "keyword": "Then "
+          },
+          {
+            "result": {
+              "duration": 147745720,
+              "status": "passed"
+            },
+            "line": 17,
+            "name": "the response should contain the updated profile data",
+            "match": {
+              "location": "tqs.backend.stepdefs.UserProfileStepDefs.theResponseShouldContainTheUpdatedProfileData()"
+            },
+            "keyword": "And "
+          }
+        ],
+        "tags": [
+          {
+            "name": "@SCRUM-18"
+          },
+          {
+            "name": "@edit"
+          },
+          {
+            "name": "@profile"
+          },
+          {
+            "name": "@happy-path"
+          }
+        ]
+      },
+      {
+        "start_timestamp": "2025-05-27T20:21:29.466Z",
+        "line": 20,
+        "name": "Attempt to update a non-existent user",
+        "description": "",
+        "id": "edit-user-profile;attempt-to-update-a-non-existent-user",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "result": {
+              "duration": 74007928,
+              "status": "passed"
+            },
+            "line": 21,
+            "name": "I update the profile for \"ghost@example.com\" with the following data",
+            "match": {
+              "arguments": [
+                {
+                  "val": "\"ghost@example.com\"",
+                  "offset": 25
+                }
+              ],
+              "location": "tqs.backend.stepdefs.UserProfileStepDefs.iUpdateTheProfileForWithTheFollowingData(java.lang.String,io.cucumber.datatable.DataTable)"
+            },
+            "rows": [
+              {
+                "cells": [
+                  "name",
+                  "email",
+                  "batteryCapacityKwh",
+                  "fullRangeKm"
+                ]
+              },
+              {
+                "cells": [
+                  "Ghost",
+                  "ghost@example.com",
+                  "70",
+                  "350"
+                ]
+              }
+            ],
+            "keyword": "When "
+          },
+          {
+            "result": {
+              "duration": 4493491,
+              "status": "passed"
+            },
+            "line": 24,
+            "name": "the update should fail with status 404",
+            "match": {
+              "arguments": [
+                {
+                  "val": "404",
+                  "offset": 35
+                }
+              ],
+              "location": "tqs.backend.stepdefs.UserProfileStepDefs.theUpdateShouldFailWithStatus(int)"
+            },
+            "keyword": "Then "
+          },
+          {
+            "result": {
+              "duration": 40011709,
+              "status": "passed"
+            },
+            "line": 25,
+            "name": "I should receive an error message about user not found",
+            "match": {
+              "location": "tqs.backend.stepdefs.UserProfileStepDefs.iShouldReceiveAnErrorMessageAboutUserNotFound()"
+            },
+            "keyword": "And "
+          }
+        ],
+        "tags": [
+          {
+            "name": "@SCRUM-18"
+          },
+          {
+            "name": "@edit"
+          },
+          {
+            "name": "@profile"
+          },
+          {
+            "name": "@not-found"
+          }
+        ]
+      }
+    ]
+  }
+]

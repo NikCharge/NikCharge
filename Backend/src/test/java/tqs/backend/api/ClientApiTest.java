@@ -26,10 +26,11 @@ class ClientApiTest {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
+    // ---------- SIGNUP TESTS ----------
+
     @Test
     void postValidSignup_ReturnsOk() {
-        RestAssured
-                .given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "Rita",
@@ -46,8 +47,7 @@ class ClientApiTest {
 
     @Test
     void postSignupWithInvalidEmail_ReturnsBadRequest() {
-        RestAssured
-                .given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "Invalid",
@@ -58,13 +58,13 @@ class ClientApiTest {
                 .when()
                 .post("/api/clients/signup")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .body("error.email", notNullValue());
     }
 
     @Test
     void postSignupWithMissingFields_ReturnsBadRequest() {
-        RestAssured
-                .given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "Incomplete",
@@ -73,13 +73,13 @@ class ClientApiTest {
                 .when()
                 .post("/api/clients/signup")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .body("error.batteryCapacityKwh", notNullValue());
     }
 
     @Test
     void postSignupWithInvalidBatteryCapacity_ReturnsBadRequest() {
-        RestAssured
-                .given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "Invalid",
@@ -90,13 +90,13 @@ class ClientApiTest {
                 .when()
                 .post("/api/clients/signup")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .body("error.batteryCapacityKwh", notNullValue());
     }
 
     @Test
     void postSignupWithInvalidRange_ReturnsBadRequest() {
-        RestAssured
-                .given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "Invalid",
@@ -107,13 +107,13 @@ class ClientApiTest {
                 .when()
                 .post("/api/clients/signup")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .body("error.fullRangeKm", notNullValue());
     }
 
     @Test
     void postSignupWithWeakPassword_ReturnsBadRequest() {
-        RestAssured
-                .given()
+        given()
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "name", "Weak",
@@ -124,57 +124,80 @@ class ClientApiTest {
                 .when()
                 .post("/api/clients/signup")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .body("error.password", notNullValue());
     }
 
     @Test
-    void postValidLogin_ReturnsOk() {
+    void postSignupWithDuplicateEmail_ReturnsConflict() {
+        var data = Map.of(
+                "name", "Dupe",
+                "email", "dupe@example.com",
+                "password", "abcdefgh",
+                "batteryCapacityKwh", 70,
+                "fullRangeKm", 350
+        );
+
+        // First sign-up should succeed
         given().contentType(ContentType.JSON)
-                .body(Map.of(
-                        "name", "LoginUser",
-                        "email", "login@example.com",
-                        "password", "abcdefgh",
-                        "batteryCapacityKwh", 70,
-                        "fullRangeKm", 350))
+                .body(data).when().post("/api/clients/signup")
+                .then().statusCode(200);
+
+        // Second sign-up should fail
+        given().contentType(ContentType.JSON)
+                .body(data).when().post("/api/clients/signup")
+                .then().statusCode(409)
+                .body("error", equalTo("Email already exists"));
+    }
+
+    // ---------- LOGIN TESTS ----------
+
+    @Test
+    void postValidLogin_ReturnsOk() {
+        var signUp = Map.of(
+                "name", "LoginUser",
+                "email", "login@example.com",
+                "password", "abcdefgh",
+                "batteryCapacityKwh", 70,
+                "fullRangeKm", 350
+        );
+
+        given().contentType(ContentType.JSON).body(signUp)
                 .when().post("/api/clients/signup").then().statusCode(200);
 
-        given().contentType(ContentType.JSON)
-                .body(Map.of(
-                        "email", "login@example.com",
-                        "password", "abcdefgh"))
+        var login = Map.of("email", "login@example.com", "password", "abcdefgh");
+
+        given().contentType(ContentType.JSON).body(login)
                 .when().post("/api/clients/login")
                 .then().statusCode(200)
-                .body("token", notNullValue())
                 .body("email", equalTo("login@example.com"))
                 .body("name", equalTo("LoginUser"));
     }
 
     @Test
     void postLoginWithWrongPassword_ReturnsForbidden() {
+        var login = Map.of("email", "login@example.com", "password", "wrongpass");
+
         given().contentType(ContentType.JSON)
-                .body(Map.of(
-                        "email", "login@example.com",
-                        "password", "wrongpass"))
+                .body(login)
                 .when().post("/api/clients/login")
-                .then().statusCode(403);
+                .then().statusCode(403)
+                .body("error", equalTo("Invalid credentials"));
     }
 
     @Test
     void postLoginWithNonExistentEmail_ReturnsForbidden() {
         given().contentType(ContentType.JSON)
-                .body(Map.of(
-                        "email", "notfound@example.com",
-                        "password", "abcdefgh"))
+                .body(Map.of("email", "notfound@example.com", "password", "abcdefgh"))
                 .when().post("/api/clients/login")
-                .then().statusCode(403);
+                .then().statusCode(403)
+                .body("error", equalTo("Invalid credentials"));
     }
 
     @Test
     void postLoginWithInvalidEmailFormat_ReturnsBadRequest() {
         given().contentType(ContentType.JSON)
-                .body(Map.of(
-                        "email", "invalidemail",
-                        "password", "abcdefgh"))
+                .body(Map.of("email", "invalidemail", "password", "abcdefgh"))
                 .when().post("/api/clients/login")
                 .then().statusCode(400)
                 .body("error.email", notNullValue());
@@ -187,5 +210,53 @@ class ClientApiTest {
                 .when().post("/api/clients/login")
                 .then().statusCode(400)
                 .body("error.password", notNullValue());
+    }
+
+    // ---------- UPDATE CLIENT TESTS ----------
+
+    @Test
+    void putUpdateExistingClient_ReturnsUpdatedData() {
+        var email = "update@example.com";
+        var original = Map.of(
+                "name", "Original",
+                "email", email,
+                "password", "abcdefgh",
+                "batteryCapacityKwh", 60,
+                "fullRangeKm", 300
+        );
+
+        var updated = Map.of(
+                "name", "Updated",
+                "email", "updated@example.com",
+                "batteryCapacityKwh", 80,
+                "fullRangeKm", 400
+        );
+
+        // Create user
+        given().contentType(ContentType.JSON).body(original)
+                .when().post("/api/clients/signup")
+                .then().statusCode(200);
+
+        // Update
+        given().contentType(ContentType.JSON).body(updated)
+                .when().put("/api/clients/" + email)
+                .then().statusCode(200)
+                .body("email", equalTo("updated@example.com"))
+                .body("name", equalTo("Updated"));
+    }
+
+    @Test
+    void putUpdateNonExistentClient_ReturnsNotFound() {
+        var update = Map.of(
+                "name", "Updated",
+                "email", "updated@example.com",
+                "batteryCapacityKwh", 80,
+                "fullRangeKm", 400
+        );
+
+        given().contentType(ContentType.JSON).body(update)
+                .when().put("/api/clients/nonexistent@example.com")
+                .then().statusCode(404)
+                .body("error", equalTo("Client not found"));
     }
 }

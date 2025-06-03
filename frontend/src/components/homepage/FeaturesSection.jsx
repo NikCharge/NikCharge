@@ -1,5 +1,5 @@
 import React from "react";
-import "../../css/Homepage.css";
+import "../../css/pages/Homepage.css";
 
 const FeaturesSection = () => (
     <div className="white-bar">

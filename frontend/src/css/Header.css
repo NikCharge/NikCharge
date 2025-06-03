@@ -1,0 +1,157 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 3rem;
+    background: linear-gradient(135deg, #1db690 0%, #19a683 40%, #158f73 100%);
+    width: 100%;
+    min-height: 90px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.logo {
+    height: 50px;
+    transform: scale(1.5);
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.15);
+}
+
+.nav {
+    display: flex;
+    gap: 3.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.2rem;
+    padding: 0.5rem 0.75rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.login-button-wrapper {
+    position: relative; /* ✅ necessário para posicionar dropdown corretamente */
+    z-index: 20;
+}
+
+.login-button {
+    background-color: #0e6355;
+    border: none;
+    padding: 1rem 1.8rem;
+    color: white;
+    border-radius: 20px 0 20px 0;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.login-text {
+    cursor: pointer;
+}
+
+/* Dropdown styles */
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    color: #0e6355;
+    width: 240px;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+}
+
+.user-dropdown h3 {
+    margin: 0 0 0.5rem 0;
+}
+
+.user-dropdown .email {
+    font-size: 0.85rem;
+    color: gray;
+    margin-bottom: 1rem;
+}
+
+.user-dropdown .car-stats span {
+    display: block;
+    font-size: 0.9rem;
+    margin: 4px 0;
+}
+
+.user-dropdown button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.user-dropdown .edit-btn {
+    background-color: #0e6355;
+    color: white;
+}
+
+.user-dropdown .logout-btn {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.user-dropdown .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.edit-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-field label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+}
+
+.edit-input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: white !important; /* Force light bg */
+    color: black;
+    font-size: 0.9rem;
+}
+
+.edit-input.disabled {
+    background-color: #f0f0f0 !important;
+    cursor: not-allowed;
+}
