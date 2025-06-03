@@ -8,4 +8,6 @@ import lombok.Data;
 public class ClientResponse {
     private String email;
     private String name;
+    private Double batteryCapacityKwh;
+    private Double fullRangeKm;
 }

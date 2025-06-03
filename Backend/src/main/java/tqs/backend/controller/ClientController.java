@@ -9,10 +9,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import tqs.backend.dto.SignUpRequest;
 import tqs.backend.dto.LoginRequest;
+import tqs.backend.dto.ClientResponse;
 import tqs.backend.model.Client;
 import tqs.backend.repository.ClientRepository;
 import tqs.backend.service.ClientService;
-import tqs.backend.dto.ClientResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,13 +61,38 @@ public class ClientController {
         Optional<Client> clientOpt = clientRepository.findByEmail(loginRequest.getEmail());
         if (clientOpt.isPresent() && passwordEncoder.matches(loginRequest.getPassword(), clientOpt.get().getPasswordHash())) {
             Client client = clientOpt.get();
-            return ResponseEntity.ok(Map.of(
-                    "token", "dummy-token",
-                    "email", client.getEmail(),
-                    "name", client.getName()
-            ));
+            ClientResponse response = new ClientResponse(
+                    client.getEmail(),
+                    client.getName(),
+                    client.getBatteryCapacityKwh(),
+                    client.getFullRangeKm()
+            );
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Invalid credentials"));
         }
+    }
+
+    @PutMapping("/{email}")
+    public ResponseEntity<Object> updateClient(@PathVariable String email, @RequestBody ClientResponse updateData) {
+        Optional<Client> clientOpt = clientRepository.findByEmail(email);
+        if (clientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Client not found"));
+        }
+
+        Client client = clientOpt.get();
+        client.setName(updateData.getName());
+        client.setEmail(updateData.getEmail());
+        client.setBatteryCapacityKwh(updateData.getBatteryCapacityKwh());
+        client.setFullRangeKm(updateData.getFullRangeKm());
+
+        clientRepository.save(client);
+
+        return ResponseEntity.ok(new ClientResponse(
+                client.getEmail(),
+                client.getName(),
+                client.getBatteryCapacityKwh(),
+                client.getFullRangeKm()
+        ));
     }
 }
