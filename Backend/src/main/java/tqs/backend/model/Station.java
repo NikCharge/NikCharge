@@ -38,7 +38,4 @@ public class Station {
     @OneToMany(mappedBy = "station", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<Charger> chargers;
-
-    @Transient
-    private Double distance;
 }
