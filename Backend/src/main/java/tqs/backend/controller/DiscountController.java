@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.RequiredArgsConstructor;
+import tqs.backend.dto.DiscountRequestDTO;
 import tqs.backend.model.Discount;
-import tqs.backend.model.enums.ChargerType;
 import tqs.backend.service.DiscountService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,17 +24,17 @@ public class DiscountController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<?> create(@RequestBody Map<String, Object> body, HttpServletRequest request) {
+    public ResponseEntity<?> create(@RequestBody DiscountRequestDTO dto, HttpServletRequest request) {
         try {
-            Long stationId = Long.valueOf(body.get("stationId").toString());
-            ChargerType chargerType = ChargerType.valueOf(body.get("chargerType").toString());
-            Integer dayOfWeek = (Integer) body.get("dayOfWeek");
-            Integer startHour = (Integer) body.get("startHour");
-            Integer endHour = (Integer) body.get("endHour");
-            Double discountPercent = Double.valueOf(body.get("discountPercent").toString());
-            Boolean active = (Boolean) body.get("active");
-
-            Discount discount = discountService.createDiscount(stationId, chargerType, dayOfWeek, startHour, endHour, discountPercent, active);
+            Discount discount = discountService.createDiscount(
+                    dto.getStationId(),
+                    dto.getChargerType(),
+                    dto.getDayOfWeek(),
+                    dto.getStartHour(),
+                    dto.getEndHour(),
+                    dto.getDiscountPercent(),
+                    dto.getActive()
+            );
             return ResponseEntity.ok(discount);
         } catch (IllegalArgumentException e) {
             return buildNotFoundResponse(e.getMessage(), request.getRequestURI());
@@ -49,27 +49,27 @@ public class DiscountController {
     }
 
     // READ one by id
-   @GetMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id, HttpServletRequest request) {
         return discountService.getDiscount(id)
                 .<ResponseEntity<?>>map(ResponseEntity::ok)
                 .orElseGet(() -> buildNotFoundResponse("Discount not found", request.getRequestURI()));
     }
 
-
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Map<String, Object> body, HttpServletRequest request) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody DiscountRequestDTO dto, HttpServletRequest request) {
         try {
-            Long stationId = Long.valueOf(body.get("stationId").toString());
-            ChargerType chargerType = ChargerType.valueOf(body.get("chargerType").toString());
-            Integer dayOfWeek = (Integer) body.get("dayOfWeek");
-            Integer startHour = (Integer) body.get("startHour");
-            Integer endHour = (Integer) body.get("endHour");
-            Double discountPercent = Double.valueOf(body.get("discountPercent").toString());
-            Boolean active = (Boolean) body.get("active");
-
-            Discount updatedDiscount = discountService.updateDiscount(id, stationId, chargerType, dayOfWeek, startHour, endHour, discountPercent, active);
+            Discount updatedDiscount = discountService.updateDiscount(
+                    id,
+                    dto.getStationId(),
+                    dto.getChargerType(),
+                    dto.getDayOfWeek(),
+                    dto.getStartHour(),
+                    dto.getEndHour(),
+                    dto.getDiscountPercent(),
+                    dto.getActive()
+            );
             return ResponseEntity.ok(updatedDiscount);
         } catch (IllegalArgumentException e) {
             return buildNotFoundResponse(e.getMessage(), request.getRequestURI());
