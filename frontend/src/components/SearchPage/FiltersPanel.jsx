@@ -74,14 +74,14 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
                 <label>Location</label>
                 <div className="filter-input">
                     <MapPin size={16} />
-                    <input
+                    <input id="location-input"
                         type="text"
                         placeholder="Enter a location (e.g., Aveiro)"
                         value={customLocation}
                         onChange={(e) => setCustomLocation(e.target.value)}
                     />
-                    <button onClick={handleLocationSearch}>Search</button>
-                    <button onClick={resetToGPS}>Current location</button>
+                    <button onClick={handleLocationSearch} id="search-button">Search</button>
+                    <button onClick={resetToGPS} id="gps-button">Current location</button>
                 </div>
                 <span className="location-status">{locationText}</span>
             </div>
