@@ -1,17 +1,19 @@
 package tqs.backend.controller;
 
-import java.util.Map;
+import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import lombok.RequiredArgsConstructor;
 import tqs.backend.model.Discount;
 import tqs.backend.model.enums.ChargerType;
 import tqs.backend.service.DiscountService;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/discounts")
@@ -22,7 +24,7 @@ public class DiscountController {
 
     // CREATE
     @PostMapping
-    public ResponseEntity<Discount> create(@RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> create(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         try {
             Long stationId = Long.valueOf(body.get("stationId").toString());
             ChargerType chargerType = ChargerType.valueOf(body.get("chargerType").toString());
@@ -35,7 +37,7 @@ public class DiscountController {
             Discount discount = discountService.createDiscount(stationId, chargerType, dayOfWeek, startHour, endHour, discountPercent, active);
             return ResponseEntity.ok(discount);
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            return buildNotFoundResponse(e.getMessage(), request.getRequestURI());
         }
     }
 
@@ -47,16 +49,17 @@ public class DiscountController {
     }
 
     // READ one by id
-    @GetMapping("/{id}")
-    public ResponseEntity<Discount> getById(@PathVariable Long id) {
+   @GetMapping("/{id}")
+    public ResponseEntity<?> getById(@PathVariable Long id, HttpServletRequest request) {
         return discountService.getDiscount(id)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Discount not found"));
+                .<ResponseEntity<?>>map(ResponseEntity::ok)
+                .orElseGet(() -> buildNotFoundResponse("Discount not found", request.getRequestURI()));
     }
+
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<Discount> update(@PathVariable Long id, @RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody Map<String, Object> body, HttpServletRequest request) {
         try {
             Long stationId = Long.valueOf(body.get("stationId").toString());
             ChargerType chargerType = ChargerType.valueOf(body.get("chargerType").toString());
@@ -69,18 +72,29 @@ public class DiscountController {
             Discount updatedDiscount = discountService.updateDiscount(id, stationId, chargerType, dayOfWeek, startHour, endHour, discountPercent, active);
             return ResponseEntity.ok(updatedDiscount);
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            return buildNotFoundResponse(e.getMessage(), request.getRequestURI());
         }
     }
 
     // DELETE
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id, HttpServletRequest request) {
         try {
             discountService.deleteDiscount(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            return buildNotFoundResponse(e.getMessage(), request.getRequestURI());
         }
+    }
+
+    // Método auxiliar para criar resposta 404 com JSON esperado
+    private ResponseEntity<Map<String, Object>> buildNotFoundResponse(String message, String path) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                "timestamp", ZonedDateTime.now().toString(),
+                "status", 404,
+                "error", "Not Found",
+                "message", message,
+                "path", path
+        ));
     }
 }

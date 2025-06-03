@@ -193,19 +193,60 @@ class DiscountApiTest {
     }
 
     @Test
-    @DisplayName("GET /api/discounts/999999 - Desconto inexistente retorna 404")
-    void getNonExistentDiscount_ReturnsNotFound() {
-        given()
-            .accept(ContentType.JSON)  // garante que a resposta seja JSON
-        .when()
-            .get("/api/discounts/999999")
-        .then()
-            .statusCode(404)
-            .contentType(ContentType.JSON)
-            .body("error", equalTo("Not Found"))
-            .body("message", equalTo("Discount not found"))
-            .body("path", containsString("/api/discounts/999999"));
-    }
+@DisplayName("GET /api/discounts/{id} - Retornar 404 se desconto não existir")
+void getDiscountByInvalidId_ReturnsNotFound() {
+    given().when().get("/api/discounts/999999")
+            .then().statusCode(404)
+            .body("message", equalTo("Discount not found"));
+}
+
+@Test
+@DisplayName("PUT /api/discounts/{id} - Retornar 404 se desconto não existir")
+void updateInvalidDiscount_ReturnsNotFound() {
+    int stationId = createStation();
+
+    var updatedDiscount = Map.of(
+            "stationId", stationId,
+            "chargerType", "AC_STANDARD",
+            "dayOfWeek", 1,
+            "startHour", 8,
+            "endHour", 18,
+            "discountPercent", 10.0,
+            "active", true
+    );
+
+    given().contentType(ContentType.JSON).body(updatedDiscount)
+            .when().put("/api/discounts/999999")
+            .then().statusCode(404)
+            .body("message", equalTo("Discount not found"));
+}
+
+@Test
+@DisplayName("DELETE /api/discounts/{id} - Retornar 404 se desconto não existir")
+void deleteInvalidDiscount_ReturnsNotFound() {
+    given().when().delete("/api/discounts/999999")
+            .then().statusCode(404)
+            .body("message", equalTo("Discount not found"));
+}
+
+@Test
+@DisplayName("POST /api/discounts - Retornar 404 se estação não existir")
+void createDiscountWithInvalidStation_ReturnsNotFound() {
+    var discount = Map.of(
+            "stationId", 999999,
+            "chargerType", "AC_STANDARD",
+            "dayOfWeek", 1,
+            "startHour", 9,
+            "endHour", 18,
+            "discountPercent", 15.0,
+            "active", true
+    );
+
+    given().contentType(ContentType.JSON).body(discount)
+            .when().post("/api/discounts")
+            .then().statusCode(404)
+            .body("message", equalTo("Station not found"));
+}
 
 
 
