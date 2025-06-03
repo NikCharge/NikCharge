@@ -12,7 +12,7 @@ Feature: Highlight discounted stations in search results
 
   @SCRUM-15-1 @happy-path
   Scenario: Discounted station appears in list view
-    When I search for stations at hour 12 with charger type "DC_FAST"
+    When I search for stations at hour 12 with charger type "DC_ULTRA_FAST"
     And I get the station list for discount search
     Then discount-search station 1 should show a discount tag with value "15"
 

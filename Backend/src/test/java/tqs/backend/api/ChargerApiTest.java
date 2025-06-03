@@ -37,8 +37,8 @@ class ChargerApiTest {
     void setup() {
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        stationRepository.deleteAll();
         chargerRepository.deleteAll();
+        stationRepository.deleteAll();
     }
 
     private int createStation() {

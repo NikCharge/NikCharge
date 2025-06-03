@@ -2,9 +2,14 @@ package tqs.backend.api;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import tqs.backend.repository.ChargerRepository;
+import tqs.backend.repository.DiscountRepository;
+import tqs.backend.repository.StationRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
@@ -20,6 +25,21 @@ class StationApiTest {
 
     @LocalServerPort
     private int port;
+
+        @Autowired
+        private StationRepository stationRepo;
+        @Autowired
+        private ChargerRepository chargerRepo;
+        @Autowired
+        private DiscountRepository discountRepo;
+
+        @BeforeEach
+        void cleanUp() {
+        discountRepo.deleteAll();
+        chargerRepo.deleteAll();
+        stationRepo.deleteAll();
+        }
+
 
     @BeforeEach
     void setup() {
@@ -86,16 +106,29 @@ class StationApiTest {
                 .body("error.city", notNullValue());
     }
 
-    @Test
-    @DisplayName("GET /api/stations - Fetch all stations")
-    void getAllStations_ReturnsList() {
+        @Test
+        @DisplayName("GET /api/stations - Fetch all stations")
+        void getAllStations_ReturnsList() {
+        var station = Map.of(
+                "name", "Station Test",
+                "address", "Rua Teste",
+                "city", "TesteVille",
+                "latitude", 41.000,
+                "longitude", -8.000
+        );
+
+        given().contentType(ContentType.JSON).body(station)
+                .when().post("/api/stations")
+                .then().statusCode(200);
+
         given()
                 .when()
                 .get("/api/stations")
                 .then()
                 .statusCode(200)
                 .body("$", not(empty()));
-    }
+        }
+
 
     @Test
     @DisplayName("GET /api/stations/{id} - Fetch specific station")
