@@ -5,6 +5,7 @@ import { MapPin, Calendar, ChevronDown } from "lucide-react";
 const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedChargerTypes }) => {
     const [locationText, setLocationText] = useState("Detecting location...");
     const [currentTime, setCurrentTime] = useState("");
+    const [customLocation, setCustomLocation] = useState("");
 
     const toggleChargerType = (type) => {
         setSelectedChargerTypes(prev =>
@@ -14,18 +15,47 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
         );
     };
 
-    useEffect(() => {
+    const handleLocationSearch = async () => {
+        if (!customLocation.trim()) return;
+
+        try {
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(customLocation)}&format=json&limit=1`
+            );
+            const data = await res.json();
+
+            if (data.length === 0) {
+                setLocationText("Location not found.");
+                return;
+            }
+
+            const lat = parseFloat(data[0].lat);
+            const lng = parseFloat(data[0].lon);
+
+            setUserLocation({ lat, lng });
+            setLocationText(`Manual: ${customLocation} (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+        } catch (error) {
+            console.error("Geocoding error:", error);
+            setLocationText("Failed to retrieve location.");
+        }
+    };
+
+    const resetToGPS = () => {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                setLocationText(`Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`);
                 setUserLocation({ lat: latitude, lng: longitude });
+                setLocationText(`GPS: Lat ${latitude.toFixed(4)}, Lng ${longitude.toFixed(4)}`);
             },
             (error) => {
                 console.error("Geolocation error:", error);
                 setLocationText("Location unavailable");
             }
         );
+    };
+
+    useEffect(() => {
+        resetToGPS();
 
         const now = new Date();
         const options = {
@@ -41,12 +71,19 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
     return (
         <div className="filters-panel">
             <div className="filter-section location-filter">
-                <label>Location (current GPS)</label>
-                <div className="filter-input active">
+                <label>Location</label>
+                <div className="filter-input">
                     <MapPin size={16} />
-                    <span>{locationText}</span>
-                    <ChevronDown size={16} />
+                    <input id="location-input"
+                        type="text"
+                        placeholder="Enter a location (e.g., Aveiro)"
+                        value={customLocation}
+                        onChange={(e) => setCustomLocation(e.target.value)}
+                    />
+                    <button onClick={handleLocationSearch} id="search-button">Search</button>
+                    <button onClick={resetToGPS} id="gps-button">Current location</button>
                 </div>
+                <span className="location-status">{locationText}</span>
             </div>
 
             <div className="filter-section date-filter">
@@ -67,7 +104,7 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
                     >
                         Fast (DC)
                     </button>
-                   <button
+                    <button
                         onClick={() => toggleChargerType('Standard (AC)')}
                         className={`charger-btn ${selectedChargerTypes.includes('Standard (AC)') ? 'active' : ''}`}
                     >

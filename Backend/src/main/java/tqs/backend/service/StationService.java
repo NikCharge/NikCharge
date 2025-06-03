@@ -32,8 +32,8 @@ public class StationService {
         this.chargerRepository = chargerRepository;
         this.discountRepository = discountRepository;
     }
-    
-    
+
+
     // For testing purposes
     public StationRepository getStationRepository() {
         return stationRepository;
@@ -75,33 +75,33 @@ public class StationService {
     }
 
     public StationDetailsDTO getStationDetails(Long stationId) {
-    Station station = stationRepository.findById(stationId)
-            .orElse(null);
+        Station station = stationRepository.findById(stationId)
+                .orElse(null);
 
-    if (station == null) {
-        return null;
+        if (station == null) {
+            return null;
+        }
+
+        List<Charger> chargers = chargerRepository.findByStationId(stationId);
+        List<ChargerDTO> chargerDTOs = chargers.stream()
+                .map(c -> ChargerDTO.builder()
+                        .id(c.getId())
+                        .chargerType(c.getChargerType())
+                        .status(c.getStatus())
+                        .pricePerKwh(c.getPricePerKwh())
+                        .build())
+                .toList();
+
+        return StationDetailsDTO.builder()
+                .id(station.getId())
+                .name(station.getName())
+                .address(station.getAddress())
+                .city(station.getCity())
+                .latitude(station.getLatitude())
+                .longitude(station.getLongitude())
+                .chargers(chargerDTOs)
+                .build();
     }
-
-    List<Charger> chargers = chargerRepository.findByStationId(stationId);
-    List<ChargerDTO> chargerDTOs = chargers.stream()
-            .map(c -> ChargerDTO.builder()
-                    .id(c.getId())
-                    .chargerType(c.getChargerType())
-                    .status(c.getStatus())
-                    .pricePerKwh(c.getPricePerKwh())
-                    .build())
-            .toList();
-
-    return StationDetailsDTO.builder()
-            .id(station.getId())
-            .name(station.getName())
-            .address(station.getAddress())
-            .city(station.getCity())
-            .latitude(station.getLatitude())
-            .longitude(station.getLongitude())
-            .chargers(chargerDTOs)
-            .build();
-}
 
     public void deleteStation(Long id) {
         if (!stationRepository.existsById(id)) {
