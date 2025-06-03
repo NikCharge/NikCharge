@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "../../css/SearchPage/FiltersPanel.css";
 import { MapPin, Calendar, ChevronDown } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedChargerTypes }) => {
+const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedChargerTypes, setFilteredStations }) => {
     const [locationText, setLocationText] = useState("Detecting location...");
-    const [currentTime, setCurrentTime] = useState("");
     const [customLocation, setCustomLocation] = useState("");
+    const [selectedDateTime, setSelectedDateTime] = useState(null);
 
     const toggleChargerType = (type) => {
         setSelectedChargerTypes(prev =>
@@ -13,6 +15,21 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
                 ? prev.filter(t => t !== type)
                 : [...prev, type]
         );
+    };
+
+    const fetchStations = async (lat, lng, datetime = null) => {
+        try {
+            let url = `/api/stations?lat=${lat}&lng=${lng}`;
+            if (datetime) {
+                const isoDate = datetime.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
+                url += `&datetime=${encodeURIComponent(isoDate)}`;
+            }
+            const res = await fetch(url);
+            const stations = await res.json();
+            setFilteredStations(stations);
+        } catch (err) {
+            console.error("Error fetching stations:", err);
+        }
     };
 
     const handleLocationSearch = async () => {
@@ -34,6 +51,7 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
 
             setUserLocation({ lat, lng });
             setLocationText(`Manual: ${customLocation} (${lat.toFixed(4)}, ${lng.toFixed(4)})`);
+            fetchStations(lat, lng, selectedDateTime);
         } catch (error) {
             console.error("Geocoding error:", error);
             setLocationText("Failed to retrieve location.");
@@ -46,6 +64,8 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
                 const { latitude, longitude } = position.coords;
                 setUserLocation({ lat: latitude, lng: longitude });
                 setLocationText(`GPS: Lat ${latitude.toFixed(4)}, Lng ${longitude.toFixed(4)}`);
+                fetchStations(latitude, longitude, null);
+                setSelectedDateTime(null);
             },
             (error) => {
                 console.error("Geolocation error:", error);
@@ -56,17 +76,19 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
 
     useEffect(() => {
         resetToGPS();
+    }, []);
 
-        const now = new Date();
-        const options = {
-            day: "2-digit",
-            month: "short",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit"
-        };
-        setCurrentTime(now.toLocaleString("en-GB", options));
-    }, [setUserLocation]);
+    const handleDateChange = (date) => {
+        setSelectedDateTime(date);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                fetchStations(position.coords.latitude, position.coords.longitude, date);
+            },
+            (error) => {
+                console.error("Failed to fetch location for time filtering:", error);
+            }
+        );
+    };
 
     return (
         <div className="filters-panel">
@@ -74,7 +96,8 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
                 <label>Location</label>
                 <div className="filter-input">
                     <MapPin size={16} />
-                    <input id="location-input"
+                    <input
+                        id="location-input"
                         type="text"
                         placeholder="Enter a location (e.g., Aveiro)"
                         value={customLocation}
@@ -87,11 +110,24 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
             </div>
 
             <div className="filter-section date-filter">
-                <label>Date and time (now)</label>
-                <div className="filter-input">
-                    <Calendar size={16} />
-                    <span>{currentTime}</span>
-                    <ChevronDown size={16} />
+                <label>Date and Time</label>
+                <div className="filter-input date-picker-wrapper">
+                    <Calendar id="date-icon" size={16} />
+                    <DatePicker
+                        popperPlacement="bottom-start"
+                        popperClassName="custom-datepicker-popper"
+                        selected={selectedDateTime}
+                        onChange={handleDateChange}
+                        showTimeSelect
+                        timeFormat="HH:mm"
+                        timeIntervals={15}
+                        timeCaption="Time"
+                        dateFormat="yyyy-MM-dd HH:mm"
+                        placeholderText="Select date and time"
+                        className="date-picker"
+                        minDate={new Date()}
+                        id="date-picker-input"
+                    />
                 </div>
             </div>
 
