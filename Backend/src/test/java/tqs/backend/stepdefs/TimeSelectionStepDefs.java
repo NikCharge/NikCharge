@@ -50,26 +50,20 @@ public class TimeSelectionStepDefs {
         // Nenhuma ação de backend necessária aqui
     }
 
-    @When("selects {string}")
-    public void selectsCustomFutureTime(String futureTimeDescription) {
-        // Simula uma data futura baseada na descrição
-        if (futureTimeDescription.equalsIgnoreCase("tomorrow at 10:00")) {
-            LocalDateTime futureTime = LocalDateTime.now().plusDays(1)
-                    .withHour(10).withMinute(0).withSecond(0).withNano(0);
+    @And("selects time {string}")
+    public void selectsCustomTime(String dateTimeString) {
+        selectedTime = dateTimeString;
 
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
-            selectedTime = futureTime.format(formatter);
+        response = RestAssured.given()
+                .queryParam("lat", 40.6400)
+                .queryParam("lng", -8.6500)
+                .queryParam("datetime", selectedTime)
+                .when()
+                .get("/api/stations");
 
-            response = RestAssured.given()
-                    .queryParam("lat", 40.6400)
-                    .queryParam("lng", -8.6500)
-                    .queryParam("datetime", selectedTime)
-                    .when()
-                    .get("/api/stations");
-
-            response.then().statusCode(200);
-        }
+        response.then().statusCode(200);
     }
+
 
     @Then("the station availability should update to reflect that selected time")
     public void availabilityReflectsFutureTime() {
@@ -96,4 +90,22 @@ public class TimeSelectionStepDefs {
         assertThat("Expected stations for real-time availability", stations, is(not(empty())));
         // Possível futura verificação de estado em tempo real
     }
+
+    @Given("the user previously selected a custom time")
+    public void theUserPreviouslySelectedACustomTime() {
+        // Simula a seleção anterior de uma data futura (mesmo comportamento do @When "selects ...")
+        LocalDateTime futureTime = LocalDateTime.now().plusDays(1).withHour(10).withMinute(0).withSecond(0).withNano(0);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
+        selectedTime = futureTime.format(formatter);
+
+        response = RestAssured.given()
+                .queryParam("lat", 40.6400)
+                .queryParam("lng", -8.6500)
+                .queryParam("datetime", selectedTime)
+                .when()
+                .get("/api/stations");
+
+        response.then().statusCode(200);
+    }
+
 }

@@ -10,7 +10,7 @@ Feature: Set a custom time
   @SCRUM-127 @calendar-selection
   Scenario: User selects a future date and time from calendar picker
     When the user opens the calendar picker
-    And selects "tomorrow at 10:00"
+    And selects time "2025-06-07T15:00"
     Then the station availability should update to reflect that selected time
 
   @SCRUM-128 @reset-to-now
