@@ -40,7 +40,8 @@ const Header = () => {
                     name: editData.name,
                     email: client.email,
                     batteryCapacityKwh: parseFloat(editData.batteryCapacityKwh),
-                    fullRangeKm: parseFloat(editData.fullRangeKm)
+                    fullRangeKm: parseFloat(editData.fullRangeKm),
+                    role:client.role,
                 }
             );
 
@@ -63,8 +64,18 @@ const Header = () => {
                 <Link to="/" className="nav-link">Home</Link>
                 <Link to="/about" className="nav-link">About</Link>
                 <Link to="/search" className="nav-link">Search</Link>
-                {client && <Link to="/dashboard" className="nav-link">Dashboard</Link>}
+                {client && (
+                    client.role === "CLIENT" ? (
+                        <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                    ) : (
+                        (() => {
+                            console.log("Role is", client.role);
+                            return <Link to="/employee-dashboard" className="nav-link">Employee Dashboard</Link>;
+                        })()
+                    )
+                )}
             </nav>
+
 
             {client ? (
                 <div className="login-button-wrapper">

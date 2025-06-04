@@ -28,14 +28,22 @@ const Login = () => {
                 email: response.data.email,
                 name: response.data.name,
                 batteryCapacityKwh: response.data.batteryCapacityKwh,
-                fullRangeKm: response.data.fullRangeKm
+                fullRangeKm: response.data.fullRangeKm,
+                role: response.data.role
             };
 
             localStorage.setItem("client", JSON.stringify(clientData));
             setMessage("Login successful!");
             setMessageType("success");
 
-            navigate("/dashboard", { replace: true });
+            // Redirect based on user role
+            if (clientData.role === "EMPLOYEE") {
+                navigate("/employee-dashboard", { replace: true });
+            } else {
+                // Default redirect for CLIENT or other roles
+                navigate("/dashboard", { replace: true });
+            }
+
         } catch (error) {
             console.error("Login failed:", error);
             let errorMsg = "Login failed. Please try again.";

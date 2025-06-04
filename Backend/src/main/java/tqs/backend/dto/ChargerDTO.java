@@ -16,4 +16,7 @@ public class ChargerDTO {
     private ChargerType chargerType;
     private ChargerStatus status;
     private BigDecimal pricePerKwh;
+    private Long stationId;
+    private String stationName;
+    private String stationCity;
 }
