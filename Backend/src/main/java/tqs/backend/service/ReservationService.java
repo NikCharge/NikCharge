@@ -13,7 +13,6 @@ import tqs.backend.model.Client;
 import tqs.backend.repository.ClientRepository;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import tqs.backend.dto.ReservationResponse;
 import tqs.backend.dto.ReservationResponse.ChargerDto;
 import tqs.backend.dto.ReservationResponse.StationDto;
@@ -34,7 +33,7 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findByUserId(clientId);
         return reservations.stream()
                 .map(this::convertToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private ReservationResponse convertToDto(Reservation reservation) {
