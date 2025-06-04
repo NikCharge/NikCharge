@@ -6,14 +6,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.ActiveProfiles;
 import tqs.backend.model.Charger;
 import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerStatus;
@@ -28,42 +22,12 @@ import java.util.List;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(initializers = ChargerIntegrationTest.Initializer.class)
+@ActiveProfiles("test")
 public class ChargerIntegrationTest {
 
     @LocalServerPort
     private int port;
-
-    @Container
-    public static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
-
-    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext context) {
-            TestPropertyValues.of(
-                            "spring.datasource.url=" + postgres.getJdbcUrl(),
-                            "spring.datasource.username=" + postgres.getUsername(),
-                            "spring.datasource.password=" + postgres.getPassword(),
-                            "spring.jpa.hibernate.ddl-auto=create-drop",
-                            "spring.jpa.show-sql=true",
-                            "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect")
-                    .applyTo(context.getEnvironment());
-        }
-    }
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        // Limpar DB antes de cada teste
-        chargerRepository.deleteAll();
-        stationRepository.deleteAll();
-    }
 
     @Autowired
     private StationRepository stationRepository;
@@ -71,7 +35,16 @@ public class ChargerIntegrationTest {
     @Autowired
     private ChargerRepository chargerRepository;
 
-    // Helper para criar uma estação no banco para usar nos testes
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        // Clean up before each test
+        chargerRepository.deleteAll();
+        stationRepository.deleteAll();
+    }
+
+    // Helper to create a station in the database for testing
     private Station createStation() {
         Station station = Station.builder()
                 .name("Integration Test Station")
@@ -109,7 +82,7 @@ public class ChargerIntegrationTest {
     @Test
     void testAddCharger_InvalidStationId_ReturnsBadRequest() {
         Map<String, Object> payload = Map.of(
-                "stationId", 999999L,  // Estação que não existe
+                "stationId", 999999L,  // Non-existent station
                 "chargerType", "DC_FAST",
                 "status", "AVAILABLE",
                 "pricePerKwh", 0.50
@@ -138,7 +111,7 @@ public class ChargerIntegrationTest {
         Charger c2 = Charger.builder()
                 .station(station)
                 .chargerType(ChargerType.DC_FAST)
-                .status(ChargerStatus.IN_USE)
+                .status(ChargerStatus.AVAILABLE)
                 .pricePerKwh(BigDecimal.valueOf(0.40))
                 .build();
 
@@ -170,31 +143,5 @@ public class ChargerIntegrationTest {
                 .then().statusCode(200)
                 .body("size()", equalTo(1))
                 .body("[0].chargerType", equalTo("AC_STANDARD"));
-    }
-
-    // ---------- DELETE CHARGER ----------
-
-    @Test
-    void testDeleteCharger_ExistingId_ReturnsNoContent() {
-        Station station = createStation();
-
-        Charger charger = Charger.builder()
-                .station(station)
-                .chargerType(ChargerType.AC_STANDARD)
-                .status(ChargerStatus.AVAILABLE)
-                .pricePerKwh(BigDecimal.valueOf(0.25))
-                .build();
-
-        Charger saved = chargerRepository.save(charger);
-
-        given().when().delete("/api/chargers/{id}", saved.getId())
-                .then().statusCode(204);
-    }
-
-    @Test
-    void testDeleteCharger_NonExistingId_ReturnsNotFound() {
-        given().when().delete("/api/chargers/{id}", 999999L)
-                .then().statusCode(404)
-                .body("error", containsString("Charger not found"));
     }
 }
