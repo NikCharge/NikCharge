@@ -11,6 +11,7 @@ const EmployeeDashboard = () => {
     const [stations, setStations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const [statistics, setStatistics] = useState({
         totalStations: 0,
         totalAvailable: 0,
@@ -20,6 +21,15 @@ const EmployeeDashboard = () => {
     const [showChargerModal, setShowChargerModal] = useState(false);
     const [chargers, setChargers] = useState([]);
     const [chargersLoading, setChargersLoading] = useState(false);
+
+    // Filter stations based on search term
+    const filteredStations = stations.filter(station => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+            station.name.toLowerCase().includes(searchLower) ||
+            station.city.toLowerCase().includes(searchLower)
+        );
+    });
 
     const fetchStations = async () => {
         try {
@@ -151,8 +161,17 @@ const EmployeeDashboard = () => {
                     availableChargers={statistics.totalAvailable}
                     inUseChargers={statistics.totalInUse}
                 />
+                <div className="search-container">
+                    <input
+                        type="text"
+                        className="search-bar"
+                        placeholder="Search stations by name or city..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
                 <StationsGrid
-                    stations={stations}
+                    stations={filteredStations}
                     loading={loading}
                     error={error}
                     onStationClick={handleStationClick}

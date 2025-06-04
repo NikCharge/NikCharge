@@ -49,6 +49,34 @@
     margin-bottom: 2rem;
 }
 
+/* Search Bar */
+.search-container {
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+    padding: 0 1rem;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: #1db690;
+    box-shadow: 0 4px 12px rgba(29, 182, 144, 0.1);
+}
+
+.search-bar::placeholder {
+    color: #999;
+}
+
 /* Dashboard Stats */
 .dashboard-stats {
     display: flex;
@@ -88,10 +116,24 @@
     text-align: center;
 }
 
+.stat-item.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-item.clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(29, 182, 144, 0.15);
+}
+
+.stat-item.clickable:active {
+    transform: translateY(-3px);
+}
+
 /* Stations Container - Improved centering and spacing */
 .stations-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Increased min width */
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Increased min width */
     gap: 2rem; /* Increased gap */
     max-width: 1200px; /* Reduced max width for better centering */
     margin: 0 auto;
@@ -124,7 +166,6 @@
 .station-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 25px rgba(29, 182, 144, 0.1);
-    border-color: #1db690;
 }
 
 .station-card:active {
@@ -261,14 +302,17 @@
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem 2rem 1rem 2rem;
+    padding: 1.5rem 2rem;
     border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -295,45 +339,92 @@
 
 .modal-body {
     padding: 2rem;
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .station-details {
     background-color: #f8fcfb;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     border-radius: 12px;
     margin-bottom: 2rem;
+    border: 1px solid #e0e0e0;
 }
 
 .station-details p {
     margin: 0.5rem 0;
-    color: #666;
+    color: #555;
+    font-size: 1rem;
 }
 
-.modal-body h3 {
+.station-details p strong {
     color: #333;
-    font-size: 1.4rem;
+    margin-right: 0.5rem;
+}
+
+/* Chargers Section Header with Filter */
+.chargers-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
     border-bottom: 2px solid #1db690;
     padding-bottom: 0.5rem;
 }
 
+.chargers-section-header h3 {
+    color: #333;
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.filter-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.filter-dropdown label {
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.filter-dropdown select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.filter-dropdown select:focus {
+    border-color: #1db690;
+    box-shadow: 0 0 0 3px rgba(29, 182, 144, 0.2);
+}
+
 .chargers-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
 }
 
 .charger-card {
     background: white;
-    border: 1px solid #e5e5e5;
+    border: 1px solid #e0e0e0;
     border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
 
 .charger-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
 }
 
@@ -342,49 +433,69 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
 }
 
-.charger-id {
+.charger-id span {
     font-weight: 600;
     color: #333;
     font-size: 1.1rem;
 }
 
 .charger-status {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
     font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
 }
 
 .charger-details {
     margin-bottom: 1.5rem;
+    flex-grow: 1;
 }
 
 .charger-info {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0.5rem;
-    padding: 0.3rem 0;
+    margin-bottom: 0.6rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.charger-info:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
 }
 
 .info-label {
     color: #666;
     font-size: 0.9rem;
+    font-weight: 500;
 }
 
 .info-value {
-    font-weight: 500;
+    font-weight: 600;
     color: #333;
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+.info-value .lucide {
+    vertical-align: middle;
+    margin-right: 0.3rem;
 }
 
 .charger-actions {
     display: flex;
     justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
 .delete-button {
@@ -395,17 +506,22 @@
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
 }
 
 .delete-button:hover {
     background-color: #dc2626;
 }
 
+.delete-button:active {
+    opacity: 0.8;
+}
+
 .empty-chargers {
     text-align: center;
     padding: 3rem;
     color: #666;
+    font-size: 1.1rem;
 }
 
 /* Loading State */
@@ -429,6 +545,7 @@
     height: 150px;
     gap: 1rem;
     color: #666;
+    padding: 3rem;
 }
 
 .loading-spinner {
@@ -464,6 +581,7 @@
     height: 150px;
     gap: 1rem;
     text-align: center;
+    padding: 3rem;
 }
 
 .error-message {
@@ -561,8 +679,47 @@
         padding: 1.5rem;
     }
 
+    .chargers-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .filter-dropdown {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .filter-dropdown select {
+        flex-grow: 1;
+    }
+
     .chargers-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .charger-card {
+        padding: 1rem 1.2rem;
+    }
+
+    .charger-header {
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .charger-details {
+        margin-bottom: 1.2rem;
+    }
+
+    .charger-info {
+        margin-bottom: 0.5rem;
+        padding: 0.1rem 0;
+    }
+
+    .info-label,
+    .info-value {
+        font-size: 0.9rem;
     }
 }
 

@@ -6,9 +6,11 @@ import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.StationRepository;
+import tqs.backend.dto.ChargerDTO;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ChargerService {
@@ -59,8 +61,19 @@ public class ChargerService {
         return chargerRepository.save(charger);
     }
 
-    public List<Charger> getChargersByStatus(ChargerStatus status) {
-        return chargerRepository.findByStatus(status);
+    public List<ChargerDTO> getChargersByStatus(ChargerStatus status) {
+        List<Charger> chargers = chargerRepository.findByStatus(status);
+        return chargers.stream()
+                .map(charger -> ChargerDTO.builder()
+                        .id(charger.getId())
+                        .chargerType(charger.getChargerType())
+                        .status(charger.getStatus())
+                        .pricePerKwh(charger.getPricePerKwh())
+                        .stationId(charger.getStation() != null ? charger.getStation().getId() : null)
+                        .stationName(charger.getStation() != null ? charger.getStation().getName() : null)
+                        .stationCity(charger.getStation() != null ? charger.getStation().getCity() : null)
+                        .build())
+                .collect(Collectors.toList());
     }
 
     public long countByStatus(ChargerStatus status) {

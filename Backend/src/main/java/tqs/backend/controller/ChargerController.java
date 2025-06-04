@@ -10,6 +10,7 @@ import tqs.backend.dto.ChargerCreationRequest;
 import tqs.backend.model.Charger;
 import tqs.backend.service.ChargerService;
 import tqs.backend.model.enums.ChargerStatus;
+import tqs.backend.dto.ChargerDTO;
 
 @RestController
 @RequestMapping("/api/chargers")
@@ -79,5 +80,10 @@ public class ChargerController {
     public ResponseEntity<Long> countInUseChargersByStation(@PathVariable Long stationId) {
         long count = chargerService.countByStationAndStatus(stationId, ChargerStatus.IN_USE);
         return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/available")
+    public ResponseEntity<List<ChargerDTO>> getAvailableChargers() {
+        return ResponseEntity.ok(chargerService.getChargersByStatus(ChargerStatus.AVAILABLE));
     }
 }
