@@ -1,10 +1,10 @@
 name: Deploy project
 
 on:
-  pull_request:
+  push:
     branches:
       - develop
-  push:
+  pull_request:
     branches:
       - develop
 
@@ -16,24 +16,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Prepare .env file
-        run: |
-          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
-          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
-          echo "NODE_ENV=development" >> .env
-          echo "VITE_API_URL=/api" >> .env
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
-
-      - name: Configure Nginx for deployment
+      - name: Run deploy on remote server
         run: |
-          sudo cp nginx/nginx.conf /etc/nginx/nginx.conf
-
-      - name: Clean up unused Docker resources
-        run: |
-          docker compose down --remove-orphans --volumes
-          docker system prune -af
-          docker volume prune -f
-
-      - name: Deploy with Docker Compose
-        run: |
-          docker compose -f docker-compose.yml up -d --build --remove-orphans
+          ssh carolinaspsilva@deti-tqs-02 << 'EOF'
+            cd ~/NikCharge
+            git reset --hard HEAD
+            git pull origin develop
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "NODE_ENV=development" >> .env
+            echo "VITE_API_URL=/api" >> .env
+            docker compose down --remove-orphans --volumes
+            docker system prune -af
+            docker volume prune -f
+            docker compose up -d --build --remove-orphans
+          EOF
