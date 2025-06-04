@@ -29,7 +29,7 @@ Feature: Reservation creation
     When the client tries to reserve with a non-existent charger at "2025-06-08T10:00:00"
     Then the reservation creation should fail with status code 400
 
-  @SCRUM-147 @negative @validation
+  @SCRUM-148 @negative @validation
   Scenario: Client sends a reservation with missing fields
     Given a client is registered with email "client5@example.com" and password "securepass123"
     And a station "Faulty Station" exists with an available charger
