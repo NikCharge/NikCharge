@@ -35,7 +35,14 @@ const Login = () => {
             setMessage("Login successful!");
             setMessageType("success");
 
-            navigate("/dashboard", { replace: true });
+            // Redirect based on user role
+            if (clientData.role === "EMPLOYEE") {
+                navigate("/employee-dashboard", { replace: true });
+            } else {
+                // Default redirect for CLIENT or other roles
+                navigate("/dashboard", { replace: true });
+            }
+
         } catch (error) {
             console.error("Login failed:", error);
             let errorMsg = "Login failed. Please try again.";

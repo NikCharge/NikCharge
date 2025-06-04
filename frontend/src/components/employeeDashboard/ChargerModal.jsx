@@ -1,18 +1,33 @@
 // components/employeeDashboard/ChargerModal.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import '../../css/pages/EmployeeDashboard.css';
 
 const ChargerModal = ({ station, chargers, loading, onClose, onDeleteCharger }) => {
+    const [filterStatus, setFilterStatus] = useState('All'); // State for filter
+
     const getStatusColor = (status) => {
         switch (status) {
             case 'AVAILABLE':
-                return '#22c55e';
+                return 'rgba(34, 197, 94, 0.1)'; // Use a lighter background color with alpha
             case 'IN_USE':
-                return '#f59e0b';
-            case 'MAINTENANCE':
-                return '#ef4444';
+                return 'rgba(245, 158, 11, 0.1)';
+            case 'UNDER_MAINTENANCE':
+                return 'rgba(239, 68, 68, 0.1)';
             default:
-                return '#6b7280';
+                return 'rgba(107, 114, 128, 0.1)';
+        }
+    };
+
+     const getStatusTextColor = (status) => {
+        switch (status) {
+            case 'AVAILABLE':
+                return '#22c55e'; // Darker green text
+            case 'IN_USE':
+                return '#f59e0b'; // Darker orange text
+            case 'UNDER_MAINTENANCE':
+                return '#ef4444'; // Darker red text
+            default:
+                return '#6b7280'; // Darker gray text
         }
     };
 
@@ -22,8 +37,8 @@ const ChargerModal = ({ station, chargers, loading, onClose, onDeleteCharger }) 
                 return 'Available';
             case 'IN_USE':
                 return 'In Use';
-            case 'MAINTENANCE':
-                return 'Maintenance';
+            case 'UNDER_MAINTENANCE':
+                return 'Under Maintenance';
             default:
                 return status;
         }
@@ -37,12 +52,17 @@ const ChargerModal = ({ station, chargers, loading, onClose, onDeleteCharger }) 
                 return 'AC Fast';
             case 'DC_FAST':
                 return 'DC Fast';
-            case 'DC_ULTRA':
-                return 'DC Ultra';
+            case 'DC_ULTRA_FAST':
+                return 'DC Ultra Fast';
             default:
                 return type;
         }
     };
+
+    // Filter chargers based on selected status
+    const filteredChargers = filterStatus === 'All'
+        ? chargers
+        : chargers.filter(charger => charger.status === filterStatus);
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -63,7 +83,23 @@ const ChargerModal = ({ station, chargers, loading, onClose, onDeleteCharger }) 
                         <p><strong>Coordinates:</strong> {station?.latitude}, {station?.longitude}</p>
                     </div>
 
-                    <h3>Chargers ({chargers.length})</h3>
+                    <div className="chargers-section-header">
+                        <h3>Chargers ({filteredChargers.length})</h3>
+                        <div className="filter-dropdown">
+                            <label htmlFor="status-filter">Filter by status:</label>
+                            <select
+                                id="status-filter"
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                            >
+                                <option value="All">All Statuses</option>
+                                <option value="AVAILABLE">Available</option>
+                                <option value="IN_USE">In Use</option>
+                                <option value="UNDER_MAINTENANCE">Under Maintenance</option>
+                                {/* Add other status options if needed */}
+                            </select>
+                        </div>
+                    </div>
 
                     {loading ? (
                         <div className="loading-content">
@@ -74,60 +110,50 @@ const ChargerModal = ({ station, chargers, loading, onClose, onDeleteCharger }) 
                         <div className="empty-chargers">
                             <p>No chargers found for this station.</p>
                         </div>
+                    ) : filteredChargers.length === 0 ? (
+                        <div className="empty-chargers">
+                            <p>No chargers found with status '{getStatusLabel(filterStatus)}'.</p>
+                        </div>
                     ) : (
                         <div className="chargers-grid">
-                            {chargers.map((charger) => (
+                            {filteredChargers.map((charger) => (
                                 <div key={charger.id} className="charger-card">
                                     <div className="charger-header">
-                                        <div className="charger-id">Charger #{charger.id}</div>
+                                        <div className="charger-id">
+                                            <span>Charger #{charger.id}</span>
+                                        </div>
                                         <div
                                             className="charger-status"
                                             style={{
-                                                backgroundColor: `${getStatusColor(charger.status)}20`,
-                                                color: getStatusColor(charger.status)
+                                                backgroundColor: getStatusColor(charger.status),
+                                                color: getStatusTextColor(charger.status) // Use contrasting color for text
                                             }}
                                         >
-                                            <div
-                                                className="status-dot"
-                                                style={{ backgroundColor: getStatusColor(charger.status) }}
-                                            ></div>
                                             {getStatusLabel(charger.status)}
                                         </div>
                                     </div>
-
                                     <div className="charger-details">
                                         <div className="charger-info">
                                             <span className="info-label">Type:</span>
                                             <span className="info-value">{getChargerTypeLabel(charger.chargerType)}</span>
                                         </div>
                                         <div className="charger-info">
-                                            <span className="info-label">Price per kWh:</span>
-                                            <span className="info-value">€{charger.pricePerKwh}</span>
+                                            <span className="info-label">Price:</span>
+                                            <span className="info-value">€{charger.pricePerKwh}/kWh</span>
                                         </div>
-                                        {charger.lastMaintenance && (
-                                            <div className="charger-info">
-                                                <span className="info-label">Last Maintenance:</span>
-                                                <span className="info-value">
-                                                    {new Date(charger.lastMaintenance).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                        )}
-                                        {charger.maintenanceNote && (
-                                            <div className="charger-info">
-                                                <span className="info-label">Note:</span>
-                                                <span className="info-value">{charger.maintenanceNote}</span>
-                                            </div>
-                                        )}
                                     </div>
-
-                                    <div className="charger-actions">
-                                        <button
-                                            className="delete-button"
-                                            onClick={() => onDeleteCharger(charger.id)}
-                                        >
-                                            Delete Charger
-                                        </button>
-                                    </div>
+                                    {/* Delete button */}
+                                    {/* Only show delete button if charger is available */}
+                                    {charger.status === 'AVAILABLE' && (
+                                        <div className="charger-actions">
+                                            <button
+                                                className="delete-button"
+                                                onClick={() => onDeleteCharger(charger.id)}
+                                            >
+                                                Delete
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
