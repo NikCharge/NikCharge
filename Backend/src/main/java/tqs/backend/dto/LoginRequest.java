@@ -2,10 +2,14 @@ package tqs.backend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.Data;
+import lombok.*;
 
-@Data
-public class LoginRequest {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+ppublic class LoginRequest {
 
     @Email(message = "Email must be valid")
     @NotBlank(message = "Email is required")

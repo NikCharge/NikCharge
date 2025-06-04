@@ -1,11 +1,15 @@
 package tqs.backend.dto;
 
-import lombok.Data;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class ReservationRequest {
     private Long clientId;
     private Long chargerId;
