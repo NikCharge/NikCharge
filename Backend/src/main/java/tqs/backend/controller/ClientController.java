@@ -41,19 +41,15 @@ public class ClientController {
 
         try {
             Client client = clientService.signUp(signUpRequest);
-
-            ClientResponse response = new ClientResponse(
-                    client.getId(),
-                    client.getEmail(),
-                    client.getName(),
-                    client.getBatteryCapacityKwh(),
-                    client.getFullRangeKm(),
-                    client.getReservations(),
-                    client.getRole()
-            );
-
-            return ResponseEntity.ok(response);
-
+            return ResponseEntity.ok(ClientResponse.builder()
+                .id(client.getId())
+                .email(client.getEmail())
+                .name(client.getName())
+                .batteryCapacityKwh(client.getBatteryCapacityKwh())
+                .fullRangeKm(client.getFullRangeKm())
+                .reservations(client.getReservations())
+                .role(client.getRole())
+                .build());
         } catch (RuntimeException e) {
             if ("Email already exists".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -76,17 +72,15 @@ public class ClientController {
         Optional<Client> clientOpt = clientRepository.findByEmail(loginRequest.getEmail());
         if (clientOpt.isPresent() && passwordEncoder.matches(loginRequest.getPassword(), clientOpt.get().getPasswordHash())) {
             Client client = clientOpt.get();
-            ClientResponse response = new ClientResponse(
-                    client.getId(),
-                    client.getEmail(),
-                    client.getName(),
-                    client.getBatteryCapacityKwh(),
-                    client.getFullRangeKm(),
-                    client.getReservations(),
-                    client.getFullRangeKm(),
-                    client.getRole()
-            );
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(ClientResponse.builder()
+                .id(client.getId())
+                .email(client.getEmail())
+                .name(client.getName())
+                .batteryCapacityKwh(client.getBatteryCapacityKwh())
+                .fullRangeKm(client.getFullRangeKm())
+                .reservations(client.getReservations())
+                .role(client.getRole())
+                .build());
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Invalid credentials"));
         }
@@ -108,16 +102,15 @@ public class ClientController {
 
         clientRepository.save(client);
 
-        return ResponseEntity.ok(new ClientResponse(
-                client.getId(),
-                client.getEmail(),
-                client.getName(),
-                client.getBatteryCapacityKwh(),
-                client.getFullRangeKm(),
-                client.getReservations(),
-                client.getFullRangeKm(),
-                client.getRole()
-        ));
+        return ResponseEntity.ok(ClientResponse.builder()
+            .id(client.getId())
+            .email(client.getEmail())
+            .name(client.getName())
+            .batteryCapacityKwh(client.getBatteryCapacityKwh())
+            .fullRangeKm(client.getFullRangeKm())
+            .reservations(client.getReservations())
+            .role(client.getRole())
+            .build());
     }
 
     @PutMapping("/changeRole/{id}")

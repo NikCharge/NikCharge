@@ -280,7 +280,15 @@ class ClientControllerTest {
         when(clientRepository.findByEmail(existingEmail)).thenReturn(Optional.of(client));
         when(clientRepository.save(any(Client.class))).thenReturn(client);
 
-        ClientResponse updatedData = new ClientResponse(1L, "email@example.com", "Name", 50.0, 300.0, new ArrayList<>());
+        ClientResponse updatedData = ClientResponse.builder()
+            .id(1L)
+            .email("email@example.com")
+            .name("Name")
+            .batteryCapacityKwh(50.0)
+            .fullRangeKm(300.0)
+            .reservations(new ArrayList<>())
+            .role(UserRole.CLIENT)
+            .build();
 
         mockMvc.perform(put("/api/clients/{email}", existingEmail)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -297,7 +305,15 @@ class ClientControllerTest {
         String email = "notfound@example.com";
         when(clientRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        ClientResponse updateData = new ClientResponse(1L, "email@example.com", "Name", 50.0, 300.0, new ArrayList<>());
+        ClientResponse updateData = ClientResponse.builder()
+            .id(1L)
+            .email("email@example.com")
+            .name("Name")
+            .batteryCapacityKwh(50.0)
+            .fullRangeKm(300.0)
+            .reservations(new ArrayList<>())
+            .role(UserRole.CLIENT)
+            .build();
 
         mockMvc.perform(put("/api/clients/{email}", email)
                 .contentType(MediaType.APPLICATION_JSON)
