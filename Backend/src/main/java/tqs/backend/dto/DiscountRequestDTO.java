@@ -1,9 +1,13 @@
 package tqs.backend.dto;
 
-import lombok.Data;
+import lombok.*;
 import tqs.backend.model.enums.ChargerType;
 
-@Data
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class DiscountRequestDTO {
     private Long stationId;
     private ChargerType chargerType;
