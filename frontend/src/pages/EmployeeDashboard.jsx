@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/global/Header.jsx';
 import DashboardHeader from '../components/employeeDashboard/DashboardHeader.jsx';
 import StationsGrid from '../components/employeeDashboard/StationsGrid';
-import ChargerModal from '../components/employeeDashboard/ChargerModal';
+import ChargerModal from '../components/employeeDashboard/ChargerModal.jsx';
+import MaintenanceNoteModal from '../components/employeeDashboard/MaintenanceNoteModal.jsx';
 import Footer from '../components/global/Footer.jsx';
 import '../css/pages/EmployeeDashboard.css';
 
@@ -21,6 +22,10 @@ const EmployeeDashboard = () => {
     const [showChargerModal, setShowChargerModal] = useState(false);
     const [chargers, setChargers] = useState([]);
     const [chargersLoading, setChargersLoading] = useState(false);
+
+    // New state for maintenance note modal
+    const [showMaintenanceNoteModal, setShowMaintenanceNoteModal] = useState(false);
+    const [chargerIdForMaintenance, setChargerIdForMaintenance] = useState(null);
 
     // Filter stations based on search term
     const filteredStations = stations.filter(station => {
@@ -95,25 +100,51 @@ const EmployeeDashboard = () => {
         }
     };
 
-    const deleteCharger = async (chargerId) => {
+    // This function will now just open the maintenance note modal
+    const handleMarkUnderMaintenanceClick = (chargerId) => {
+        setChargerIdForMaintenance(chargerId);
+        setShowMaintenanceNoteModal(true);
+    };
+
+    // This function will handle the API call after submitting the note
+    const handleMaintenanceNoteSubmit = async (chargerId, maintenanceNote) => {
         try {
-            const response = await fetch(`http://localhost:8080/api/chargers/${chargerId}`, {
-                method: 'DELETE'
+            const response = await fetch(`http://localhost:8080/api/chargers/${chargerId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: 'UNDER_MAINTENANCE', maintenanceNote: maintenanceNote })
             });
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                 // Attempt to read error message from response body
+                const errorBody = await response.json();
+                const errorMessage = errorBody.error || `HTTP error! status: ${response.status}`;
+                throw new Error(errorMessage);
             }
 
-            // Refresh chargers list and statistics
+            // Refresh chargers list for the current station
             if (selectedStation) {
                 await fetchChargers(selectedStation.id);
             }
-            await fetchStatistics();
+            // No need to refresh overall statistics as under maintenance chargers are still counted in total
+
         } catch (err) {
-            console.error('Error deleting charger:', err);
-            throw err;
+            console.error('Error marking charger under maintenance:', err);
+            alert(`Failed to mark charger under maintenance: ${err.message || 'Unknown error'}`);
         }
+    };
+
+    const handleCloseChargerModal = () => {
+        setShowChargerModal(false);
+        setSelectedStation(null);
+        setChargers([]);
+    };
+
+    const handleCloseMaintenanceNoteModal = () => {
+        setShowMaintenanceNoteModal(false);
+        setChargerIdForMaintenance(null);
     };
 
     useEffect(() => {
@@ -132,21 +163,29 @@ const EmployeeDashboard = () => {
         await fetchChargers(station.id);
     };
 
-    const handleCloseModal = () => {
-        setShowChargerModal(false);
-        setSelectedStation(null);
-        setChargers([]);
-    };
-
     const handleRetry = () => {
         fetchStations();
     };
 
+    // The delete function is kept but not used in ChargerModal anymore
     const handleDeleteCharger = async (chargerId) => {
         if (window.confirm('Are you sure you want to delete this charger?')) {
             try {
-                await deleteCharger(chargerId);
+                const response = await fetch(`http://localhost:8080/api/chargers/${chargerId}`, {
+                    method: 'DELETE'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Refresh chargers list and statistics
+                if (selectedStation) {
+                    await fetchChargers(selectedStation.id);
+                }
+                await fetchStatistics();
             } catch (err) {
+                console.error('Error deleting charger:', err);
                 alert('Failed to delete charger. Please try again.');
             }
         }
@@ -185,8 +224,17 @@ const EmployeeDashboard = () => {
                     station={selectedStation}
                     chargers={chargers}
                     loading={chargersLoading}
-                    onClose={handleCloseModal}
-                    onDeleteCharger={handleDeleteCharger}
+                    onClose={handleCloseChargerModal}
+                    onMarkUnderMaintenance={handleMarkUnderMaintenanceClick}
+                />
+            )}
+
+            {showMaintenanceNoteModal && (
+                <MaintenanceNoteModal
+                    show={showMaintenanceNoteModal}
+                    onClose={handleCloseMaintenanceNoteModal}
+                    onSubmit={handleMaintenanceNoteSubmit}
+                    chargerId={chargerIdForMaintenance}
                 />
             )}
         </div>
