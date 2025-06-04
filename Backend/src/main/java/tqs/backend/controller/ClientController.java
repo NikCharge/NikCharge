@@ -38,7 +38,18 @@ public class ClientController {
 
         try {
             Client client = clientService.signUp(signUpRequest);
-            return ResponseEntity.ok(client);
+
+            ClientResponse response = new ClientResponse(
+                    client.getId(),
+                    client.getEmail(),
+                    client.getName(),
+                    client.getBatteryCapacityKwh(),
+                    client.getFullRangeKm(),
+                    client.getReservations()
+            );
+
+            return ResponseEntity.ok(response);
+
         } catch (RuntimeException e) {
             if ("Email already exists".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
@@ -62,10 +73,12 @@ public class ClientController {
         if (clientOpt.isPresent() && passwordEncoder.matches(loginRequest.getPassword(), clientOpt.get().getPasswordHash())) {
             Client client = clientOpt.get();
             ClientResponse response = new ClientResponse(
+                    client.getId(),
                     client.getEmail(),
                     client.getName(),
                     client.getBatteryCapacityKwh(),
-                    client.getFullRangeKm()
+                    client.getFullRangeKm(),
+                    client.getReservations()
             );
             return ResponseEntity.ok(response);
         } else {
@@ -89,10 +102,12 @@ public class ClientController {
         clientRepository.save(client);
 
         return ResponseEntity.ok(new ClientResponse(
+                client.getId(),
                 client.getEmail(),
                 client.getName(),
                 client.getBatteryCapacityKwh(),
-                client.getFullRangeKm()
+                client.getFullRangeKm(),
+                client.getReservations()
         ));
     }
 }

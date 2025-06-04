@@ -147,7 +147,7 @@ class StationApiTest {
         var charger2 = Map.of(
                 "stationId", stationId,
                 "chargerType", "AC_STANDARD",
-                "status", "IN_USE",
+                "status", "AVAILABLE",
                 "pricePerKwh", 0.20
         );
 
@@ -170,7 +170,7 @@ class StationApiTest {
                 .body("chargers.findAll { it.chargerType == 'DC_FAST' }.size()", greaterThanOrEqualTo(1))
                 .body("chargers.findAll { it.chargerType == 'AC_STANDARD' }.size()", greaterThanOrEqualTo(1))
                 .body("chargers[0].pricePerKwh", notNullValue())
-                .body("chargers[0].status", anyOf(equalTo("AVAILABLE"), equalTo("IN_USE"), equalTo("MAINTENANCE")));
+                .body("chargers[0].status", anyOf(equalTo("AVAILABLE"), equalTo("AVAILABLE"), equalTo("UNDER_MAINTENANCE")));
         }
 
         @Test

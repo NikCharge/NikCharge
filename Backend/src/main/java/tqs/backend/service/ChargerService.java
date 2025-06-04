@@ -3,10 +3,12 @@ package tqs.backend.service;
 import org.springframework.stereotype.Service;
 import tqs.backend.model.Charger;
 import tqs.backend.model.Station;
+import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.StationRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ChargerService {
@@ -41,6 +43,31 @@ public class ChargerService {
         }
         chargerRepository.deleteById(id);
     }
-        
 
+    public Optional<Charger> getChargerById(Long id) {
+        return chargerRepository.findById(id);
+    }
+
+    public Charger saveCharger(Charger charger) {
+        return chargerRepository.save(charger);
+    }
+
+    public Charger updateChargerStatus(Long id, ChargerStatus status) {
+        Charger charger = chargerRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Charger not found"));
+        charger.setStatus(status);
+        return chargerRepository.save(charger);
+    }
+
+    public List<Charger> getChargersByStatus(ChargerStatus status) {
+        return chargerRepository.findByStatus(status);
+    }
+
+    public long countByStatus(ChargerStatus status) {
+        return chargerRepository.countByStatus(status);
+    }
+
+    public long countByStationAndStatus(Long stationId, ChargerStatus status) {
+        return chargerRepository.countByStationIdAndStatus(stationId, status);
+    }
 }

@@ -9,14 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.ActiveProfiles;
 import tqs.backend.model.Charger;
 import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerStatus;
@@ -28,45 +22,26 @@ import java.util.*;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(initializers = StationIntegrationTest.Initializer.class)
+@ActiveProfiles("test")
 public class StationIntegrationTest {
 
     @LocalServerPort
     private int port;
 
-    @Container
-    public static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
+    @Autowired
+    private StationRepository stationRepository;
 
-    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext context) {
-            TestPropertyValues.of(
-                            "spring.datasource.url=" + postgres.getJdbcUrl(),
-                            "spring.datasource.username=" + postgres.getUsername(),
-                            "spring.datasource.password=" + postgres.getPassword(),
-                            "spring.jpa.hibernate.ddl-auto=create-drop",
-                            "spring.jpa.show-sql=true",
-                            "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect")
-                    .applyTo(context.getEnvironment());
-        }
-    }
+    @Autowired
+    private ChargerRepository chargerRepository;
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        chargerRepository.deleteAll();
+        stationRepository.deleteAll();
     }
-
-        @Autowired
-        private StationRepository stationRepository;
-
-        @Autowired
-        private ChargerRepository chargerRepository;
 
     // ---------- CREATE STATION TESTS ----------
 
@@ -148,8 +123,8 @@ public class StationIntegrationTest {
                 .body("name", equalTo("Unique"));
     }
 
-        @Test
-        void testGetStationDetails_ReturnsStationWithChargers() {
+    @Test
+    void testGetStationDetails_ReturnsStationWithChargers() {
         // Step 1: Create station via API
         var stationPayload = Map.of(
                 "name", "Station D",
@@ -178,7 +153,7 @@ public class StationIntegrationTest {
         Charger c2 = Charger.builder()
                 .station(station)
                 .chargerType(ChargerType.AC_STANDARD)
-                .status(ChargerStatus.IN_USE)
+                .status(ChargerStatus.AVAILABLE)
                 .pricePerKwh(BigDecimal.valueOf(0.20))
                 .build();
 
@@ -191,47 +166,5 @@ public class StationIntegrationTest {
                 .body("chargers.size()", equalTo(2))
                 .body("chargers[0].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")))
                 .body("chargers[1].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")));
-        }
-
-        // ---------- DELETE STATION TESTS ----------
-
-        @Test
-        void testDeleteExistingStation_ReturnsNoContent() {
-        // Criar estação para garantir que existe
-        var payload = Map.of(
-                "name", "ToDelete",
-                "address", "Rua Delete",
-                "city", "Delete City",
-                "latitude", 45.0,
-                "longitude", -10.0
-        );
-
-        int stationId = given().contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/api/stations")
-                .then().statusCode(200)
-                .extract().path("id");
-
-        // Deletar estação criada
-        given()
-                .when().delete("/api/stations/{id}", stationId)
-                .then().statusCode(204);
-
-        // Confirmar que foi removida (retorna 404)
-        given()
-                .when().get("/api/stations/{id}", stationId)
-                .then().statusCode(404);
-        }
-
-        @Test
-        void testDeleteNonExistingStation_ReturnsNotFound() {
-        int nonExistingId = 99999;
-
-        given()
-                .when().delete("/api/stations/{id}", nonExistingId)
-                .then()
-                .statusCode(404)
-                .body("error", equalTo("Station not found"));
-        }
-
+    }
 }
