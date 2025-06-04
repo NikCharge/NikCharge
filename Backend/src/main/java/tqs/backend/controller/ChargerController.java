@@ -86,4 +86,34 @@ public class ChargerController {
     public ResponseEntity<List<ChargerDTO>> getAvailableChargers() {
         return ResponseEntity.ok(chargerService.getChargersByStatus(ChargerStatus.AVAILABLE));
     }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateChargerStatus(@PathVariable Long id, @RequestBody Map<String, String> requestBody) {
+        try {
+            String statusStr = requestBody.get("status");
+            String maintenanceNote = requestBody.get("maintenanceNote");
+
+            if (statusStr == null || statusStr.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Missing 'status' in request body"));
+            }
+
+            ChargerStatus newStatus;
+            try {
+                newStatus = ChargerStatus.valueOf(statusStr.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid status value: " + statusStr));
+            }
+
+            // Validate that only UNDER_MAINTENANCE status is allowed
+            if (newStatus != ChargerStatus.UNDER_MAINTENANCE) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid status value: " + statusStr));
+            }
+
+            Charger updatedCharger = chargerService.updateChargerStatus(id, newStatus, maintenanceNote);
+            return ResponseEntity.ok(updatedCharger);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
+    }
 }
