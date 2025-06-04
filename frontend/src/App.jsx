@@ -6,6 +6,7 @@ import SignUpLogin from "./pages/SignUpLogIn.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Search from "./pages/Search.jsx";
 import EmployeeDashboard from "./pages/EmployeeDashboard.jsx";
+import ManagerDashboard from "./pages/ManagerDashboard";
 
 function App() {
     return (
@@ -16,7 +17,8 @@ function App() {
                 <Route path="/signup" element={<SignUpLogin />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/search" element={<Search />} />
-                <Route path="/employee-dashboard" element={<EmployeeDashboard />}></Route>
+                <Route path="/employee-dashboard" element={<EmployeeDashboard />} />
+                <Route path="/manager-dashboard" element={<ManagerDashboard />} />
             </Routes>
         </Router>
     );
