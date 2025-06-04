@@ -220,6 +220,18 @@ class ReservationControllerTest {
         verify(reservationService, times(1)).createReservation(any(ReservationRequest.class));
     }
 
+    @Test
+    void whenGetReservationsByClientIdThrowsException_thenReturnBadRequest() throws Exception {
+        when(reservationService.getReservationsByClientId(1L))
+                .thenThrow(new RuntimeException("Client not found"));
+
+        mockMvc.perform(get("/api/reservations/client/{clientId}", 1L))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Client not found")));
+
+        verify(reservationService, times(1)).getReservationsByClientId(1L);
+    }
+
     @TestConfiguration
     static class MockConfig {
         @Bean

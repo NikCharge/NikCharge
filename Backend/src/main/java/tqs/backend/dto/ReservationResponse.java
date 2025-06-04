@@ -1,14 +1,13 @@
 package tqs.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import tqs.backend.model.enums.ReservationStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReservationResponse {
@@ -21,7 +20,8 @@ public class ReservationResponse {
     private BigDecimal estimatedCost;
     private ReservationStatus status;
 
-    @Data
+    @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class ChargerDto {
@@ -30,7 +30,8 @@ public class ReservationResponse {
         private StationDto station;
     }
 
-    @Data
+    @Getter
+    @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     public static class StationDto {
