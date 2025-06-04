@@ -7,9 +7,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import tqs.backend.dto.ReservationRequest;
+import tqs.backend.dto.ReservationResponse;
 import tqs.backend.model.Charger;
 import tqs.backend.model.Client;
 import tqs.backend.model.Reservation;
+import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ReservationStatus;
 import tqs.backend.repository.ChargerRepository;
@@ -48,6 +50,7 @@ class ReservationServiceTest {
     private ReservationRequest request;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Station station;
 
     @BeforeEach
     void setUp() {
@@ -60,9 +63,18 @@ class ReservationServiceTest {
                 .email("test@example.com")
                 .build();
 
+        station = Station.builder()
+                .id(1L)
+                .name("Test Station")
+                .address("123 Test St")
+                .city("Test City")
+                .build();
+
         charger = Charger.builder()
                 .id(1L)
                 .status(ChargerStatus.AVAILABLE)
+                .station(station)
+                .chargerType(tqs.backend.model.enums.ChargerType.AC_STANDARD)
                 .build();
 
         reservation = Reservation.builder()
@@ -166,5 +178,36 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("already reserved");
+    }
+
+    @Test
+    void whenGetReservationsByClientId_thenReturnListOfReservationResponses() {
+        when(reservationRepository.findByUserId(1L)).thenReturn(Arrays.asList(reservation));
+
+        List<ReservationResponse> found = reservationService.getReservationsByClientId(1L);
+
+        assertThat(found).hasSize(1);
+        ReservationResponse response = found.get(0);
+
+        assertThat(response).isNotNull();
+        assertThat(response.getId()).isEqualTo(reservation.getId());
+        assertThat(response.getStartTime()).isEqualTo(reservation.getStartTime());
+        assertThat(response.getEstimatedEndTime()).isEqualTo(reservation.getEstimatedEndTime());
+        assertThat(response.getBatteryLevelStart()).isEqualTo(reservation.getBatteryLevelStart());
+        assertThat(response.getEstimatedKwh()).isEqualTo(reservation.getEstimatedKwh());
+        assertThat(response.getEstimatedCost()).isEqualTo(reservation.getEstimatedCost());
+        assertThat(response.getStatus()).isEqualTo(reservation.getStatus());
+
+        assertThat(response.getCharger()).isNotNull();
+        assertThat(response.getCharger().getId()).isEqualTo(charger.getId());
+        assertThat(response.getCharger().getChargerType()).isEqualTo(charger.getChargerType().toString());
+
+        assertThat(response.getCharger().getStation()).isNotNull();
+        assertThat(response.getCharger().getStation().getId()).isEqualTo(station.getId());
+        assertThat(response.getCharger().getStation().getName()).isEqualTo(station.getName());
+        assertThat(response.getCharger().getStation().getAddress()).isEqualTo(station.getAddress());
+        assertThat(response.getCharger().getStation().getCity()).isEqualTo(station.getCity());
+
+        verify(reservationRepository, times(1)).findByUserId(1L);
     }
 } 

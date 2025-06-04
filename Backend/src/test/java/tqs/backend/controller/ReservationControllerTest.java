@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import tqs.backend.dto.ReservationResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -95,6 +96,55 @@ class ReservationControllerTest {
 
         // Reset mocks before each test
         reset(reservationService);
+    }
+
+    @Test
+    void whenGetReservationsByClientId_thenReturnListOfReservationResponses() throws Exception {
+        // Create sample DTOs
+        ReservationResponse.StationDto stationDto = new ReservationResponse.StationDto(
+                1L,
+                "Test Station",
+                "123 Test St",
+                "Test City"
+        );
+
+        ReservationResponse.ChargerDto chargerDto = new ReservationResponse.ChargerDto(
+                101L,
+                "DC_FAST",
+                stationDto
+        );
+
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plusHours(1);
+        BigDecimal estimatedCost = new BigDecimal("10.50");
+
+        ReservationResponse reservationResponse = new ReservationResponse(
+                201L,
+                chargerDto,
+                startTime,
+                endTime,
+                80.0,
+                50.0,
+                estimatedCost,
+                ReservationStatus.ACTIVE
+        );
+
+        List<ReservationResponse> reservationResponses = Arrays.asList(reservationResponse);
+
+        when(reservationService.getReservationsByClientId(1L)).thenReturn(reservationResponses);
+
+        mockMvc.perform(get("/api/reservations/client/{clientId}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(201)))
+                .andExpect(jsonPath("$[0].status", is("ACTIVE")))
+                .andExpect(jsonPath("$[0].charger.id", is(101)))
+                .andExpect(jsonPath("$[0].charger.chargerType", is("DC_FAST")))
+                .andExpect(jsonPath("$[0].charger.station.id", is(1)))
+                .andExpect(jsonPath("$[0].charger.station.name", is("Test Station")))
+                .andExpect(jsonPath("$[0].charger.station.address", is("123 Test St")))
+                .andExpect(jsonPath("$[0].charger.station.city", is("Test City")));
+
+        verify(reservationService, times(1)).getReservationsByClientId(1L);
     }
 
     @Test
