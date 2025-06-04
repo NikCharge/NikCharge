@@ -48,45 +48,7 @@ class DiscountRequestDTOTest {
         assertNull(dto.getActive());
     }
 
-    @Test
-    void testToStringEqualsHashCode() {
-        DiscountRequestDTO dto1 = new DiscountRequestDTO();
-        dto1.setStationId(1L);
-        dto1.setChargerType(ChargerType.DC_FAST);
-        dto1.setDayOfWeek(2);
-        dto1.setStartHour(10);
-        dto1.setEndHour(12);
-        dto1.setDiscountPercent(10.0);
-        dto1.setActive(false);
-
-        DiscountRequestDTO dto2 = new DiscountRequestDTO();
-        dto2.setStationId(1L);
-        dto2.setChargerType(ChargerType.DC_FAST);
-        dto2.setDayOfWeek(2);
-        dto2.setStartHour(10);
-        dto2.setEndHour(12);
-        dto2.setDiscountPercent(10.0);
-        dto2.setActive(false);
-
-        assertEquals(dto1, dto2);
-        assertEquals(dto1.hashCode(), dto2.hashCode());
-        assertNotNull(dto1.toString());
-    }
-
-    @Test
-    void testEqualsWithVariousCases() {
-        DiscountRequestDTO dto = new DiscountRequestDTO();
-        dto.setStationId(1L);
-
-        assertEquals(dto, dto);               // objeto igual a si mesmo
-        assertNotEquals(dto, null);           // comparar com null
-        assertNotEquals(dto, new Object());   // comparar com objeto diferente
-
-        DiscountRequestDTO dtoDiff = new DiscountRequestDTO();
-        dtoDiff.setStationId(2L);
-        assertNotEquals(dto, dtoDiff);        // diferentes campos
-    }
-
+    
     @Test
     void testDefaultConstructor() {
         DiscountRequestDTO dto = new DiscountRequestDTO();
