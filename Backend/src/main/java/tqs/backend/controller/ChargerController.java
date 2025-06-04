@@ -106,8 +106,9 @@ public class ChargerController {
                 return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, e.getMessage()));
             }
 
-            if (newStatus != ChargerStatus.UNDER_MAINTENANCE) {
-                return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "Invalid status value: " + statusStr));
+            // Validate that only UNDER_MAINTENANCE or AVAILABLE status is allowed via this endpoint
+            if (newStatus != ChargerStatus.UNDER_MAINTENANCE && newStatus != ChargerStatus.AVAILABLE) {
+                return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "Invalid status value: " + statusStr + ". Only UNDER_MAINTENANCE or AVAILABLE status allowed via this endpoint."));
             }
 
             Charger updatedCharger = chargerService.updateChargerStatus(id, newStatus, maintenanceNote);

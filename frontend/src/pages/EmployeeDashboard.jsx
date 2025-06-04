@@ -147,6 +147,33 @@ const EmployeeDashboard = () => {
         setChargerIdForMaintenance(null);
     };
 
+    const handleMarkAvailable = async (chargerId) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/chargers/${chargerId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: 'AVAILABLE' })
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json();
+                const errorMessage = errorBody.error || `HTTP error! status: ${response.status}`;
+                throw new Error(errorMessage);
+            }
+
+            // Refresh chargers list for the current station
+            if (selectedStation) {
+                await fetchChargers(selectedStation.id);
+            }
+
+        } catch (err) {
+            console.error('Error marking charger as available:', err);
+            alert(`Failed to mark charger as available: ${err.message || 'Unknown error'}`);
+        }
+    };
+
     useEffect(() => {
         fetchStations();
     }, []);
@@ -226,6 +253,7 @@ const EmployeeDashboard = () => {
                     loading={chargersLoading}
                     onClose={handleCloseChargerModal}
                     onMarkUnderMaintenance={handleMarkUnderMaintenanceClick}
+                    onMarkAvailable={handleMarkAvailable}
                 />
             )}
 

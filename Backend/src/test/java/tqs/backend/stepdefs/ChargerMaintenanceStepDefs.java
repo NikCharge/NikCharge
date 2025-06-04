@@ -42,19 +42,18 @@ public class ChargerMaintenanceStepDefs {
     private static final AtomicInteger coordinateCounter = new AtomicInteger(0);
 
     @Autowired
-    private MockMvc mockMvc;
+    protected MockMvc mockMvc;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    protected ObjectMapper objectMapper;
 
     @Autowired
-    private StationRepository stationRepository;
+    protected StationRepository stationRepository;
 
     @Autowired
-    private ChargerRepository chargerRepository;
+    protected ChargerRepository chargerRepository;
 
-    private Long testChargerId;
-    private ResultActions latestResultActions;
+    protected Long testChargerId;
 
     @Given("a station with an available charger exists")
     public void a_station_with_an_available_charger_exists() {
@@ -93,9 +92,11 @@ public class ChargerMaintenanceStepDefs {
         requestBody.put("status", status);
         requestBody.put("maintenanceNote", note);
 
-        latestResultActions = mockMvc.perform(put("/api/chargers/{id}/status", testChargerId)
+        ResultActions resultActions = mockMvc.perform(put("/api/chargers/{id}/status", testChargerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestBody)));
+        
+        SharedContext.setLatestResultActions(resultActions);
     }
 
     @When("I mark the charger as {string} with no note")
@@ -104,9 +105,11 @@ public class ChargerMaintenanceStepDefs {
         requestBody.put("status", status);
         // No maintenanceNote is added
 
-        latestResultActions = mockMvc.perform(put("/api/chargers/{id}/status", testChargerId)
+        ResultActions resultActions = mockMvc.perform(put("/api/chargers/{id}/status", testChargerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestBody)));
+        
+        SharedContext.setLatestResultActions(resultActions);
     }
 
     @When("I mark a non-existent charger as {string} with note {string}")
@@ -116,9 +119,11 @@ public class ChargerMaintenanceStepDefs {
         requestBody.put("status", status);
         requestBody.put("maintenanceNote", note);
 
-        latestResultActions = mockMvc.perform(put("/api/chargers/{id}/status", nonExistentChargerId)
+        ResultActions resultActions = mockMvc.perform(put("/api/chargers/{id}/status", nonExistentChargerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(requestBody)));
+        
+        SharedContext.setLatestResultActions(resultActions);
     }
 
     @Given("the existing charger is marked as {string} with note {string}")
@@ -154,31 +159,31 @@ public class ChargerMaintenanceStepDefs {
 
     @Then("the response status code should be {int}")
     public void the_response_status_code_should_be(int expectedStatusCode) throws Exception {
-        latestResultActions.andExpect(status().is(expectedStatusCode));
+        StepDefsUtils.verifyResponseStatus(SharedContext.getLatestResultActions(), expectedStatusCode);
     }
 
     @Then("the response body should contain {string}")
     public void the_response_body_should_contain(String expectedBodyContent) throws Exception {
-        latestResultActions.andExpect(
+        SharedContext.getLatestResultActions().andExpect(
             result -> assertThat(result.getResponse().getContentAsString()).contains(expectedBodyContent)
         );
     }
 
     @Then("the charger maintenance note should be {string}")
     public void the_charger_maintenance_note_should_be(String expectedNote) throws Exception {
-        latestResultActions.andExpect(status().isOk())
+        SharedContext.getLatestResultActions().andExpect(status().isOk())
                           .andExpect(jsonPath("$.maintenanceNote", is(expectedNote)));
     }
 
     @Then("the charger maintenance note should be empty")
     public void the_charger_maintenance_note_should_be_empty() throws Exception {
-         latestResultActions.andExpect(status().isOk())
+         SharedContext.getLatestResultActions().andExpect(status().isOk())
                            .andExpect(jsonPath("$.maintenanceNote").isEmpty());
     }
 
     @Then("the charger status should be {string}")
     public void the_charger_status_should_be(String expectedStatus) throws Exception {
-        latestResultActions.andExpect(status().isOk())
+        SharedContext.getLatestResultActions().andExpect(status().isOk())
                            .andExpect(jsonPath("$.status", is(expectedStatus)));
     }
 

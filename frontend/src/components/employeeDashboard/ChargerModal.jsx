@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../css/pages/EmployeeDashboard.css';
 
-const ChargerModal = ({ station, chargers, loading, onClose, onMarkUnderMaintenance }) => {
+const ChargerModal = ({ station, chargers, loading, onClose, onMarkUnderMaintenance, onMarkAvailable }) => {
     const [filterStatus, setFilterStatus] = useState('All'); // State for filter
 
     const getStatusColor = (status) => {
@@ -150,6 +150,15 @@ const ChargerModal = ({ station, chargers, loading, onClose, onMarkUnderMaintena
                                                 onClick={() => onMarkUnderMaintenance(charger.id)}
                                             >
                                                 Mark Under Maintenance
+                                            </button>
+                                        )}
+                                        {/* Mark Available button */}
+                                        {charger.status === 'UNDER_MAINTENANCE' && (
+                                            <button
+                                                className="available-button"
+                                                onClick={() => onMarkAvailable(charger.id)}
+                                            >
+                                                Mark as Available
                                             </button>
                                         )}
                                     </div>
