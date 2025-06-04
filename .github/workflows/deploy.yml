@@ -1,95 +1,33 @@
-name: Deploy
+name: Deploy project
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - develop
   pull_request:
-    branches: [main, develop]
-    types: [opened, synchronize, reopened]
-  workflow_dispatch:
-
-env:
-  GITHUB_REPOSITORY_OWNER: nikcharge
+    branches:
+      - develop
 
 jobs:
-  acceptance_tests:
-    name: Acceptance Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          java-version: 21
-          distribution: temurin
-
-      - name: Set up Firefox
-        uses: browser-actions/setup-firefox@latest
-
-      - name: Build with Maven
-        run: mvn -f ./Backend/pom.xml clean package -DskipTests
-
-      - name: Start Docker Compose Environment
-        run: docker compose up -d
-        env:
-          GITHUB_REPOSITORY_OWNER: ${{ env.GITHUB_REPOSITORY_OWNER }}
-
-  build:
-    name: Docker Build and Push
-    needs: acceptance_tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v3
-        with:
-          java-version: 21
-          distribution: temurin
-
-      - name: Build with Maven
-        run: mvn -f ./Backend/pom.xml clean package -DskipTests
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and Push Docker Images
-        run: |
-          docker compose build
-          docker compose push
-
   deploy:
-    name: Deploy to UA VM
-    needs: build
-    runs-on: self-hosted
+    runs-on: self-hosted  # ALTERADO: usar o runner no teu PC
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deploy Application
+      - name: Run deploy on remote server
         run: |
-          docker compose -f docker-compose.yml pull
-          docker compose -f docker-compose.yml up -d --remove-orphans
-          docker container prune -f
-          docker image prune -af
-          docker builder prune
+          ssh carolinaspsilva@deti-tqs-02 << 'EOF'
+            cd ~/NikCharge
+            git reset --hard HEAD
+            git pull origin develop
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "NODE_ENV=development" >> .env
+            echo "VITE_API_URL=/api" >> .env
+            docker-compose down --remove-orphans --volumes
+            docker-system prune -af
+            docker-volume prune -f
+            docker-compose up -d --build --remove-orphans
+          EOF
