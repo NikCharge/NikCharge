@@ -788,24 +788,52 @@
     }
 }
 
-/* Specific styles for the 'Mark Under Maintenance' button */
+/* Maintenance Button */
 .maintenance-button {
-    background-color: #fff; /* White background */
-    color: #0c6342; /* Theme color text */
-    border: 1px solid #0c6342; /* Theme color border */
-    padding: 0.6rem 1.2rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    color: #ffffff;
+    background-color: #ef4444; /* A shade of red */
+    border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2);
 }
 
 .maintenance-button:hover {
-    background-color: #0c6342; /* Theme color background on hover */
-    color: #fff; /* White text on hover */
-    border-color: #095035; /* Darker theme color border on hover */
+    background-color: #dc2626; /* Darker red on hover */
+    box-shadow: 0 6px 15px rgba(239, 68, 68, 0.3);
 }
 
 .maintenance-button:active {
-    opacity: 0.8;
+    background-color: #b91c1c; /* Even darker red on active */
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+/* Available Button */
+.available-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    color: #ffffff;
+    background-color: #10b981; /* A shade of green */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+}
+
+.available-button:hover {
+    background-color: #059669; /* Darker green on hover */
+    box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+}
+
+.available-button:active {
+    background-color: #047857; /* Even darker green on active */
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }

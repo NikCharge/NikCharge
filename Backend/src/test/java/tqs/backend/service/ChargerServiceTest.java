@@ -150,6 +150,36 @@ class ChargerServiceTest {
     }
 
     @Test
+    void whenUpdateChargerStatusToAvailable_thenReturnUpdatedChargerWithoutNote() {
+        Long chargerId = 3L;
+        Charger initialCharger = new Charger();
+        initialCharger.setId(chargerId);
+        initialCharger.setStatus(ChargerStatus.UNDER_MAINTENANCE);
+        initialCharger.setMaintenanceNote("Faulty cable");
+        initialCharger.setChargerType(tqs.backend.model.enums.ChargerType.DC_ULTRA_FAST);
+        initialCharger.setPricePerKwh(BigDecimal.valueOf(0.45));
+
+        when(chargerRepository.findById(chargerId)).thenReturn(Optional.of(initialCharger));
+        when(chargerRepository.save(any(Charger.class))).thenAnswer(invocation -> {
+            Charger savedCharger = invocation.getArgument(0);
+            // Simulate repository saving the updated charger
+            assertThat(savedCharger.getId()).isEqualTo(chargerId);
+            assertThat(savedCharger.getStatus()).isEqualTo(ChargerStatus.AVAILABLE);
+            assertThat(savedCharger.getMaintenanceNote()).isNull(); // Note should be cleared
+            return savedCharger;
+        });
+
+        Charger updated = chargerService.updateChargerStatus(chargerId, ChargerStatus.AVAILABLE, null);
+
+        assertThat(updated).isNotNull();
+        assertThat(updated.getId()).isEqualTo(chargerId);
+        assertThat(updated.getStatus()).isEqualTo(ChargerStatus.AVAILABLE);
+        assertThat(updated.getMaintenanceNote()).isNull();
+        verify(chargerRepository, times(1)).findById(chargerId);
+        verify(chargerRepository, times(1)).save(any(Charger.class));
+    }
+
+    @Test
     void whenGetChargersByStatus_thenReturnFilteredChargers() {
         // Arrange
         List<Charger> availableChargerEntities = Arrays.asList(charger1);

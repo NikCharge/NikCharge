@@ -270,7 +270,7 @@ class ChargerControllerTest {
                 .maintenanceNote(maintenanceNote)
                 .build();
 
-        when(chargerService.updateChargerStatus(eq(chargerId), eq(ChargerStatus.UNDER_MAINTENANCE), eq(maintenanceNote)))
+        when(chargerService.updateChargerStatus(chargerId, ChargerStatus.UNDER_MAINTENANCE, maintenanceNote))
                 .thenReturn(updatedCharger);
 
         Map<String, String> requestBody = Map.of(
@@ -292,7 +292,7 @@ class ChargerControllerTest {
         Long chargerId = 999L;
         String maintenanceNote = "Faulty cable";
 
-        when(chargerService.updateChargerStatus(eq(chargerId), eq(ChargerStatus.UNDER_MAINTENANCE), eq(maintenanceNote)))
+        when(chargerService.updateChargerStatus(chargerId, ChargerStatus.UNDER_MAINTENANCE, maintenanceNote))
                 .thenThrow(new IllegalArgumentException("Charger not found"));
 
         Map<String, String> requestBody = Map.of(
@@ -342,5 +342,34 @@ class ChargerControllerTest {
                         .content(objectMapper.writeValueAsString(requestBody)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error").value("Missing 'status' in request body"));
+    }
+
+    // ---------- MARK CHARGER AVAILABLE TESTS ----------
+
+    @Test
+    void markChargerAvailable_ReturnsUpdatedCharger() throws Exception {
+        Long chargerId = 1L;
+        Charger updatedCharger = Charger.builder()
+                .id(chargerId)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.30))
+                .maintenanceNote(null) // Note should be null when available
+                .build();
+
+        when(chargerService.updateChargerStatus(eq(chargerId), eq(ChargerStatus.AVAILABLE), eq(null)))
+                .thenReturn(updatedCharger);
+
+        Map<String, String> requestBody = Map.of(
+                "status", "AVAILABLE"
+        );
+
+        mockMvc.perform(put("/api/chargers/{id}/status", chargerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(chargerId))
+                .andExpect(jsonPath("$.status").value("AVAILABLE"))
+                .andExpect(jsonPath("$.maintenanceNote").isEmpty()); // Assert maintenance note is empty/null in JSON
     }
 }

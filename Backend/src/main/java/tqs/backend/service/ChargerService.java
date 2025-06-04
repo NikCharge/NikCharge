@@ -57,8 +57,17 @@ public class ChargerService {
     public Charger updateChargerStatus(Long id, ChargerStatus status, String maintenanceNote) {
         Charger charger = chargerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Charger not found"));
+
         charger.setStatus(status);
-        charger.setMaintenanceNote(maintenanceNote);
+
+        // If setting status to AVAILABLE, clear the maintenance note
+        if (status == ChargerStatus.AVAILABLE) {
+            charger.setMaintenanceNote(null);
+        } else {
+            // Otherwise, set the maintenance note from the provided argument
+            charger.setMaintenanceNote(maintenanceNote);
+        }
+
         return chargerRepository.save(charger);
     }
 
