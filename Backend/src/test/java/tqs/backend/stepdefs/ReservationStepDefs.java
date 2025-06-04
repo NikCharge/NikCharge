@@ -6,7 +6,6 @@ import io.restassured.response.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.http.HttpStatus;
 import tqs.backend.model.*;
 import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.repository.*;
