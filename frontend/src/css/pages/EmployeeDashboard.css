@@ -1,0 +1,744 @@
+/* css/pages/EmployeeDashboard.css */
+
+.employee-dashboard-page {
+    min-height: 100vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fcfb;
+}
+
+.dashboard-content {
+    flex: 1;
+    width: 100%;
+    background: linear-gradient(135deg, #f8fcfb 0%, #e8f5f3 100%);
+    padding: 1rem 2rem 2rem 2rem;
+    padding-top: calc(1rem + 80px); /* Reduced top padding for closer header */
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem; /* Reduced margin for closer positioning */
+    padding: 1rem 0; /* Reduced padding */
+}
+
+.dashboard-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1db690;
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.dashboard-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background-color: #1db690;
+    border-radius: 2px;
+}
+
+.dashboard-header p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+/* Search Bar */
+.search-container {
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+    padding: 0 1rem;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    background-color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.search-bar:focus {
+    outline: none;
+    border-color: #1db690;
+    box-shadow: 0 4px 12px rgba(29, 182, 144, 0.1);
+}
+
+.search-bar::placeholder {
+    color: #999;
+}
+
+/* Dashboard Stats */
+.dashboard-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(29, 182, 144, 0.1);
+    min-width: 120px;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1db690;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+.stat-item.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-item.clickable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(29, 182, 144, 0.15);
+}
+
+.stat-item.clickable:active {
+    transform: translateY(-3px);
+}
+
+/* Stations Container - Improved centering and spacing */
+.stations-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Increased min width */
+    gap: 2rem; /* Increased gap */
+    max-width: 1200px; /* Reduced max width for better centering */
+    margin: 0 auto;
+    padding: 0 2rem; /* Added horizontal padding */
+}
+
+/* Station Card */
+.station-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.station-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1db690, #19a683);
+}
+
+.station-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(29, 182, 144, 0.1);
+}
+
+.station-card:active {
+    transform: translateY(-4px);
+}
+
+/* Station Card Header */
+.station-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.station-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #1db690, #19a683);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 10px rgba(29, 182, 144, 0.3);
+}
+
+.station-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.station-status.online {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Station Info */
+.station-info {
+    margin-bottom: 1.5rem;
+}
+
+.station-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1db690;
+    margin-bottom: 0.8rem;
+}
+
+.station-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap; /* Allow items to wrap */
+}
+
+.station-location span, .station-coordinates span {
+    flex-shrink: 1;
+}
+
+.station-coordinates {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #999;
+    flex-wrap: wrap; /* Allow items to wrap */
+}
+
+.station-coordinates span {
+    background-color: #f8fcfb;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+}
+
+/* Station Footer */
+.station-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.station-metric {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1db690;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid #f0f0f0;
+    flex-shrink: 0;
+}
+
+.modal-header h2 {
+    color: #1db690;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #666;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.close-button:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.modal-body {
+    padding: 2rem;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.station-details {
+    background-color: #f8fcfb;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px solid #e0e0e0;
+}
+
+.station-details p {
+    margin: 0.5rem 0;
+    color: #555;
+    font-size: 1rem;
+}
+
+.station-details p strong {
+    color: #333;
+    margin-right: 0.5rem;
+}
+
+/* Chargers Section Header with Filter */
+.chargers-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #1db690;
+    padding-bottom: 0.5rem;
+}
+
+.chargers-section-header h3 {
+    color: #333;
+    font-size: 1.4rem;
+    margin: 0;
+}
+
+.filter-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.filter-dropdown label {
+    font-size: 0.9rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.filter-dropdown select {
+    padding: 0.4rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.filter-dropdown select:focus {
+    border-color: #1db690;
+    box-shadow: 0 0 0 3px rgba(29, 182, 144, 0.2);
+}
+
+.chargers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.2rem;
+}
+
+.charger-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 15px;
+    padding: 1.2rem 1.5rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.charger-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.charger-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.charger-id span {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.charger-status {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.charger-details {
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.charger-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+    padding: 0.2rem 0;
+    border-bottom: 1px dashed #eee;
+}
+
+.charger-info:last-child {
+    margin-bottom: 0;
+    border-bottom: none;
+}
+
+.info-label {
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+    text-align: right;
+}
+
+.info-value .lucide {
+    vertical-align: middle;
+    margin-right: 0.3rem;
+}
+
+.charger-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.delete-button {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #dc2626;
+}
+
+.delete-button:active {
+    opacity: 0.8;
+}
+
+.empty-chargers {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Loading State */
+.station-card.loading {
+    cursor: default;
+    background: linear-gradient(90deg, #f8fcfb 25%, #ffffff 50%, #f8fcfb 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    gap: 1rem;
+    color: #666;
+    padding: 3rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f0f0f0;
+    border-top: 3px solid #1db690;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.station-card.error {
+    cursor: default;
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.station-card.error::before {
+    background: #ef4444;
+}
+
+.error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    gap: 1rem;
+    text-align: center;
+    padding: 3rem;
+}
+
+.error-message {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.retry-button {
+    padding: 0.5rem 1.5rem;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+    background-color: #dc2626;
+}
+
+/* Empty State */
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #666;
+}
+
+.empty-state svg {
+    color: #1db690;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .dashboard-stats {
+        gap: 2rem;
+    }
+
+    .stations-container {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-content {
+        padding: 1rem;
+        padding-top: calc(1rem + 80px);
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .dashboard-stats {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .stat-item {
+        min-width: 200px;
+    }
+
+    .stations-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0;
+    }
+
+    .modal-overlay {
+        padding: 1rem;
+    }
+
+    .modal-content {
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .chargers-section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.8rem;
+    }
+
+    .filter-dropdown {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .filter-dropdown select {
+        flex-grow: 1;
+    }
+
+    .chargers-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .charger-card {
+        padding: 1rem 1.2rem;
+    }
+
+    .charger-header {
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .charger-details {
+        margin-bottom: 1.2rem;
+    }
+
+    .charger-info {
+        margin-bottom: 0.5rem;
+        padding: 0.1rem 0;
+    }
+
+    .info-label,
+    .info-value {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .station-card {
+        padding: 1rem;
+    }
+
+    .station-coordinates {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-header,
+    .modal-body {
+        padding: 1rem;
+    }
+}

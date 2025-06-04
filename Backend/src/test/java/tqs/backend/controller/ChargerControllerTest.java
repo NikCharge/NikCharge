@@ -22,6 +22,7 @@ import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.StationRepository;
 import tqs.backend.service.ChargerService;
 import tqs.backend.dto.ChargerCreationRequest;
+import tqs.backend.dto.ChargerDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -179,5 +180,78 @@ class ChargerControllerTest {
         mockMvc.perform(delete("/api/chargers/{id}", chargerId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Charger not found"));
+    }
+
+    @Test
+    void countAvailableChargersTotal_ReturnsCount() throws Exception {
+        when(chargerService.countByStatus(ChargerStatus.AVAILABLE)).thenReturn(5L);
+
+        mockMvc.perform(get("/api/chargers/count/available/total"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("5"));
+    }
+
+    @Test
+    void countAvailableChargersByStation_ReturnsCount() throws Exception {
+        Long stationId = 1L;
+        when(chargerService.countByStationAndStatus(stationId, ChargerStatus.AVAILABLE)).thenReturn(3L);
+
+        mockMvc.perform(get("/api/chargers/count/available/station/{stationId}", stationId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("3"));
+    }
+
+    @Test
+    void countInUseChargersTotal_ReturnsCount() throws Exception {
+        when(chargerService.countByStatus(ChargerStatus.IN_USE)).thenReturn(2L);
+
+        mockMvc.perform(get("/api/chargers/count/in_use/total"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("2"));
+    }
+
+    @Test
+    void countInUseChargersByStation_ReturnsCount() throws Exception {
+        Long stationId = 1L;
+        when(chargerService.countByStationAndStatus(stationId, ChargerStatus.IN_USE)).thenReturn(1L);
+
+        mockMvc.perform(get("/api/chargers/count/in_use/station/{stationId}", stationId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"));
+    }
+
+    @Test
+    void getAvailableChargers_ReturnsList() throws Exception {
+        List<ChargerDTO> availableChargers = List.of(
+            ChargerDTO.builder()
+                .id(1L)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.20))
+                .stationId(101L)
+                .stationName("Test Station 1")
+                .stationCity("Test City 1")
+                .build(),
+            ChargerDTO.builder()
+                .id(2L)
+                .chargerType(ChargerType.DC_FAST)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.40))
+                .stationId(102L)
+                .stationName("Test Station 2")
+                .stationCity("Test City 2")
+                .build()
+        );
+
+        when(chargerService.getChargersByStatus(ChargerStatus.AVAILABLE))
+            .thenReturn(availableChargers);
+
+        mockMvc.perform(get("/api/chargers/available"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(availableChargers.size()))
+            .andExpect(jsonPath("$[0].status").value("AVAILABLE"))
+            .andExpect(jsonPath("$[1].status").value("AVAILABLE"))
+            .andExpect(jsonPath("$[0].chargerType").value("AC_STANDARD"))
+            .andExpect(jsonPath("$[1].chargerType").value("DC_FAST"));
     }
 }
