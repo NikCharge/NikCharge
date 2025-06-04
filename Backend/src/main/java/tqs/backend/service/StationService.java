@@ -6,12 +6,18 @@ import tqs.backend.dto.ChargerDTO;
 import tqs.backend.dto.StationDetailsDTO;
 import tqs.backend.dto.StationRequest;
 import tqs.backend.model.Charger;
+import tqs.backend.model.Discount;
 import tqs.backend.model.Station;
+import tqs.backend.model.enums.ChargerType;
 import tqs.backend.repository.StationRepository;
 import tqs.backend.repository.ChargerRepository;
+import tqs.backend.repository.DiscountRepository;
 
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 @Service
@@ -19,10 +25,12 @@ public class StationService {
 
     private final StationRepository stationRepository;
     private final ChargerRepository chargerRepository;
+    private final DiscountRepository discountRepository;
 
-    public StationService(StationRepository stationRepository, ChargerRepository chargerRepository) {
+    public StationService(StationRepository stationRepository, ChargerRepository chargerRepository, DiscountRepository discountRepository) {
         this.stationRepository = stationRepository;
         this.chargerRepository = chargerRepository;
+        this.discountRepository = discountRepository;
     }
 
 
@@ -33,6 +41,10 @@ public class StationService {
 
     public ChargerRepository getChargerRepository(){
         return chargerRepository;
+    }
+
+    public DiscountRepository getDiscountRepository(){
+        return discountRepository;
     }
 
     public List<Station> getAllStations() {
@@ -98,5 +110,29 @@ public class StationService {
         stationRepository.deleteById(id);
     }
 
+    public List<Map<String, Object>> searchStationsWithDiscount(int dayOfWeek, int hour, ChargerType type) {
+        List<Station> stations = stationRepository.findAll();
+        List<Discount> discounts = discountRepository.findByActiveTrueAndDayOfWeekAndStartHourLessThanEqualAndEndHourGreaterThanEqualAndChargerType(
+                dayOfWeek, hour, hour, type
+        );
+
+        Map<Long, Discount> stationToDiscount = discounts.stream()
+                .collect(Collectors.toMap(d -> d.getStation().getId(), d -> d));
+
+        return stations.stream().map(station -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", station.getId());
+            map.put("name", station.getName());
+            map.put("latitude", station.getLatitude());
+            map.put("longitude", station.getLongitude());
+
+            if (stationToDiscount.containsKey(station.getId())) {
+                double percent = stationToDiscount.get(station.getId()).getDiscountPercent();
+                map.put("discountTag", String.format("%.0f%% off", percent));
+            }
+
+            return map;
+        }).toList();
+    }
 
 }
