@@ -60,13 +60,12 @@ class ChargerTest {
                 "Note A"
         );
 
-        // Como @EqualsAndHashCode(onlyExplicitlyIncluded = true), equals() depende apenas dos campos anotados.
-        // Como nenhum campo está anotado com @EqualsAndHashCode.Include, então equals/hashCode são baseados apenas na referência de objeto,
-        // e como são diferentes objetos, o equals será falso por omissão, a não ser que @Data ou @Builder inclua algo.
+        // Como @EqualsAndHashCode(), equals() depende de todos os campos não transientes.
+        // Como ambos os objetos têm os mesmos valores para todos os campos, o equals será verdadeiro.
 
-        // Mas mesmo assim, estamos a cobrir a linha com a anotação.
-        assertNotEquals(charger1, charger2);
-        assertNotEquals(charger1.hashCode(), charger2.hashCode());
+        // Corrigindo a asserção para verificar igualdade
+        assertEquals(charger1, charger2);
+        assertEquals(charger1.hashCode(), charger2.hashCode());
     }
 
     @Test
