@@ -17,7 +17,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode()
+@EqualsAndHashCode(exclude = "id")
 public class Charger {
 
     @Id
