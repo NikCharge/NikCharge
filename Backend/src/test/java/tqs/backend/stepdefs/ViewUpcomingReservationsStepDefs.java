@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ViewReservationsStepDefs {
+public class ViewUpcomingReservationsStepDefs {
 
     @LocalServerPort
     private int port;
@@ -88,15 +88,11 @@ public class ViewReservationsStepDefs {
 
     @And("the client has a reservation at that charger with status {string}")
     public void the_client_has_a_reservation_at_that_charger_with_status(String status) {
-        if (currentClient == null || currentCharger == null) {
-            throw new RuntimeException("Client or Charger not set up.");
-        }
-
         Reservation reservation = Reservation.builder()
                 .user(currentClient)
                 .charger(currentCharger)
-                .startTime(LocalDateTime.now().minusHours(status.equals("COMPLETED") ? 2 : -1))
-                .estimatedEndTime(LocalDateTime.now().minusHours(status.equals("COMPLETED") ? 1 : -2))
+                .startTime(LocalDateTime.now().minusHours(1))
+                .estimatedEndTime(LocalDateTime.now().minusHours(2))
                 .batteryLevelStart(20.0)
                 .estimatedKwh(30.0)
                 .estimatedCost(new BigDecimal("15.00"))
