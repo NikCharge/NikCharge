@@ -15,6 +15,8 @@ import tqs.backend.BackendApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import io.cucumber.java.Before;
+import tqs.backend.repository.ClientRepository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -32,6 +34,14 @@ public class UserRegistrationStepDefs {
 
         private Response response;
         private Map<String, String> registrationData;
+
+        @Autowired
+        private ClientRepository clientRepository;
+
+        @Before
+        public void setup() {
+                clientRepository.deleteAll();
+        }
 
         @Given("a user with email {string} exists in the system")
         public void aUserWithEmailExistsInTheSystem(String email) {

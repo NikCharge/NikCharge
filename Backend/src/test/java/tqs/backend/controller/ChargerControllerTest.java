@@ -134,7 +134,7 @@ class ChargerControllerTest {
     void getAllChargers_ReturnsList() throws Exception {
         List<Charger> chargers = List.of(
                 Charger.builder().id(1L).chargerType(ChargerType.AC_STANDARD).status(ChargerStatus.AVAILABLE).pricePerKwh(BigDecimal.valueOf(0.20)).build(),
-                Charger.builder().id(2L).chargerType(ChargerType.DC_FAST).status(ChargerStatus.IN_USE).pricePerKwh(BigDecimal.valueOf(0.40)).build()
+                Charger.builder().id(2L).chargerType(ChargerType.DC_FAST).status(ChargerStatus.AVAILABLE).pricePerKwh(BigDecimal.valueOf(0.40)).build()
         );
 
         when(chargerService.getAllChargers()).thenReturn(chargers);
