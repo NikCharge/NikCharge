@@ -1,0 +1,581 @@
+/* css/pages/EmployeeDashboard.css */
+
+.employee-dashboard-page {
+    min-height: 100vh;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fcfb;
+}
+
+.dashboard-content {
+    flex: 1;
+    width: 100%;
+    background: linear-gradient(135deg, #f8fcfb 0%, #e8f5f3 100%);
+    padding: 1rem 2rem 2rem 2rem;
+    padding-top: calc(1rem + 80px); /* Reduced top padding for closer header */
+}
+
+/* Dashboard Header */
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 2rem; /* Reduced margin for closer positioning */
+    padding: 1rem 0; /* Reduced padding */
+}
+
+.dashboard-header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #1db690;
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.dashboard-header h1::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 4px;
+    background-color: #1db690;
+    border-radius: 2px;
+}
+
+.dashboard-header p {
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+/* Dashboard Stats */
+.dashboard-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 2rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(29, 182, 144, 0.1);
+    min-width: 120px;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-5px);
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1db690;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+}
+
+/* Stations Container - Improved centering and spacing */
+.stations-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Increased min width */
+    gap: 2.5rem; /* Increased gap */
+    max-width: 1200px; /* Reduced max width for better centering */
+    margin: 0 auto;
+    padding: 0 2rem; /* Added horizontal padding */
+}
+
+/* Station Card */
+.station-card {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.station-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #1db690, #19a683);
+}
+
+.station-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 35px rgba(29, 182, 144, 0.15);
+    border-color: #1db690;
+}
+
+.station-card:active {
+    transform: translateY(-4px);
+}
+
+/* Station Card Header */
+.station-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.station-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #1db690, #19a683);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 10px rgba(29, 182, 144, 0.3);
+}
+
+.station-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.station-status.online {
+    background-color: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: currentColor;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Station Info */
+.station-info {
+    margin-bottom: 1.5rem;
+}
+
+.station-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1db690;
+    margin-bottom: 0.8rem;
+}
+
+.station-location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.station-coordinates {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.station-coordinates span {
+    background-color: #f8fcfb;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+}
+
+/* Station Footer */
+.station-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+}
+
+.station-metric {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #1db690;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 20px;
+    max-width: 800px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 2rem 1rem 2rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-header h2 {
+    color: #1db690;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.close-button {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #666;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.close-button:hover {
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+.station-details {
+    background-color: #f8fcfb;
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.station-details p {
+    margin: 0.5rem 0;
+    color: #666;
+}
+
+.modal-body h3 {
+    color: #333;
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #1db690;
+    padding-bottom: 0.5rem;
+}
+
+.chargers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.charger-card {
+    background: white;
+    border: 1px solid #e5e5e5;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.charger-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.charger-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.charger-id {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.charger-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.charger-details {
+    margin-bottom: 1.5rem;
+}
+
+.charger-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.3rem 0;
+}
+
+.info-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.info-value {
+    font-weight: 500;
+    color: #333;
+}
+
+.charger-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.delete-button {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.delete-button:hover {
+    background-color: #dc2626;
+}
+
+.empty-chargers {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+/* Loading State */
+.station-card.loading {
+    cursor: default;
+    background: linear-gradient(90deg, #f8fcfb 25%, #ffffff 50%, #f8fcfb 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.loading-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    gap: 1rem;
+    color: #666;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f0f0f0;
+    border-top: 3px solid #1db690;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error State */
+.station-card.error {
+    cursor: default;
+    border-color: #ef4444;
+    background-color: #fef2f2;
+}
+
+.station-card.error::before {
+    background: #ef4444;
+}
+
+.error-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 150px;
+    gap: 1rem;
+    text-align: center;
+}
+
+.error-message {
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.retry-button {
+    padding: 0.5rem 1.5rem;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.retry-button:hover {
+    background-color: #dc2626;
+}
+
+/* Empty State */
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #666;
+}
+
+.empty-state svg {
+    color: #1db690;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .dashboard-stats {
+        gap: 2rem;
+    }
+
+    .stations-container {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-content {
+        padding: 1rem;
+        padding-top: calc(1rem + 80px);
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .dashboard-stats {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .stat-item {
+        min-width: 200px;
+    }
+
+    .stations-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0;
+    }
+
+    .modal-overlay {
+        padding: 1rem;
+    }
+
+    .modal-content {
+        max-height: 95vh;
+    }
+
+    .modal-header,
+    .modal-body {
+        padding: 1.5rem;
+    }
+
+    .chargers-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-header h1 {
+        font-size: 2rem;
+    }
+
+    .station-card {
+        padding: 1rem;
+    }
+
+    .station-coordinates {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .modal-header,
+    .modal-body {
+        padding: 1rem;
+    }
+}
