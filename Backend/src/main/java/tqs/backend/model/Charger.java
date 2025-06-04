@@ -17,7 +17,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = "id")
 public class Charger {
 
     @Id
@@ -39,4 +38,21 @@ public class Charger {
     private LocalDateTime lastMaintenance;
     private String maintenanceNote;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Charger charger = (Charger) o;
+        return java.util.Objects.equals(station, charger.station) &&
+               chargerType == charger.chargerType &&
+               status == charger.status &&
+               java.util.Objects.equals(pricePerKwh, charger.pricePerKwh) &&
+               java.util.Objects.equals(lastMaintenance, charger.lastMaintenance) &&
+               java.util.Objects.equals(maintenanceNote, charger.maintenanceNote);
+    }
+
+    @Override
+    public int hashCode() {
+        return java.util.Objects.hash(station, chargerType, status, pricePerKwh, lastMaintenance, maintenanceNote);
+    }
 }
