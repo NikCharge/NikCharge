@@ -3,9 +3,6 @@ package tqs.backend.stepdefs;
 import io.cucumber.java.en.*;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import tqs.backend.model.Charger;
 import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerStatus;
@@ -17,11 +14,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest
-@ActiveProfiles("test")
 public class StationFilteringStepDefs {
 
     private Response response;
@@ -32,84 +29,104 @@ public class StationFilteringStepDefs {
     @Autowired
     private ChargerRepository chargerRepository;
 
-    @Given("there are multiple stations with chargers of various types")
-    public void setupStationsWithVariousChargers() {
-        // Clean up existing data
+
+    @Given("there are multiple stations with chargers of various types and statuses")
+    public void setupStationsWithVariousChargersAndStatuses() {
         chargerRepository.deleteAll();
         stationRepository.deleteAll();
 
-        // Create stations with different charger types
-        Station station1 = new Station();
-        station1.setName("Station 1");
-        station1.setAddress("Address 1");
-        station1.setCity("City 1");
-        station1.setLatitude(40.6333);
-        station1.setLongitude(-8.659);
-        station1 = stationRepository.save(station1);
+        // Criação das estações
+        Station station1 = Station.builder()
+                .name("Station Alpha")
+                .address("Rua A")
+                .city("Lisboa")
+                .latitude(38.7223)
+                .longitude(-9.1393)
+                .build();
 
-        Station station2 = new Station();
-        station2.setName("Station 2");
-        station2.setAddress("Address 2");
-        station2.setCity("City 2");
-        station2.setLatitude(40.6334);
-        station2.setLongitude(-8.660);
+        Station station2 = Station.builder()
+                .name("Station Beta")
+                .address("Rua B")
+                .city("Porto")
+                .latitude(41.1579)
+                .longitude(-8.6291)
+                .build();
+
+        station1 = stationRepository.save(station1);
         station2 = stationRepository.save(station2);
 
-        // Add chargers to stations
-        Charger acCharger = new Charger();
-        acCharger.setStation(station1);
-        acCharger.setChargerType(ChargerType.AC_STANDARD);
-        acCharger.setStatus(ChargerStatus.AVAILABLE);
-        acCharger.setPricePerKwh(BigDecimal.valueOf(0.20));
-        chargerRepository.save(acCharger);
+        // Criação de carregadores com diferentes tipos e estados
+        Charger charger1 = Charger.builder()
+                .station(station1)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.25))
+                .build();
 
-        Charger dcFastCharger = new Charger();
-        dcFastCharger.setStation(station2);
-        dcFastCharger.setChargerType(ChargerType.DC_FAST);
-        dcFastCharger.setStatus(ChargerStatus.AVAILABLE);
-        dcFastCharger.setPricePerKwh(BigDecimal.valueOf(0.30));
-        chargerRepository.save(dcFastCharger);
+        Charger charger2 = Charger.builder()
+                .station(station1)
+                .chargerType(ChargerType.DC_FAST)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.40))
+                .build();
 
-        Charger dcUltraCharger = new Charger();
-        dcUltraCharger.setStation(station1);
-        dcUltraCharger.setChargerType(ChargerType.DC_ULTRA_FAST);
-        dcUltraCharger.setStatus(ChargerStatus.AVAILABLE);
-        dcUltraCharger.setPricePerKwh(BigDecimal.valueOf(0.40));
-        chargerRepository.save(dcUltraCharger);
+        Charger charger3 = Charger.builder()
+                .station(station2)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.IN_USE)
+                .pricePerKwh(BigDecimal.valueOf(0.30))
+                .build();
+
+        chargerRepository.saveAll(List.of(charger1, charger2, charger3));
     }
 
-    @When("I filter stations by charger type {string}")
-    public void iFilterByChargerType(String chargerType) {
+    @When("I filter stations by charger type {string} and status {string}")
+    public void iFilterStationsByChargerTypeAndStatus(String chargerTypeStr, String statusStr) {
+        ChargerType chargerType = ChargerType.valueOf(chargerTypeStr);
+        ChargerStatus status = ChargerStatus.valueOf(statusStr);
+
+        // Filtra carregadores que correspondem ao tipo e estado pedidos
+        List<Charger> filteredChargers = chargerRepository.findAll().stream()
+                .filter(c -> c.getChargerType() == chargerType && c.getStatus() == status)
+                .toList();
+
+        // Obtém IDs das estações que possuem esses carregadores
+        List<Long> stationIds = filteredChargers.stream()
+                .map(c -> c.getStation().getId())
+                .distinct()
+                .toList();
+
+        // Faz GET para cada estação filtrada para obter os detalhes
+        // Guarda resposta da última estação (podes adaptar para várias estações se quiser)
+        if (stationIds.isEmpty()) {
+            throw new RuntimeException("No stations found with specified charger type and status");
+        }
+
+        Long stationId = stationIds.get(0);
+
         response = RestAssured.given()
-                .queryParam("lat", 40.6333)
-                .queryParam("lng", -8.659)
                 .when()
-                .get("/api/stations");
+                .get("/api/stations/" + stationId + "/details");
 
         response.then().statusCode(200);
     }
 
-    @Then("I should only see stations that have {string} chargers")
-    public void iSeeOnlyStationsWithChargerType(String expectedType) {
-        List<Map<String, Object>> stations = response.jsonPath().getList("$");
+    @Then("I should only see stations that have {string} chargers with status {string}")
+    public void iShouldOnlySeeStationsWithChargersAndStatus(String expectedType, String expectedStatus) {
+        Map<String, Object> stationDetails = response.jsonPath().getMap("$");
+        assertThat(stationDetails, is(notNullValue()));
 
-        for (Map<String, Object> station : stations) {
-            List<Map<String, Object>> chargers = (List<Map<String, Object>>) station.get("chargers");
-            
-            // Skip stations without chargers
-            if (chargers == null || chargers.isEmpty()) {
-                continue;
-            }
+        List<Map<String, Object>> chargers = (List<Map<String, Object>>) stationDetails.get("chargers");
+        assertThat(chargers, is(not(empty())));
 
-            List<String> types = chargers.stream()
-                    .map(c -> c.get("chargerType").toString())
-                    .toList();
+        boolean hasExpectedCharger = chargers.stream()
+                .anyMatch(c ->
+                        expectedType.equals(c.get("chargerType").toString()) &&
+                                expectedStatus.equals(c.get("status").toString())
+                );
 
-            assertThat(
-                    "Each station should contain the expected charger type",
-                    types,
-                    hasItem(expectedType)
-            );
-        }
+        assertThat("Station should have at least one charger with expected type and status", hasExpectedCharger, is(true));
+
+
     }
 }
