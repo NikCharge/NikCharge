@@ -357,7 +357,7 @@ class ChargerControllerTest {
                 .maintenanceNote(null) // Note should be null when available
                 .build();
 
-        when(chargerService.updateChargerStatus(eq(chargerId), eq(ChargerStatus.AVAILABLE), eq(null)))
+        when(chargerService.updateChargerStatus(chargerId, ChargerStatus.AVAILABLE, null))
                 .thenReturn(updatedCharger);
 
         Map<String, String> requestBody = Map.of(

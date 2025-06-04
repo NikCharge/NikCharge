@@ -85,4 +85,57 @@ class ChargerTest {
         assertEquals(new BigDecimal("0.30"), charger.getPricePerKwh());
         assertEquals("Checking battery sync", charger.getMaintenanceNote());
     }
+
+    @Test
+    void testStationAssociation() {
+        Station station = new Station();
+        station.setId(1L);
+        station.setName("Test Station");
+
+        Charger charger = new Charger();
+        charger.setStation(station);
+
+        assertEquals(station, charger.getStation());
+    }
+
+    @Test
+    void testNullMaintenanceFields() {
+        Charger charger = new Charger();
+
+        charger.setLastMaintenance(null);
+        charger.setMaintenanceNote(null);
+
+        assertNull(charger.getLastMaintenance());
+        assertNull(charger.getMaintenanceNote());
+    }
+
+    @Test
+    void testDifferentEnumValues() {
+        Charger chargerAC = new Charger();
+        chargerAC.setChargerType(ChargerType.AC_STANDARD);
+        chargerAC.setStatus(ChargerStatus.IN_USE);
+
+        Charger chargerDC = new Charger();
+        chargerDC.setChargerType(ChargerType.DC_ULTRA_FAST);
+        chargerDC.setStatus(ChargerStatus.UNDER_MAINTENANCE);
+
+        assertEquals(ChargerType.AC_STANDARD, chargerAC.getChargerType());
+        assertEquals(ChargerStatus.IN_USE, chargerAC.getStatus());
+
+        assertEquals(ChargerType.DC_ULTRA_FAST, chargerDC.getChargerType());
+        assertEquals(ChargerStatus.UNDER_MAINTENANCE, chargerDC.getStatus());
+    }
+
+    @Test
+    void testBigDecimalPrecision() {
+        Charger charger = new Charger();
+        BigDecimal price1 = new BigDecimal("0.250");
+        BigDecimal price2 = new BigDecimal("0.25");
+
+        charger.setPricePerKwh(price1);
+
+        assertEquals(price1, charger.getPricePerKwh());
+        // BigDecimal equals considers scale, but for practical purposes, compare values
+        assertTrue(price1.compareTo(price2) == 0);
+    }
 }
