@@ -32,16 +32,25 @@ class ChargerServiceTest {
     private Charger charger3;
 
     private Station station1;
+    private Station station2;
 
     @BeforeEach
     void setUp() {
         station1 = new Station();
         station1.setId(1L);
-        station1.setName("Test Station");
-        station1.setCity("Test City");
-        station1.setAddress("Test Address");
+        station1.setName("Test Station 1");
+        station1.setCity("Test City 1");
+        station1.setAddress("Test Address 1");
         station1.setLatitude(BigDecimal.valueOf(40.123456).doubleValue());
         station1.setLongitude(BigDecimal.valueOf(-8.765432).doubleValue());
+
+        station2 = new Station();
+        station2.setId(2L);
+        station2.setName("Test Station 2");
+        station2.setCity("Test City 2");
+        station2.setAddress("Test Address 2");
+        station2.setLatitude(BigDecimal.valueOf(41.987654).doubleValue());
+        station2.setLongitude(BigDecimal.valueOf(-7.123456).doubleValue());
 
         charger1 = new Charger();
         charger1.setId(1L);
@@ -53,10 +62,16 @@ class ChargerServiceTest {
         charger2 = new Charger();
         charger2.setId(2L);
         charger2.setStatus(ChargerStatus.IN_USE);
+        charger2.setStation(station1);
+        charger2.setChargerType(tqs.backend.model.enums.ChargerType.DC_FAST);
+        charger2.setPricePerKwh(BigDecimal.valueOf(0.35));
 
         charger3 = new Charger();
         charger3.setId(3L);
         charger3.setStatus(ChargerStatus.UNDER_MAINTENANCE);
+        charger3.setStation(station2);
+        charger3.setChargerType(tqs.backend.model.enums.ChargerType.DC_ULTRA_FAST);
+        charger3.setPricePerKwh(BigDecimal.valueOf(0.45));
     }
 
     @Test
@@ -108,18 +123,6 @@ class ChargerServiceTest {
     void whenGetChargersByStatus_thenReturnFilteredChargers() {
         // Arrange
         List<Charger> availableChargerEntities = Arrays.asList(charger1);
-        
-        List<ChargerDTO> expectedAvailableChargers = availableChargerEntities.stream()
-            .map(charger -> ChargerDTO.builder()
-                .id(charger.getId())
-                .chargerType(charger.getChargerType())
-                .status(charger.getStatus())
-                .pricePerKwh(charger.getPricePerKwh())
-                .stationId(charger.getStation() != null ? charger.getStation().getId() : null)
-                .stationName(charger.getStation() != null ? charger.getStation().getName() : null)
-                .stationCity(charger.getStation() != null ? charger.getStation().getCity() : null)
-                .build())
-            .toList();
 
         when(chargerRepository.findByStatus(ChargerStatus.AVAILABLE))
                 .thenReturn(availableChargerEntities);
@@ -133,5 +136,48 @@ class ChargerServiceTest {
         assertThat(availableChargers.get(0).getStationId()).isEqualTo(station1.getId());
         assertThat(availableChargers.get(0).getStationName()).isEqualTo(station1.getName());
         assertThat(availableChargers.get(0).getStationCity()).isEqualTo(station1.getCity());
+    }
+
+    @Test
+    void whenCountByStatus_thenReturnCorrectCount() {
+        // Arrange
+        when(chargerRepository.countByStatus(ChargerStatus.AVAILABLE)).thenReturn(1L);
+        when(chargerRepository.countByStatus(ChargerStatus.IN_USE)).thenReturn(1L);
+        when(chargerRepository.countByStatus(ChargerStatus.UNDER_MAINTENANCE)).thenReturn(1L);
+        when(chargerRepository.countByStatus(ChargerStatus.MAINTENANCE)).thenReturn(0L); // Assuming MAINTENANCE status exists but no chargers have it
+
+        // Act & Assert
+        assertThat(chargerService.countByStatus(ChargerStatus.AVAILABLE)).isEqualTo(1L);
+        assertThat(chargerService.countByStatus(ChargerStatus.IN_USE)).isEqualTo(1L);
+        assertThat(chargerService.countByStatus(ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(1L);
+        assertThat(chargerService.countByStatus(ChargerStatus.MAINTENANCE)).isEqualTo(0L);
+    }
+
+    @Test
+    void whenCountByStationAndStatus_thenReturnCorrectCount() {
+        // Arrange
+        Long station1Id = station1.getId();
+        Long station2Id = station2.getId();
+
+        when(chargerRepository.countByStationIdAndStatus(station1Id, ChargerStatus.AVAILABLE)).thenReturn(1L);
+        when(chargerRepository.countByStationIdAndStatus(station1Id, ChargerStatus.IN_USE)).thenReturn(1L);
+        when(chargerRepository.countByStationIdAndStatus(station1Id, ChargerStatus.UNDER_MAINTENANCE)).thenReturn(0L);
+
+        when(chargerRepository.countByStationIdAndStatus(station2Id, ChargerStatus.AVAILABLE)).thenReturn(0L);
+        when(chargerRepository.countByStationIdAndStatus(station2Id, ChargerStatus.IN_USE)).thenReturn(0L);
+        when(chargerRepository.countByStationIdAndStatus(station2Id, ChargerStatus.UNDER_MAINTENANCE)).thenReturn(1L);
+
+        // Act & Assert
+        assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.AVAILABLE)).isEqualTo(1L);
+        assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.IN_USE)).isEqualTo(1L);
+        assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(0L);
+
+        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.AVAILABLE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.IN_USE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(1L);
+
+        // Test a station with no chargers
+        when(chargerRepository.countByStationIdAndStatus(3L, ChargerStatus.AVAILABLE)).thenReturn(0L);
+        assertThat(chargerService.countByStationAndStatus(3L, ChargerStatus.AVAILABLE)).isEqualTo(0L);
     }
 } 

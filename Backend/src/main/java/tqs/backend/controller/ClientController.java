@@ -24,6 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ClientController {
 
+    private static final String CLIENT_NOT_FOUND_MESSAGE = "Client not found";
+
     private final ClientService clientService;
     private final ClientRepository clientRepository;
     private final PasswordEncoder passwordEncoder;
@@ -85,7 +87,7 @@ public class ClientController {
     public ResponseEntity<Object> updateClient(@PathVariable String email, @RequestBody ClientResponse updateData) {
         Optional<Client> clientOpt = clientRepository.findByEmail(email);
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Client not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
         }
 
         Client client = clientOpt.get();
@@ -123,7 +125,7 @@ public class ClientController {
 
         Optional<Client> clientOpt = clientRepository.findById(id);
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Client not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
         }
 
         Client client = clientOpt.get();
@@ -141,7 +143,7 @@ public class ClientController {
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
         Optional<Client> clientOpt = clientRepository.findById(id);
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Client not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
         }
 
         Client client = clientOpt.get();

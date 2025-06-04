@@ -316,6 +316,20 @@ public class ChargerDashboardStepDefs {
             assertNotNull(charger.getPricePerKwh(), "Charger should have a price per kWh");
             assertTrue(charger.getPricePerKwh().compareTo(BigDecimal.ZERO) > 0, 
                     "Price per kWh should be greater than zero");
+            assertTrue(charger.getPricePerKwh().compareTo(BigDecimal.valueOf(1.0)) <= 0,
+                    "Price per kWh should not exceed 1.0");
+            
+            // Check if price is reasonable based on charger type
+            if (charger.getChargerType() == ChargerType.AC_STANDARD) {
+                assertTrue(charger.getPricePerKwh().compareTo(BigDecimal.valueOf(0.30)) <= 0,
+                        "AC Standard charger price should not exceed 0.30");
+            } else if (charger.getChargerType() == ChargerType.DC_FAST) {
+                assertTrue(charger.getPricePerKwh().compareTo(BigDecimal.valueOf(0.50)) <= 0,
+                        "DC Fast charger price should not exceed 0.50");
+            } else if (charger.getChargerType() == ChargerType.DC_ULTRA_FAST) {
+                assertTrue(charger.getPricePerKwh().compareTo(BigDecimal.valueOf(0.70)) <= 0,
+                        "DC Ultra Fast charger price should not exceed 0.70");
+            }
         });
     }
 } 
