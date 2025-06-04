@@ -65,14 +65,14 @@ public class StationIntegrationTest {
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
-        @Autowired
-        private StationRepository stationRepository;
+    @Autowired
+    private StationRepository stationRepository;
 
-        @Autowired
-        private ChargerRepository chargerRepository;
+    @Autowired
+    private ChargerRepository chargerRepository;
 
-        @Autowired
-        private DiscountRepository discountRepository;
+    @Autowired
+    private DiscountRepository discountRepository;
 
     // ---------- CREATE STATION TESTS ----------
 
@@ -154,8 +154,8 @@ public class StationIntegrationTest {
                 .body("name", equalTo("Unique"));
     }
 
-        @Test
-        void testGetStationDetails_ReturnsStationWithChargers() {
+    @Test
+    void testGetStationDetails_ReturnsStationWithChargers() {
         // Step 1: Create station via API
         var stationPayload = Map.of(
                 "name", "Station D",
@@ -197,12 +197,12 @@ public class StationIntegrationTest {
                 .body("chargers.size()", equalTo(2))
                 .body("chargers[0].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")))
                 .body("chargers[1].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")));
-        }
+    }
 
-        // ---------- DELETE STATION TESTS ----------
+    // ---------- DELETE STATION TESTS ----------
 
-        @Test
-        void testDeleteExistingStation_ReturnsNoContent() {
+    @Test
+    void testDeleteExistingStation_ReturnsNoContent() {
         // Criar estação para garantir que existe
         var payload = Map.of(
                 "name", "ToDelete",
@@ -227,10 +227,10 @@ public class StationIntegrationTest {
         given()
                 .when().get("/api/stations/{id}", stationId)
                 .then().statusCode(404);
-        }
+    }
 
-        @Test
-        void testDeleteNonExistingStation_ReturnsNotFound() {
+    @Test
+    void testDeleteNonExistingStation_ReturnsNotFound() {
         int nonExistingId = 99999;
 
         given()
@@ -238,10 +238,10 @@ public class StationIntegrationTest {
                 .then()
                 .statusCode(404)
                 .body("error", equalTo("Station not found"));
-        }
+    }
 
-        @Test
-        void testSearchStationsWithActiveDiscount_shouldIncludeDiscountTag() {
+    @Test
+    void testSearchStationsWithActiveDiscount_shouldIncludeDiscountTag() {
         // 1. Criar estação via API
         var stationPayload = Map.of(
                 "name", "Station With Discount",
@@ -302,6 +302,6 @@ public class StationIntegrationTest {
                 .body("size()", greaterThanOrEqualTo(1))
                 .body("[0].name", equalTo("Station With Discount"))
                 .body("[0].discountTag", equalTo("20% off"));
-        }
+    }
 
 }

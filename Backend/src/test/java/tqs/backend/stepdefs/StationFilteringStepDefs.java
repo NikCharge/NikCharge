@@ -37,45 +37,45 @@ public class StationFilteringStepDefs {
 
         // Criação das estações
         Station station1 = Station.builder()
-            .name("Station Alpha")
-            .address("Rua A")
-            .city("Lisboa")
-            .latitude(38.7223)
-            .longitude(-9.1393)
-            .build();
+                .name("Station Alpha")
+                .address("Rua A")
+                .city("Lisboa")
+                .latitude(38.7223)
+                .longitude(-9.1393)
+                .build();
 
         Station station2 = Station.builder()
-            .name("Station Beta")
-            .address("Rua B")
-            .city("Porto")
-            .latitude(41.1579)
-            .longitude(-8.6291)
-            .build();
+                .name("Station Beta")
+                .address("Rua B")
+                .city("Porto")
+                .latitude(41.1579)
+                .longitude(-8.6291)
+                .build();
 
         station1 = stationRepository.save(station1);
         station2 = stationRepository.save(station2);
 
         // Criação de carregadores com diferentes tipos e estados
         Charger charger1 = Charger.builder()
-            .station(station1)
-            .chargerType(ChargerType.AC_STANDARD)
-            .status(ChargerStatus.AVAILABLE)
-            .pricePerKwh(BigDecimal.valueOf(0.25))
-            .build();
+                .station(station1)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.25))
+                .build();
 
         Charger charger2 = Charger.builder()
-            .station(station1)
-            .chargerType(ChargerType.DC_FAST)
-            .status(ChargerStatus.AVAILABLE)
-            .pricePerKwh(BigDecimal.valueOf(0.40))
-            .build();
+                .station(station1)
+                .chargerType(ChargerType.DC_FAST)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.40))
+                .build();
 
         Charger charger3 = Charger.builder()
-            .station(station2)
-            .chargerType(ChargerType.AC_STANDARD)
-            .status(ChargerStatus.IN_USE)
-            .pricePerKwh(BigDecimal.valueOf(0.30))
-            .build();
+                .station(station2)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.IN_USE)
+                .pricePerKwh(BigDecimal.valueOf(0.30))
+                .build();
 
         chargerRepository.saveAll(List.of(charger1, charger2, charger3));
     }
@@ -119,11 +119,11 @@ public class StationFilteringStepDefs {
         List<Map<String, Object>> chargers = (List<Map<String, Object>>) stationDetails.get("chargers");
         assertThat(chargers, is(not(empty())));
 
-      boolean hasExpectedCharger = chargers.stream()
-            .anyMatch(c -> 
-                expectedType.equals(c.get("chargerType").toString()) &&
-                expectedStatus.equals(c.get("status").toString())
-            );
+        boolean hasExpectedCharger = chargers.stream()
+                .anyMatch(c ->
+                        expectedType.equals(c.get("chargerType").toString()) &&
+                                expectedStatus.equals(c.get("status").toString())
+                );
 
         assertThat("Station should have at least one charger with expected type and status", hasExpectedCharger, is(true));
 
