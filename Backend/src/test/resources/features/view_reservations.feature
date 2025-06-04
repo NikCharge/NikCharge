@@ -4,6 +4,7 @@ Feature: View Reservations
   I want to view my reservations
   So that I can see my upcoming and past charging sessions
 
+  @SCRUM-173 @active
   Scenario: View active reservations when logged in
     Given a client is registered
     And a station with name "Station Active" and address "Address Active" and city "City Active" exists
@@ -15,6 +16,7 @@ Feature: View Reservations
     And one reservation should have status "ACTIVE"
     And the "ACTIVE" reservation should include station name "Station Active" and address "Address Active" and city "City Active"
 
+  @SCRUM-174 @completed
   Scenario: View completed reservations when logged in
     Given a client is registered
     And a station with name "Station Completed" and address "Address Completed" and city "City Completed" exists
