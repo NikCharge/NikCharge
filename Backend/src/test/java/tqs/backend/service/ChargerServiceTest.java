@@ -113,10 +113,40 @@ class ChargerServiceTest {
         when(chargerRepository.save(any(Charger.class))).thenReturn(charger1);
 
         charger1.setStatus(ChargerStatus.IN_USE);
-        Charger updated = chargerService.updateChargerStatus(1L, ChargerStatus.IN_USE);
+        Charger updated = chargerService.updateChargerStatus(1L, ChargerStatus.IN_USE, null);
 
         assertThat(updated).isNotNull();
         assertThat(updated.getStatus()).isEqualTo(ChargerStatus.IN_USE);
+    }
+
+    @Test
+    void whenUpdateChargerStatusToUnderMaintenance_thenReturnUpdatedChargerWithNote() {
+        Long chargerId = 1L;
+        String maintenanceNote = "Broken screen";
+        Charger initialCharger = new Charger();
+        initialCharger.setId(chargerId);
+        initialCharger.setStatus(ChargerStatus.AVAILABLE);
+        initialCharger.setChargerType(tqs.backend.model.enums.ChargerType.AC_STANDARD);
+        initialCharger.setPricePerKwh(BigDecimal.valueOf(0.25));
+
+        when(chargerRepository.findById(chargerId)).thenReturn(Optional.of(initialCharger));
+        when(chargerRepository.save(any(Charger.class))).thenAnswer(invocation -> {
+            Charger savedCharger = invocation.getArgument(0);
+            // Simulate repository saving the updated charger
+            assertThat(savedCharger.getId()).isEqualTo(chargerId);
+            assertThat(savedCharger.getStatus()).isEqualTo(ChargerStatus.UNDER_MAINTENANCE);
+            assertThat(savedCharger.getMaintenanceNote()).isEqualTo(maintenanceNote);
+            return savedCharger;
+        });
+
+        Charger updated = chargerService.updateChargerStatus(chargerId, ChargerStatus.UNDER_MAINTENANCE, maintenanceNote);
+
+        assertThat(updated).isNotNull();
+        assertThat(updated.getId()).isEqualTo(chargerId);
+        assertThat(updated.getStatus()).isEqualTo(ChargerStatus.UNDER_MAINTENANCE);
+        assertThat(updated.getMaintenanceNote()).isEqualTo(maintenanceNote);
+        verify(chargerRepository, times(1)).findById(chargerId);
+        verify(chargerRepository, times(1)).save(any(Charger.class));
     }
 
     @Test
