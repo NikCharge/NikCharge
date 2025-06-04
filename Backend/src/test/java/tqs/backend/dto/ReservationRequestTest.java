@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ReservationRequestTest {
+class ReservationRequestTest {
 
     @Test
     void reservationRequest_shouldStoreFieldsCorrectly() {

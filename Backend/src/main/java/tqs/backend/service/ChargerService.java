@@ -10,7 +10,6 @@ import tqs.backend.dto.ChargerDTO;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
