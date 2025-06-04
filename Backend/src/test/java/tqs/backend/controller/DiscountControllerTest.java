@@ -15,6 +15,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+
+import tqs.backend.dto.DiscountRequestDTO;
 import tqs.backend.model.Discount;
 import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerType;
@@ -110,8 +112,9 @@ class DiscountControllerTest {
                 .build();
 
         when(discountService.createDiscount(
-                eq(1L), eq(ChargerType.AC_STANDARD), eq(2), eq(9), eq(18), eq(20.0), eq(true)))
-                .thenReturn(savedDiscount);
+        1L, ChargerType.AC_STANDARD, 2, 9, 18, 20.0, true))
+        .thenReturn(savedDiscount);
+
 
         mockMvc.perform(post("/api/discounts")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -204,7 +207,7 @@ class DiscountControllerTest {
                 .andExpect(jsonPath("$.message").value("Discount not found"));    }
 
     @Test
-    void updateDiscount_ValidRequest_ReturnsUpdated() throws Exception {
+        void updateDiscount_ValidRequest_ReturnsUpdated() throws Exception {
         reset(discountService);
         Long discountId = 1L;
         Map<String, Object> requestBody = Map.of(
@@ -230,8 +233,10 @@ class DiscountControllerTest {
                 .active(false)
                 .build();
 
-        when(discountService.updateDiscount(
-                eq(discountId), eq(1L), eq(ChargerType.DC_FAST), eq(4), eq(10), eq(19), eq(30.0), eq(false)))
+        
+
+        when(discountService.updateDiscount(eq(discountId), any(DiscountRequestDTO.class)))
+
                 .thenReturn(updatedDiscount);
 
         mockMvc.perform(put("/api/discounts/{id}", discountId)
@@ -242,31 +247,35 @@ class DiscountControllerTest {
                 .andExpect(jsonPath("$.chargerType").value("DC_FAST"))
                 .andExpect(jsonPath("$.discountPercent").value(30.0))
                 .andExpect(jsonPath("$.active").value(false));
-    }
+        }
+
 
     @Test
-    void updateDiscount_NotFound_ReturnsNotFound() throws Exception {
-        Long discountId = 999L;
+void updateDiscount_NotFound_ReturnsNotFound() throws Exception {
+    Long discountId = 999L;
 
-        Map<String, Object> requestBody = Map.of(
-                "stationId", 1L,
-                "chargerType", "DC_FAST",
-                "dayOfWeek", 4,
-                "startHour", 10,
-                "endHour", 19,
-                "discountPercent", 30.0,
-                "active", false
-        );
+    Map<String, Object> requestBody = Map.of(
+            "stationId", 1L,
+            "chargerType", "DC_FAST",
+            "dayOfWeek", 4,
+            "startHour", 10,
+            "endHour", 19,
+            "discountPercent", 30.0,
+            "active", false
+    );
 
-        when(discountService.updateDiscount(anyLong(), anyLong(), any(), anyInt(), anyInt(), anyInt(), anyDouble(), anyBoolean()))
-                .thenThrow(new IllegalArgumentException("Discount not found"));
+    
 
-        mockMvc.perform(put("/api/discounts/{id}", discountId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(requestBody)))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Discount not found"));    
-    }
+when(discountService.updateDiscount(eq(discountId), any(DiscountRequestDTO.class)))
+            .thenThrow(new IllegalArgumentException("Discount not found"));
+
+    mockMvc.perform(put("/api/discounts/{id}", discountId)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requestBody)))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.message").value("Discount not found"));    
+}
+
 
     @Test
     void deleteDiscount_ExistingId_ReturnsNoContent() throws Exception {

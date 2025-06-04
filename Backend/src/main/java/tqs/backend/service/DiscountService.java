@@ -2,6 +2,8 @@ package tqs.backend.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import tqs.backend.dto.DiscountRequestDTO;
 import tqs.backend.model.Discount;
 import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerType;
@@ -49,24 +51,23 @@ public class DiscountService {
         return discountRepository.findAll();
     }
 
-    public Discount updateDiscount(Long id, Long stationId, ChargerType chargerType, Integer dayOfWeek, Integer startHour,
-                                   Integer endHour, Double discountPercent, Boolean active) {
-        Discount discount = discountRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Discount not found"));
+    public Discount updateDiscount(Long id, DiscountRequestDTO dto) {
+    Discount discount = discountRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Discount not found"));
 
-        Station station = stationRepository.findById(stationId)
-                .orElseThrow(() -> new IllegalArgumentException("Station not found"));
+    Station station = stationRepository.findById(dto.getStationId())
+            .orElseThrow(() -> new IllegalArgumentException("Station not found"));
 
-        discount.setStation(station);
-        discount.setChargerType(chargerType);
-        discount.setDayOfWeek(dayOfWeek);
-        discount.setStartHour(startHour);
-        discount.setEndHour(endHour);
-        discount.setDiscountPercent(discountPercent);
-        discount.setActive(active);
+    discount.setStation(station);
+    discount.setChargerType(dto.getChargerType());
+    discount.setDayOfWeek(dto.getDayOfWeek());
+    discount.setStartHour(dto.getStartHour());
+    discount.setEndHour(dto.getEndHour());
+    discount.setDiscountPercent(dto.getDiscountPercent());
+    discount.setActive(dto.getActive());
 
-        return discountRepository.save(discount);
-    }
+    return discountRepository.save(discount);
+}
 
     public void deleteDiscount(Long id) {
         if (!discountRepository.existsById(id)) {

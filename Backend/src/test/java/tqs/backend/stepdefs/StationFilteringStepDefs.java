@@ -89,7 +89,7 @@ public class StationFilteringStepDefs {
         // Filtra carregadores que correspondem ao tipo e estado pedidos
         List<Charger> filteredChargers = chargerRepository.findAll().stream()
                 .filter(c -> c.getChargerType() == chargerType && c.getStatus() == status)
-                .collect(Collectors.toList());
+                .toList();
 
         // Obtém IDs das estações que possuem esses carregadores
         List<Long> stationIds = filteredChargers.stream()

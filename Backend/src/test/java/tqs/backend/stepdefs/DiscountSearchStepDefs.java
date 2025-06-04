@@ -161,7 +161,7 @@ public void noDiscountsAreActive(int id) {
                             selectedHour <= endHour &&
                             selectedChargerType.equals(chargerType);
                 })
-                .collect(Collectors.toList());
+                .toList();
 
         // Serializa a lista filtrada para JSON
         ObjectMapper mapper = new ObjectMapper();
