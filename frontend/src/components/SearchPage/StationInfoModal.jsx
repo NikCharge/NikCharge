@@ -22,8 +22,14 @@ const StationInfoModal = ({ station, onClose }) => {
     }[selectedCharger?.chargerType] || 0;
 
     const validBattery = Number.isInteger(battery) && battery >= 0 && battery < 100;
-    const energyNeeded = useMemo(() => ((100 - battery) * 0.4).toFixed(2), [battery]);
-    const durationMin = useMemo(() => powerKw ? Math.ceil((energyNeeded / powerKw) * 60) : 0, [energyNeeded, powerKw]);
+    const energyNeeded = useMemo(() => {
+        const batt = parseInt(battery, 10);
+        if (isNaN(batt)) {
+            return "0.00";
+        }
+        return ((100 - batt) * 0.4).toFixed(2);
+    }, [battery]);
+    const durationMin = useMemo(() => powerKw ? Math.ceil((parseFloat(energyNeeded) / powerKw) * 60) : 0, [energyNeeded, powerKw]);
     const cost = useMemo(() => selectedCharger ? (energyNeeded * selectedCharger.pricePerKwh).toFixed(2) : "0.00", [energyNeeded, selectedCharger]);
 
     const now = new Date();

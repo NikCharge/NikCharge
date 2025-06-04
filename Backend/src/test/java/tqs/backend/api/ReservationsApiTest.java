@@ -264,4 +264,45 @@ class ReservationsApiTest {
                 .statusCode(400)
                 .body("error", equalTo("Charger is already reserved for the requested time."));
     }
+
+    @Test
+    @DisplayName("GET /api/reservations/client/{clientId} - Get reservations by client ID")
+    void getReservationsByClientId_ReturnsListOfReservationResponses() {
+        // Create a test reservation first
+        var reservation = Map.of(
+                "clientId", testClient.getId(),
+                "chargerId", testCharger.getId(),
+                "startTime", startTime.toString(),
+                "estimatedEndTime", endTime.toString(),
+                "batteryLevelStart", 20.0,
+                "estimatedKwh", 30.0,
+                "estimatedCost", 7.50
+        );
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when()
+                .post("/api/reservations")
+                .then()
+                .statusCode(201);
+
+        // Now get reservations by client ID
+        given()
+                .when()
+                .get("/api/reservations/client/{clientId}", testClient.getId())
+                .then()
+                .statusCode(200)
+                .body("$", not(empty()))
+                .body("size()", equalTo(1))
+                .body("[0].status", equalTo("ACTIVE"))
+                .body("[0].batteryLevelStart", equalTo(20.0f))
+                .body("[0].estimatedKwh", equalTo(30.0f))
+                .body("[0].charger.id", equalTo(testCharger.getId().intValue()))
+                .body("[0].charger.chargerType", equalTo(testCharger.getChargerType().toString()))
+                .body("[0].charger.station.id", equalTo(testCharger.getStation().getId().intValue()))
+                .body("[0].charger.station.name", equalTo(testCharger.getStation().getName()))
+                .body("[0].charger.station.address", equalTo(testCharger.getStation().getAddress()))
+                .body("[0].charger.station.city", equalTo(testCharger.getStation().getCity()));
+    }
 } 

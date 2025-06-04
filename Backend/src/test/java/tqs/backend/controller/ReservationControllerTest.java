@@ -22,6 +22,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import tqs.backend.dto.ReservationResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -98,6 +99,55 @@ class ReservationControllerTest {
     }
 
     @Test
+    void whenGetReservationsByClientId_thenReturnListOfReservationResponses() throws Exception {
+        // Create sample DTOs
+        ReservationResponse.StationDto stationDto = new ReservationResponse.StationDto(
+                1L,
+                "Test Station",
+                "123 Test St",
+                "Test City"
+        );
+
+        ReservationResponse.ChargerDto chargerDto = new ReservationResponse.ChargerDto(
+                101L,
+                "DC_FAST",
+                stationDto
+        );
+
+        LocalDateTime localStartTime = LocalDateTime.now();
+        LocalDateTime localEndTime = localStartTime.plusHours(1);
+        BigDecimal estimatedCost = new BigDecimal("10.50");
+
+        ReservationResponse reservationResponse = new ReservationResponse(
+                201L,
+                chargerDto,
+                localStartTime,
+                localEndTime,
+                80.0,
+                50.0,
+                estimatedCost,
+                ReservationStatus.ACTIVE
+        );
+
+        List<ReservationResponse> reservationResponses = Arrays.asList(reservationResponse);
+
+        when(reservationService.getReservationsByClientId(1L)).thenReturn(reservationResponses);
+
+        mockMvc.perform(get("/api/reservations/client/{clientId}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id", is(201)))
+                .andExpect(jsonPath("$[0].status", is("ACTIVE")))
+                .andExpect(jsonPath("$[0].charger.id", is(101)))
+                .andExpect(jsonPath("$[0].charger.chargerType", is("DC_FAST")))
+                .andExpect(jsonPath("$[0].charger.station.id", is(1)))
+                .andExpect(jsonPath("$[0].charger.station.name", is("Test Station")))
+                .andExpect(jsonPath("$[0].charger.station.address", is("123 Test St")))
+                .andExpect(jsonPath("$[0].charger.station.city", is("Test City")));
+
+        verify(reservationService, times(1)).getReservationsByClientId(1L);
+    }
+
+    @Test
     void whenGetAllReservations_thenReturnReservationsList() throws Exception {
         List<Reservation> reservations = Arrays.asList(reservation);
         when(reservationService.getAllReservations()).thenReturn(reservations);
@@ -168,6 +218,18 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.error", is("Charger is already reserved for the requested time.")));
 
         verify(reservationService, times(1)).createReservation(any(ReservationRequest.class));
+    }
+
+    @Test
+    void whenGetReservationsByClientIdThrowsException_thenReturnBadRequest() throws Exception {
+        when(reservationService.getReservationsByClientId(1L))
+                .thenThrow(new RuntimeException("Client not found"));
+
+        mockMvc.perform(get("/api/reservations/client/{clientId}", 1L))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Client not found")));
+
+        verify(reservationService, times(1)).getReservationsByClientId(1L);
     }
 
     @TestConfiguration
