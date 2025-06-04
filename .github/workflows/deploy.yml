@@ -18,11 +18,11 @@ jobs:
 
       - name: Prepare .env file
         run: |
-          if [ -f .env ]; then
-            echo ".env file found, continuing."
-          else
-            echo ".env file not found!" && exit 1
-          fi
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "NODE_ENV=development" >> .env
+          echo "VITE_API_URL=/api" >> .env
+
 
       - name: Configure Nginx for deployment
         run: |
