@@ -231,4 +231,43 @@ public class ChargerIntegrationTest {
                 .body("[0].id", equalTo(availableCharger.getId().intValue()))
                 .body("[0].status", equalTo("AVAILABLE"));
     }
+
+    // ---------- MARK CHARGER AVAILABLE ----------
+
+    @Test
+    void testMarkChargerAvailable_ExistingCharger_ReturnsOk() {
+        Station station = createStation();
+        Charger charger = Charger.builder()
+                .station(station)
+                .chargerType(ChargerType.DC_FAST)
+                .status(ChargerStatus.UNDER_MAINTENANCE)
+                .pricePerKwh(BigDecimal.valueOf(0.50))
+                .maintenanceNote("Needs repair")
+                .build();
+        charger = chargerRepository.save(charger);
+
+        Map<String, String> payload = Map.of(
+                "status", "AVAILABLE"
+        );
+
+        given().contentType(ContentType.JSON)
+                .body(payload)
+                .when().put("/api/chargers/{id}/status", charger.getId())
+                .then().statusCode(200)
+                .body("id", equalTo(charger.getId().intValue()))
+                .body("status", equalTo("AVAILABLE"))
+                .body("maintenanceNote", nullValue()); // Assert maintenance note is null
+
+        // Verify the status was actually updated in the database and note cleared
+        Charger updatedCharger = chargerRepository.findById(charger.getId()).orElse(null);
+        assertThat(updatedCharger).isNotNull();
+        assertThat(updatedCharger.getStatus()).isEqualTo(ChargerStatus.AVAILABLE);
+        assertThat(updatedCharger.getMaintenanceNote()).isNull();
+
+        // Verify it's now included in available chargers
+        given().when().get("/api/chargers/available")
+                .then().statusCode(200)
+                .body("size()", greaterThanOrEqualTo(1))
+                .body("find { it.id == " + charger.getId() + " }.status", equalTo("AVAILABLE"));
+    }
 }
