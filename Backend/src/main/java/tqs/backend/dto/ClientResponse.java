@@ -18,14 +18,14 @@ public class ClientResponse {
     private Double fullRangeKm;
     private List<Reservation> reservations;
     private UserRole role;
-
-    // Constructor without role for backward compatibility
-    @Builder(builderMethodName = "simpleBuilder")
-    public ClientResponse(String email, String name, Double batteryCapacityKwh, Double fullRangeKm) {
-        this.email = email;
-        this.name = name;
-        this.batteryCapacityKwh = batteryCapacityKwh;
-        this.fullRangeKm = fullRangeKm;
-        this.role = UserRole.CLIENT; // Default role
-    }
+//
+//    // Constructor without role for backward compatibility
+//    @Builder(builderMethodName = "simpleBuilder")
+//    public ClientResponse(String email, String name, Double batteryCapacityKwh, Double fullRangeKm) {
+//        this.email = email;
+//        this.name = name;
+//        this.batteryCapacityKwh = batteryCapacityKwh;
+//        this.fullRangeKm = fullRangeKm;
+//        this.role = UserRole.CLIENT; // Default role
+//    }
 }
