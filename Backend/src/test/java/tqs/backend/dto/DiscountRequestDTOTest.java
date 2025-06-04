@@ -1,5 +1,4 @@
 package tqs.backend.dto;
-
 import org.junit.jupiter.api.Test;
 import tqs.backend.model.enums.ChargerType;
 
@@ -29,6 +28,27 @@ class DiscountRequestDTOTest {
     }
 
     @Test
+    void testGettersAndSettersWithNull() {
+        DiscountRequestDTO dto = new DiscountRequestDTO();
+
+        dto.setStationId(null);
+        dto.setChargerType(null);
+        dto.setDayOfWeek(null);
+        dto.setStartHour(null);
+        dto.setEndHour(null);
+        dto.setDiscountPercent(null);
+        dto.setActive(null);
+
+        assertNull(dto.getStationId());
+        assertNull(dto.getChargerType());
+        assertNull(dto.getDayOfWeek());
+        assertNull(dto.getStartHour());
+        assertNull(dto.getEndHour());
+        assertNull(dto.getDiscountPercent());
+        assertNull(dto.getActive());
+    }
+
+    @Test
     void testToStringEqualsHashCode() {
         DiscountRequestDTO dto1 = new DiscountRequestDTO();
         dto1.setStationId(1L);
@@ -51,5 +71,25 @@ class DiscountRequestDTOTest {
         assertEquals(dto1, dto2);
         assertEquals(dto1.hashCode(), dto2.hashCode());
         assertNotNull(dto1.toString());
+    }
+
+    @Test
+    void testEqualsWithVariousCases() {
+        DiscountRequestDTO dto = new DiscountRequestDTO();
+        dto.setStationId(1L);
+
+        assertEquals(dto, dto);               // objeto igual a si mesmo
+        assertNotEquals(dto, null);           // comparar com null
+        assertNotEquals(dto, new Object());   // comparar com objeto diferente
+
+        DiscountRequestDTO dtoDiff = new DiscountRequestDTO();
+        dtoDiff.setStationId(2L);
+        assertNotEquals(dto, dtoDiff);        // diferentes campos
+    }
+
+    @Test
+    void testDefaultConstructor() {
+        DiscountRequestDTO dto = new DiscountRequestDTO();
+        assertNotNull(dto);
     }
 }

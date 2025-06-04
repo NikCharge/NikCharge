@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class StationServiceTest {
@@ -139,23 +140,52 @@ class StationServiceTest {
     }
 
     @Test
-    void searchStationsWithDiscount_ReturnsMappedStations() {
-        var station = Station.builder().id(1L).name("Discounted").latitude(1.1).longitude(2.2).build();
-        when(stationRepository.findAll()).thenReturn(List.of(station));
+void searchStationsWithDiscount_ReturnsMappedStations() {
+    // Station com desconto
+    var discountedStation = Station.builder()
+            .id(1L)
+            .name("Discounted")
+            .latitude(1.1)
+            .longitude(2.2)
+            .build();
 
-        var discount = Discount.builder()
-                .station(station)
-                .discountPercent(20.0)
-                .chargerType(ChargerType.AC_STANDARD)
-                .build();
+    // Station sem desconto
+    var noDiscountStation = Station.builder()
+            .id(2L)
+            .name("NoDiscount")
+            .latitude(3.3)
+            .longitude(4.4)
+            .build();
 
-        when(discountRepository.findByActiveTrueAndDayOfWeekAndStartHourLessThanEqualAndEndHourGreaterThanEqualAndChargerType(
-                1, 15, 15, ChargerType.AC_STANDARD)).thenReturn(List.of(discount));
+    when(stationRepository.findAll()).thenReturn(List.of(discountedStation, noDiscountStation));
 
-        List<Map<String, Object>> result = stationService.searchStationsWithDiscount(1, 15, ChargerType.AC_STANDARD);
+    var discount = Discount.builder()
+            .station(discountedStation)
+            .discountPercent(20.0)
+            .chargerType(ChargerType.AC_STANDARD)
+            .build();
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0)).containsEntry("name", "Discounted")
-                                 .containsEntry("discountTag", "20% off");
-    }
+    when(discountRepository.findByActiveTrueAndDayOfWeekAndStartHourLessThanEqualAndEndHourGreaterThanEqualAndChargerType(
+            1, 15, 15, ChargerType.AC_STANDARD))
+        .thenReturn(List.of(discount));
+
+    List<Map<String, Object>> result = stationService.searchStationsWithDiscount(1, 15, ChargerType.AC_STANDARD);
+
+    // Verifica que o station com desconto tem a tag de desconto
+    assertThat(result).hasSize(2);
+
+    Map<String, Object> discountedMap = result.stream()
+            .filter(m -> m.get("id").equals(1L))
+            .findFirst().orElseThrow();
+    assertThat(discountedMap).containsEntry("name", "Discounted")
+                             .containsEntry("discountTag", "20% off");
+
+    // Verifica que o station sem desconto NÃO tem a tag de desconto
+    Map<String, Object> noDiscountMap = result.stream()
+            .filter(m -> m.get("id").equals(2L))
+            .findFirst().orElseThrow();
+    assertThat(noDiscountMap).containsEntry("name", "NoDiscount")
+                             .doesNotContainKey("discountTag");
+}
+    
 }
