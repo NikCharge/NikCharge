@@ -24,6 +24,7 @@ const Login = () => {
             });
 
             const clientData = {
+                id: response.data.id,
                 email: response.data.email,
                 name: response.data.name,
                 batteryCapacityKwh: response.data.batteryCapacityKwh,
