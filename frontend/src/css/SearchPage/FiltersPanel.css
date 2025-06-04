@@ -133,3 +133,26 @@
         font-size: 0.8rem;
     }
 }
+
+/* not mind the dark mode */
+#location-input{
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    color: black;
+}
+
+/* not mind the dark mode */
+#search-button, #gps-button{
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    color: #6b7280;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#search-button:hover, #gps-button:hover {
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
