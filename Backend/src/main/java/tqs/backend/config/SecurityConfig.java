@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import java.util.List;
 
@@ -23,7 +25,10 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.POST, "/api/clients").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/clients/login").permitAll()
                         .requestMatchers(
                                 "/api/clients/**",
                                 "/api/stations/**",
@@ -33,9 +38,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/api/discounts/**",
                                 "/v3/api-docs/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**"
+                                "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 );
 

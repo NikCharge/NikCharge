@@ -54,10 +54,11 @@ public class ChargerService {
         return chargerRepository.save(charger);
     }
 
-    public Charger updateChargerStatus(Long id, ChargerStatus status) {
+    public Charger updateChargerStatus(Long id, ChargerStatus status, String maintenanceNote) {
         Charger charger = chargerRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Charger not found"));
         charger.setStatus(status);
+        charger.setMaintenanceNote(maintenanceNote);
         return chargerRepository.save(charger);
     }
 
