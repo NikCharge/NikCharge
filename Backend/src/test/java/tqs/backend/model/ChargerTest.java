@@ -138,4 +138,117 @@ class ChargerTest {
         // BigDecimal equals considers scale, but for practical purposes, compare values
         assertTrue(price1.compareTo(price2) == 0);
     }
+
+    @Test
+    void testEqualsAndHashCode_SameObjects() {
+        Station station = new Station();
+        Charger charger = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+
+        assertEquals(charger, charger);
+        assertEquals(charger.hashCode(), charger.hashCode());
+    }
+
+    @Test
+    void testEqualsAndHashCode_EqualContentDifferentIds() {
+        Station station = new Station();
+        station.setId(100L);
+
+        Charger charger1 = new Charger(
+                1L,
+                station,
+                ChargerType.DC_FAST,
+                ChargerStatus.AVAILABLE,
+                new BigDecimal("0.25"),
+                LocalDateTime.of(2024, 12, 1, 10, 0),
+                "Note A"
+        );
+
+        Charger charger2 = new Charger(
+                2L,
+                station,
+                ChargerType.DC_FAST,
+                ChargerStatus.AVAILABLE,
+                new BigDecimal("0.25"),
+                LocalDateTime.of(2024, 12, 1, 10, 0),
+                "Note A"
+        );
+
+        assertEquals(charger1, charger2);
+        assertEquals(charger1.hashCode(), charger2.hashCode());
+    }
+
+    @Test
+    void testEqualsAndHashCode_DifferentStation() {
+        Station station1 = new Station();
+        station1.setId(1L);
+        Station station2 = new Station();
+        station2.setId(2L);
+
+        Charger charger1 = new Charger(1L, station1, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+        Charger charger2 = new Charger(1L, station2, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+
+        assertNotEquals(charger1, charger2);
+    }
+
+    @Test
+    void testEqualsAndHashCode_DifferentChargerType() {
+        Station station = new Station();
+        Charger charger1 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+        Charger charger2 = new Charger(1L, station, ChargerType.AC_STANDARD, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+
+        assertNotEquals(charger1, charger2);
+    }
+
+    @Test
+    void testEqualsAndHashCode_DifferentStatus() {
+        Station station = new Station();
+        Charger charger1 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+        Charger charger2 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.IN_USE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+
+        assertNotEquals(charger1, charger2);
+    }
+
+    @Test
+    void testEqualsAndHashCode_DifferentPricePerKwh() {
+        Station station = new Station();
+        Charger charger1 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+        Charger charger2 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.30"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+
+        assertNotEquals(charger1, charger2);
+    }
+
+    @Test
+    void testEqualsAndHashCode_DifferentLastMaintenance() {
+        Station station = new Station();
+        Charger charger1 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+        Charger charger2 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 2, 10, 0), "Note A");
+
+        assertNotEquals(charger1, charger2);
+    }
+
+    @Test
+    void testEqualsAndHashCode_DifferentMaintenanceNote() {
+        Station station = new Station();
+        Charger charger1 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+        Charger charger2 = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note B");
+
+        assertNotEquals(charger1, charger2);
+    }
+
+    @Test
+    void testEqualsAndHashCode_AgainstNull() {
+        Station station = new Station();
+        Charger charger = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+
+        assertFalse(charger.equals(null));
+    }
+
+    @Test
+    void testEqualsAndHashCode_AgainstDifferentClass() {
+        Station station = new Station();
+        Charger charger = new Charger(1L, station, ChargerType.DC_FAST, ChargerStatus.AVAILABLE, new BigDecimal("0.25"), LocalDateTime.of(2024, 12, 1, 10, 0), "Note A");
+        Object differentObject = new Object();
+
+        assertFalse(charger.equals(differentObject));
+    }
 }
