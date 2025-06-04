@@ -7,8 +7,8 @@ import tqs.backend.model.enums.UserRole;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class ClientResponse {
     private Long id;
@@ -20,6 +20,7 @@ public class ClientResponse {
     private UserRole role;
 
     // Constructor without role for backward compatibility
+    @Builder(builderMethodName = "simpleBuilder")
     public ClientResponse(String email, String name, Double batteryCapacityKwh, Double fullRangeKm) {
         this.email = email;
         this.name = name;
