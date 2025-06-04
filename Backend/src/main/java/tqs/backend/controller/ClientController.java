@@ -13,6 +13,7 @@ import tqs.backend.dto.ClientResponse;
 import tqs.backend.model.Client;
 import tqs.backend.repository.ClientRepository;
 import tqs.backend.service.ClientService;
+import tqs.backend.model.enums.UserRole;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,8 @@ import java.util.Optional;
 @RequestMapping("/api/clients")
 @RequiredArgsConstructor
 public class ClientController {
+
+    private static final String CLIENT_NOT_FOUND_MESSAGE = "Client not found";
 
     private final ClientService clientService;
     private final ClientRepository clientRepository;
@@ -45,7 +48,8 @@ public class ClientController {
                     client.getName(),
                     client.getBatteryCapacityKwh(),
                     client.getFullRangeKm(),
-                    client.getReservations()
+                    client.getReservations(),
+                    client.getRole()
             );
 
             return ResponseEntity.ok(response);
@@ -78,7 +82,9 @@ public class ClientController {
                     client.getName(),
                     client.getBatteryCapacityKwh(),
                     client.getFullRangeKm(),
-                    client.getReservations()
+                    client.getReservations(),
+                    client.getFullRangeKm(),
+                    client.getRole()
             );
             return ResponseEntity.ok(response);
         } else {
@@ -90,7 +96,7 @@ public class ClientController {
     public ResponseEntity<Object> updateClient(@PathVariable String email, @RequestBody ClientResponse updateData) {
         Optional<Client> clientOpt = clientRepository.findByEmail(email);
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Client not found"));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
         }
 
         Client client = clientOpt.get();
@@ -98,6 +104,7 @@ public class ClientController {
         client.setEmail(updateData.getEmail());
         client.setBatteryCapacityKwh(updateData.getBatteryCapacityKwh());
         client.setFullRangeKm(updateData.getFullRangeKm());
+        client.setRole(updateData.getRole());
 
         clientRepository.save(client);
 
@@ -107,7 +114,62 @@ public class ClientController {
                 client.getName(),
                 client.getBatteryCapacityKwh(),
                 client.getFullRangeKm(),
-                client.getReservations()
+                client.getReservations(),
+                client.getFullRangeKm(),
+                client.getRole()
         ));
     }
+
+    @PutMapping("/changeRole/{id}")
+    public ResponseEntity<?> changeRole(@PathVariable Long id, @RequestBody Map<String, String> body) {
+        String newRoleStr = body.get("newRole");
+
+        if (newRoleStr == null || newRoleStr.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Missing 'newRole' in request body"));
+        }
+
+        UserRole newRole;
+        try {
+            newRole = UserRole.valueOf(newRoleStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid role: " + newRoleStr));
+        }
+
+        Optional<Client> clientOpt = clientRepository.findById(id);
+        if (clientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
+        }
+
+        Client client = clientOpt.get();
+        client.setRole(newRole);
+        clientRepository.save(client);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Role updated successfully",
+                "email", client.getEmail(),
+                "newRole", client.getRole().name()
+        ));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getClientById(@PathVariable Long id) {
+        Optional<Client> clientOpt = clientRepository.findById(id);
+        if (clientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
+        }
+
+        Client client = clientOpt.get();
+
+        Map<String, Object> clientData = new HashMap<>();
+        clientData.put("id", client.getId());
+        clientData.put("name", client.getName());
+        clientData.put("email", client.getEmail());
+        clientData.put("role", client.getRole());
+        clientData.put("batteryCapacityKwh", client.getBatteryCapacityKwh());
+        clientData.put("fullRangeKm", client.getFullRangeKm());
+
+        return ResponseEntity.ok(clientData);
+    }
+
+
 }

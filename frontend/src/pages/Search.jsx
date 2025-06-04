@@ -128,15 +128,15 @@ const Search = () => {
                 />
 
                 {viewMode === "map" ? (
-                    <MapDisplay 
-                        stations={filteredStations} 
-                        userLocation={userLocation} 
+                    <MapDisplay
+                        stations={filteredStations}
+                        userLocation={userLocation}
                         onStationClick={handleStationClick}
                     />
                 ) : (
-                    <StationList 
-                        stations={filteredStations} 
-                        onStationClick={handleStationClick} 
+                    <StationList
+                        stations={filteredStations}
+                        onStationClick={handleStationClick}
                     />
                 )}
 
