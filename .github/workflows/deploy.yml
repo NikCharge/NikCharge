@@ -26,8 +26,8 @@ jobs:
             echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
             echo "NODE_ENV=development" >> .env
             echo "VITE_API_URL=/api" >> .env
-            docker compose down --remove-orphans --volumes
-            docker system prune -af
-            docker volume prune -f
-            docker compose up -d --build --remove-orphans
+            docker-compose down --remove-orphans --volumes
+            docker-system prune -af
+            docker-volume prune -f
+            docker-compose up -d --build --remove-orphans
           EOF
