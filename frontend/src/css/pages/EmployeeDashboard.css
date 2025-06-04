@@ -92,7 +92,7 @@
 .stations-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); /* Increased min width */
-    gap: 2.5rem; /* Increased gap */
+    gap: 2rem; /* Increased gap */
     max-width: 1200px; /* Reduced max width for better centering */
     margin: 0 auto;
     padding: 0 2rem; /* Added horizontal padding */
@@ -103,7 +103,7 @@
     background: white;
     border-radius: 20px;
     padding: 1.5rem;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
     cursor: pointer;
     border: 2px solid transparent;
@@ -122,8 +122,8 @@
 }
 
 .station-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 35px rgba(29, 182, 144, 0.15);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(29, 182, 144, 0.1);
     border-color: #1db690;
 }
 
@@ -199,6 +199,11 @@
     gap: 0.5rem;
     color: #666;
     margin-bottom: 0.5rem;
+    flex-wrap: wrap; /* Allow items to wrap */
+}
+
+.station-location span, .station-coordinates span {
+    flex-shrink: 1;
 }
 
 .station-coordinates {
@@ -206,6 +211,7 @@
     gap: 1rem;
     font-size: 0.8rem;
     color: #999;
+    flex-wrap: wrap; /* Allow items to wrap */
 }
 
 .station-coordinates span {
