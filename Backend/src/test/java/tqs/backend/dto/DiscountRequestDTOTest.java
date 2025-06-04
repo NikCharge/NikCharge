@@ -54,4 +54,47 @@ class DiscountRequestDTOTest {
         DiscountRequestDTO dto = new DiscountRequestDTO();
         assertNotNull(dto);
     }
+
+    @Test
+void testAllArgsConstructor() {
+    DiscountRequestDTO dto = new DiscountRequestDTO(
+        1L,
+        ChargerType.AC_STANDARD,
+        1,
+        14,
+        18,
+        15.0,
+        true
+    );
+
+    assertEquals(1L, dto.getStationId());
+    assertEquals(ChargerType.AC_STANDARD, dto.getChargerType());
+    assertEquals(1, dto.getDayOfWeek());
+    assertEquals(14, dto.getStartHour());
+    assertEquals(18, dto.getEndHour());
+    assertEquals(15.0, dto.getDiscountPercent());
+    assertTrue(dto.getActive());
+}
+
+    @Test
+    void testBuilder() {
+        DiscountRequestDTO dto = DiscountRequestDTO.builder()
+            .stationId(1L)
+            .chargerType(ChargerType.AC_STANDARD)
+            .dayOfWeek(1)
+            .startHour(14)
+            .endHour(18)
+            .discountPercent(15.0)
+            .active(true)
+            .build();
+
+        assertEquals(1L, dto.getStationId());
+        assertEquals(ChargerType.AC_STANDARD, dto.getChargerType());
+        assertEquals(1, dto.getDayOfWeek());
+        assertEquals(14, dto.getStartHour());
+        assertEquals(18, dto.getEndHour());
+        assertEquals(15.0, dto.getDiscountPercent());
+        assertTrue(dto.getActive());
+    }
+
 }
