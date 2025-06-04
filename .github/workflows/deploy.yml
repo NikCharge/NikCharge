@@ -10,16 +10,11 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted  # ALTERADO: usar o runner no teu PC
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
 
       - name: Run deploy on remote server
         run: |
