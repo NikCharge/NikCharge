@@ -6,64 +6,76 @@ import tqs.backend.model.enums.ReservationStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
-public class ReservationResponseTest {
+class ReservationResponseTest {
 
     @Test
-    void testReservationResponseDto() {
-        // Create StationDto
-        ReservationResponse.StationDto stationDto = new ReservationResponse.StationDto(
-                1L,
-                "Test Station",
-                "123 Test St",
-                "Test City"
-        );
+    void testReservationResponseGettersAndSetters() {
+        ReservationResponse response = new ReservationResponse();
 
-        // Create ChargerDto
-        ReservationResponse.ChargerDto chargerDto = new ReservationResponse.ChargerDto(
-                101L,
-                "DC_FAST",
-                stationDto
-        );
-
-        // Create ReservationResponse
+        Long id = 1L;
+        ReservationResponse.ChargerDto charger = new ReservationResponse.ChargerDto();
         LocalDateTime startTime = LocalDateTime.now();
-        LocalDateTime endTime = startTime.plusHours(1);
-        BigDecimal estimatedCost = new BigDecimal("10.50");
+        LocalDateTime estimatedEndTime = startTime.plusHours(1);
+        Double batteryLevelStart = 20.0;
+        Double estimatedKwh = 30.0;
+        BigDecimal estimatedCost = new BigDecimal("15.00");
+        ReservationStatus status = ReservationStatus.ACTIVE;
 
-        ReservationResponse reservationResponse = new ReservationResponse(
-                201L,
-                chargerDto,
-                startTime,
-                endTime,
-                80.0,
-                50.0,
-                estimatedCost,
-                ReservationStatus.ACTIVE
-        );
+        response.setId(id);
+        response.setCharger(charger);
+        response.setStartTime(startTime);
+        response.setEstimatedEndTime(estimatedEndTime);
+        response.setBatteryLevelStart(batteryLevelStart);
+        response.setEstimatedKwh(estimatedKwh);
+        response.setEstimatedCost(estimatedCost);
+        response.setStatus(status);
 
-        // Verify ReservationResponse fields
-        assertNotNull(reservationResponse);
-        assertEquals(201L, reservationResponse.getId());
-        assertEquals(startTime, reservationResponse.getStartTime());
-        assertEquals(endTime, reservationResponse.getEstimatedEndTime());
-        assertEquals(80.0, reservationResponse.getBatteryLevelStart());
-        assertEquals(50.0, reservationResponse.getEstimatedKwh());
-        assertEquals(estimatedCost, reservationResponse.getEstimatedCost());
-        assertEquals(ReservationStatus.ACTIVE, reservationResponse.getStatus());
+        assertThat(response.getId()).isEqualTo(id);
+        assertThat(response.getCharger()).isEqualTo(charger);
+        assertThat(response.getStartTime()).isEqualTo(startTime);
+        assertThat(response.getEstimatedEndTime()).isEqualTo(estimatedEndTime);
+        assertThat(response.getBatteryLevelStart()).isEqualTo(batteryLevelStart);
+        assertThat(response.getEstimatedKwh()).isEqualTo(estimatedKwh);
+        assertThat(response.getEstimatedCost()).isEqualTo(estimatedCost);
+        assertThat(response.getStatus()).isEqualTo(status);
+    }
 
-        // Verify ChargerDto fields within ReservationResponse
-        assertNotNull(reservationResponse.getCharger());
-        assertEquals(101L, reservationResponse.getCharger().getId());
-        assertEquals("DC_FAST", reservationResponse.getCharger().getChargerType());
+    @Test
+    void testChargerDtoGettersAndSetters() {
+        ReservationResponse.ChargerDto chargerDto = new ReservationResponse.ChargerDto();
 
-        // Verify StationDto fields within ChargerDto
-        assertNotNull(reservationResponse.getCharger().getStation());
-        assertEquals(1L, reservationResponse.getCharger().getStation().getId());
-        assertEquals("Test Station", reservationResponse.getCharger().getStation().getName());
-        assertEquals("123 Test St", reservationResponse.getCharger().getStation().getAddress());
-        assertEquals("Test City", reservationResponse.getCharger().getStation().getCity());
+        Long id = 101L;
+        String chargerType = "DC_FAST";
+        ReservationResponse.StationDto station = new ReservationResponse.StationDto();
+
+        chargerDto.setId(id);
+        chargerDto.setChargerType(chargerType);
+        chargerDto.setStation(station);
+
+        assertThat(chargerDto.getId()).isEqualTo(id);
+        assertThat(chargerDto.getChargerType()).isEqualTo(chargerType);
+        assertThat(chargerDto.getStation()).isEqualTo(station);
+    }
+
+    @Test
+    void testStationDtoGettersAndSetters() {
+        ReservationResponse.StationDto stationDto = new ReservationResponse.StationDto();
+
+        Long id = 1L;
+        String name = "Test Station";
+        String address = "123 Test St";
+        String city = "Test City";
+
+        stationDto.setId(id);
+        stationDto.setName(name);
+        stationDto.setAddress(address);
+        stationDto.setCity(city);
+
+        assertThat(stationDto.getId()).isEqualTo(id);
+        assertThat(stationDto.getName()).isEqualTo(name);
+        assertThat(stationDto.getAddress()).isEqualTo(address);
+        assertThat(stationDto.getCity()).isEqualTo(city);
     }
 } 

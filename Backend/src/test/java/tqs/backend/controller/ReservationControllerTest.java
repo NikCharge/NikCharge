@@ -114,15 +114,15 @@ class ReservationControllerTest {
                 stationDto
         );
 
-        LocalDateTime startTime = LocalDateTime.now();
-        LocalDateTime endTime = startTime.plusHours(1);
+        LocalDateTime localStartTime = LocalDateTime.now();
+        LocalDateTime localEndTime = localStartTime.plusHours(1);
         BigDecimal estimatedCost = new BigDecimal("10.50");
 
         ReservationResponse reservationResponse = new ReservationResponse(
                 201L,
                 chargerDto,
-                startTime,
-                endTime,
+                localStartTime,
+                localEndTime,
                 80.0,
                 50.0,
                 estimatedCost,
