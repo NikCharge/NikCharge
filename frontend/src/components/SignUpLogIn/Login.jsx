@@ -32,6 +32,7 @@ const Login = () => {
             };
 
             localStorage.setItem("client", JSON.stringify(clientData));
+            localStorage.setItem("role", clientData.role);
             setMessage("Login successful!");
             setMessageType("success");
 
