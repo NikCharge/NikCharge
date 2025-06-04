@@ -58,23 +58,15 @@ public class DiscountController {
 
     // UPDATE
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody DiscountRequestDTO dto, HttpServletRequest request) {
-        try {
-            Discount updatedDiscount = discountService.updateDiscount(
-                    id,
-                    dto.getStationId(),
-                    dto.getChargerType(),
-                    dto.getDayOfWeek(),
-                    dto.getStartHour(),
-                    dto.getEndHour(),
-                    dto.getDiscountPercent(),
-                    dto.getActive()
-            );
-            return ResponseEntity.ok(updatedDiscount);
-        } catch (IllegalArgumentException e) {
-            return buildNotFoundResponse(e.getMessage(), request.getRequestURI());
-        }
+public ResponseEntity<?> update(@PathVariable Long id, @RequestBody DiscountRequestDTO dto, HttpServletRequest request) {
+    try {
+        Discount updatedDiscount = discountService.updateDiscount(id, dto);
+        return ResponseEntity.ok(updatedDiscount);
+    } catch (IllegalArgumentException e) {
+        return buildNotFoundResponse(e.getMessage(), request.getRequestURI());
     }
+}
+
 
     // DELETE
     @DeleteMapping("/{id}")
