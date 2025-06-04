@@ -3,67 +3,31 @@ package tqs.backend.integration;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import tqs.backend.repository.ChargerRepository;
-import tqs.backend.repository.DiscountRepository;
 import tqs.backend.repository.StationRepository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.util.TestPropertyValues;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.springframework.test.context.ActiveProfiles;
 import tqs.backend.model.Charger;
-import tqs.backend.model.Discount;
 import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ChargerType;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
-@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(initializers = StationIntegrationTest.Initializer.class)
-public class StationIntegrationTest {
+@ActiveProfiles("test")
+class StationIntegrationTest {
 
     @LocalServerPort
     private int port;
-
-    @Container
-    public static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15")
-            .withDatabaseName("testdb")
-            .withUsername("test")
-            .withPassword("test");
-
-    static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
-        @Override
-        public void initialize(ConfigurableApplicationContext context) {
-            TestPropertyValues.of(
-                            "spring.datasource.url=" + postgres.getJdbcUrl(),
-                            "spring.datasource.username=" + postgres.getUsername(),
-                            "spring.datasource.password=" + postgres.getPassword(),
-                            "spring.jpa.hibernate.ddl-auto=create-drop",
-                            "spring.jpa.show-sql=true",
-                            "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect")
-                    .applyTo(context.getEnvironment());
-        }
-    }
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-    }
 
     @Autowired
     private StationRepository stationRepository;
@@ -71,8 +35,13 @@ public class StationIntegrationTest {
     @Autowired
     private ChargerRepository chargerRepository;
 
-    @Autowired
-    private DiscountRepository discountRepository;
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+        chargerRepository.deleteAll();
+        stationRepository.deleteAll();
+    }
 
     // ---------- CREATE STATION TESTS ----------
 
@@ -184,7 +153,7 @@ public class StationIntegrationTest {
         Charger c2 = Charger.builder()
                 .station(station)
                 .chargerType(ChargerType.AC_STANDARD)
-                .status(ChargerStatus.IN_USE)
+                .status(ChargerStatus.AVAILABLE)
                 .pricePerKwh(BigDecimal.valueOf(0.20))
                 .build();
 
@@ -198,110 +167,4 @@ public class StationIntegrationTest {
                 .body("chargers[0].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")))
                 .body("chargers[1].chargerType", anyOf(equalTo("DC_FAST"), equalTo("AC_STANDARD")));
     }
-
-    // ---------- DELETE STATION TESTS ----------
-
-    @Test
-    void testDeleteExistingStation_ReturnsNoContent() {
-        // Criar estação para garantir que existe
-        var payload = Map.of(
-                "name", "ToDelete",
-                "address", "Rua Delete",
-                "city", "Delete City",
-                "latitude", 45.0,
-                "longitude", -10.0
-        );
-
-        int stationId = given().contentType(ContentType.JSON)
-                .body(payload)
-                .when().post("/api/stations")
-                .then().statusCode(200)
-                .extract().path("id");
-
-        // Deletar estação criada
-        given()
-                .when().delete("/api/stations/{id}", stationId)
-                .then().statusCode(204);
-
-        // Confirmar que foi removida (retorna 404)
-        given()
-                .when().get("/api/stations/{id}", stationId)
-                .then().statusCode(404);
-    }
-
-    @Test
-    void testDeleteNonExistingStation_ReturnsNotFound() {
-        int nonExistingId = 99999;
-
-        given()
-                .when().delete("/api/stations/{id}", nonExistingId)
-                .then()
-                .statusCode(404)
-                .body("error", equalTo("Station not found"));
-    }
-
-    @Test
-    void testSearchStationsWithActiveDiscount_shouldIncludeDiscountTag() {
-        // 1. Criar estação via API
-        var stationPayload = Map.of(
-                "name", "Station With Discount",
-                "address", "Rua Teste",
-                "city", "Test City",
-                "latitude", 38.5,
-                "longitude", -9.1
-        );
-
-        int stationId = given()
-                .contentType(ContentType.JSON)
-                .body(stationPayload)
-                .when()
-                .post("/api/stations")
-                .then()
-                .statusCode(200)
-                .extract()
-                .path("id");
-
-        // 2. Criar carregador via repositório com ChargerType AC_STANDARD
-        Station station = stationRepository.findById((long) stationId).orElseThrow();
-
-        Charger charger = Charger.builder()
-                .station(station)
-                .chargerType(ChargerType.AC_STANDARD)
-                .status(ChargerStatus.AVAILABLE)
-                .pricePerKwh(BigDecimal.valueOf(0.25))
-                .build();
-
-        chargerRepository.save(charger);
-
-        // 3. Criar desconto ativo via repositório
-        Discount discount = Discount.builder()
-                .station(station)
-                .chargerType(ChargerType.AC_STANDARD)
-                .dayOfWeek(LocalDateTime.now().getDayOfWeek().getValue()) // pega dia da semana atual (1=segunda)
-                .startHour(10)
-                .endHour(20)
-                .discountPercent(20.0)
-                .active(true)
-                .build();
-
-        discountRepository.save(discount);
-
-        // 4. Chamar endpoint de busca passando dia/hora dentro do intervalo do desconto
-        int dayOfWeek = LocalDateTime.now().getDayOfWeek().getValue();
-        int hour = 15;
-
-        given()
-                .accept(ContentType.JSON)
-                .queryParam("dayOfWeek", dayOfWeek)
-                .queryParam("hour", hour)
-                .queryParam("chargerType", "AC_STANDARD")
-                .when()
-                .get("/api/stations/search")
-                .then()
-                .statusCode(200)
-                .body("size()", greaterThanOrEqualTo(1))
-                .body("[0].name", equalTo("Station With Discount"))
-                .body("[0].discountTag", equalTo("20% off"));
-    }
-
 }

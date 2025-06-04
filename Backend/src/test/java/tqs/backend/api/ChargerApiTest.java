@@ -90,7 +90,7 @@ class ChargerApiTest {
         var charger = Map.of(
                 "stationId", stationId,
                 "chargerType", "DC_FAST",
-                "status", "IN_USE",
+                "status", "AVAILABLE",
                 "pricePerKwh", 0.40
         );
 

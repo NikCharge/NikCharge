@@ -24,20 +24,20 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(
-                            "/api/clients/**",
-                            "/api/stations/**",
-                            "/api/stations/*/details",  
-                            "/api/stations/search",         
-                            "/api/chargers/**",
-                            "/api/discounts/**",
-                            "/api/discounts",
-                           "/swagger-ui/**",
-                            "/v3/api-docs/**",
-                            "/swagger-ui.html"
+                        .requestMatchers(
+                                "/api/clients/**",
+                                "/api/stations/**",
+                                "/api/stations/*/details",
+                                "/api/chargers/**",
+                                "/api/reservations/**",
+                                "/swagger-ui/**",
+                                "/api/discounts/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**"
                         ).permitAll()
-
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated()
+                );
 
         return http.build();
     }

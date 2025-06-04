@@ -111,7 +111,7 @@ public class ChargerIntegrationTest {
         Charger c2 = Charger.builder()
                 .station(station)
                 .chargerType(ChargerType.DC_FAST)
-                .status(ChargerStatus.IN_USE)
+                .status(ChargerStatus.AVAILABLE)
                 .pricePerKwh(BigDecimal.valueOf(0.40))
                 .build();
 

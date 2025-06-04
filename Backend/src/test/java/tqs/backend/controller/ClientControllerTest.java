@@ -24,6 +24,7 @@ import tqs.backend.model.enums.UserRole;
 import tqs.backend.repository.ClientRepository;
 import tqs.backend.service.ClientService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -93,7 +94,7 @@ class ClientControllerTest {
     @Test
     void validSignUp_shouldReturnOk() throws Exception {
         SignUpRequest request = new SignUpRequest("John Doe", "john@example.com", "password123", 50.0, 300.0);
-        Client client = new Client(null, "John Doe", "john@example.com", "hashed", UserRole.CLIENT, 50.0, 300.0);
+        Client client = new Client(null, "John Doe", "john@example.com", "hashed", UserRole.CLIENT, 50.0, 300.0, new ArrayList<>());
 
         when(clientService.signUp(any(SignUpRequest.class))).thenReturn(client);
 
@@ -279,16 +280,24 @@ class ClientControllerTest {
         when(clientRepository.findByEmail(existingEmail)).thenReturn(Optional.of(client));
         when(clientRepository.save(any(Client.class))).thenReturn(client);
 
-        ClientResponse updatedData = new ClientResponse("new@example.com", "New Name", 60.0, 350.0);
+        ClientResponse updatedData = ClientResponse.builder()
+            .id(1L)
+            .email("email@example.com")
+            .name("Name")
+            .batteryCapacityKwh(50.0)
+            .fullRangeKm(300.0)
+            .reservations(new ArrayList<>())
+            .role(UserRole.CLIENT)
+            .build();
 
         mockMvc.perform(put("/api/clients/{email}", existingEmail)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedData)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("new@example.com"))
-                .andExpect(jsonPath("$.name").value("New Name"))
-                .andExpect(jsonPath("$.batteryCapacityKwh").value(60.0))
-                .andExpect(jsonPath("$.fullRangeKm").value(350.0));
+                .andExpect(jsonPath("$.email").value("email@example.com"))
+                .andExpect(jsonPath("$.name").value("Name"))
+                .andExpect(jsonPath("$.batteryCapacityKwh").value(50.0))
+                .andExpect(jsonPath("$.fullRangeKm").value(300.0));
     }
 
     @Test
@@ -296,7 +305,15 @@ class ClientControllerTest {
         String email = "notfound@example.com";
         when(clientRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        ClientResponse updateData = new ClientResponse(email, "Name", 55.0, 310.0);
+        ClientResponse updateData = ClientResponse.builder()
+            .id(1L)
+            .email("email@example.com")
+            .name("Name")
+            .batteryCapacityKwh(50.0)
+            .fullRangeKm(300.0)
+            .reservations(new ArrayList<>())
+            .role(UserRole.CLIENT)
+            .build();
 
         mockMvc.perform(put("/api/clients/{email}", email)
                 .contentType(MediaType.APPLICATION_JSON)
