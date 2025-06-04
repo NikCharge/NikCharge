@@ -150,7 +150,7 @@ class ChargerServiceTest {
         assertThat(chargerService.countByStatus(ChargerStatus.AVAILABLE)).isEqualTo(1L);
         assertThat(chargerService.countByStatus(ChargerStatus.IN_USE)).isEqualTo(1L);
         assertThat(chargerService.countByStatus(ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(1L);
-        assertThat(chargerService.countByStatus(ChargerStatus.MAINTENANCE)).isEqualTo(0L);
+        assertThat(chargerService.countByStatus(ChargerStatus.MAINTENANCE)).isZero();
     }
 
     @Test
@@ -170,14 +170,14 @@ class ChargerServiceTest {
         // Act & Assert
         assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.AVAILABLE)).isEqualTo(1L);
         assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.IN_USE)).isEqualTo(1L);
-        assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.UNDER_MAINTENANCE)).isZero();
 
-        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.AVAILABLE)).isEqualTo(0L);
-        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.IN_USE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.AVAILABLE)).isZero();
+        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.IN_USE)).isZero();
         assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(1L);
 
         // Test a station with no chargers
         when(chargerRepository.countByStationIdAndStatus(3L, ChargerStatus.AVAILABLE)).thenReturn(0L);
-        assertThat(chargerService.countByStationAndStatus(3L, ChargerStatus.AVAILABLE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(3L, ChargerStatus.AVAILABLE)).isZero();
     }
 } 
