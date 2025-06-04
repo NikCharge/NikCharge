@@ -61,7 +61,7 @@ const Header = () => {
             <img src={logo} alt="NikCharge Logo" className="logo" />
 
             <nav className="nav">
-                <Link to="/" className="nav-link">Homeiiiiiiii</Link>
+                <Link to="/" className="nav-link">Home</Link>
                 <Link to="/about" className="nav-link">About</Link>
                 <Link to="/search" className="nav-link">Search</Link>
                 {client && (
