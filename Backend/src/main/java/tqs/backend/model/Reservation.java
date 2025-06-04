@@ -13,8 +13,6 @@ import com.fasterxml.jackson.annotation.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@ToString
 public class Reservation {
 
     @Id
