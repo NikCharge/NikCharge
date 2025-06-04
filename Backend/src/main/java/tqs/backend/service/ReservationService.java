@@ -11,9 +11,11 @@ import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.ReservationRepository;
 import tqs.backend.model.Client;
 import tqs.backend.repository.ClientRepository;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import tqs.backend.dto.ReservationResponse;
+import tqs.backend.dto.ReservationResponse.ChargerDto;
+import tqs.backend.dto.ReservationResponse.StationDto;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,45 @@ public class ReservationService {
 
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
+    }
+
+    public List<ReservationResponse> getReservationsByClientId(Long clientId) {
+        List<Reservation> reservations = reservationRepository.findByUserId(clientId);
+        return reservations.stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    private ReservationResponse convertToDto(Reservation reservation) {
+        StationDto stationDto = null;
+        if (reservation.getCharger() != null && reservation.getCharger().getStation() != null) {
+            stationDto = new StationDto(
+                    reservation.getCharger().getStation().getId(),
+                    reservation.getCharger().getStation().getName(),
+                    reservation.getCharger().getStation().getAddress(),
+                    reservation.getCharger().getStation().getCity()
+            );
+        }
+
+        ChargerDto chargerDto = null;
+        if (reservation.getCharger() != null) {
+            chargerDto = new ChargerDto(
+                    reservation.getCharger().getId(),
+                    reservation.getCharger().getChargerType() != null ? reservation.getCharger().getChargerType().toString() : null,
+                    stationDto
+            );
+        }
+
+        return new ReservationResponse(
+                reservation.getId(),
+                chargerDto,
+                reservation.getStartTime(),
+                reservation.getEstimatedEndTime(),
+                reservation.getBatteryLevelStart(),
+                reservation.getEstimatedKwh(),
+                reservation.getEstimatedCost(),
+                reservation.getStatus()
+        );
     }
 
     public boolean hasOverlappingReservation(Long chargerId, LocalDateTime startTime, LocalDateTime endTime) {

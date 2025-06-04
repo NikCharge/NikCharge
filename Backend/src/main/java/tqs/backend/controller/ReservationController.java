@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tqs.backend.dto.ReservationRequest;
+import tqs.backend.dto.ReservationResponse;
 import tqs.backend.model.Reservation;
 import tqs.backend.service.ReservationService;
 
@@ -26,6 +27,17 @@ public class ReservationController {
     @GetMapping
     public List<Reservation> getAllReservations() {
         return reservationService.getAllReservations();
+    }
+
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<?> getReservationsByClientId(@PathVariable Long clientId) {
+        try {
+            List<ReservationResponse> reservations = reservationService.getReservationsByClientId(clientId);
+            return new ResponseEntity<>(reservations, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            logger.error("Error fetching reservations for client {}: {}", clientId, e.getMessage());
+            return handleRuntimeException(e);
+        }
     }
 
     @PostMapping
