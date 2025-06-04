@@ -1,16 +1,28 @@
 package tqs.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import tqs.backend.model.enums.UserRole;
 
 @Data
+@NoArgsConstructor
 @AllArgsConstructor
 public class ClientResponse {
+    @JsonProperty("email")
     private String email;
+    
+    @JsonProperty("name")
     private String name;
+    
+    @JsonProperty("batteryCapacityKwh")
     private Double batteryCapacityKwh;
+    
+    @JsonProperty("fullRangeKm")
     private Double fullRangeKm;
+    
+    @JsonProperty("role")
     private UserRole role;
 
     // Constructor without role for backward compatibility
