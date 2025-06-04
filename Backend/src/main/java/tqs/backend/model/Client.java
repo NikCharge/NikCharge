@@ -26,6 +26,7 @@ public class Client {
     private String name;
 
     @Column(unique = true, nullable = false)
+    @EqualsAndHashCode.Include
     private String email;
 
     @Column(nullable = false)
