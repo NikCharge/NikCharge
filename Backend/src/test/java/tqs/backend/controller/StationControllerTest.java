@@ -227,7 +227,7 @@ class StationControllerTest {
                         .id(2L)
                         .station(station)
                         .chargerType(ChargerType.AC_STANDARD)
-                        .status(ChargerStatus.IN_USE)
+                        .status(ChargerStatus.AVAILABLE)
                         .pricePerKwh(BigDecimal.valueOf(0.20))
                         .build()
         );

@@ -1,13 +1,19 @@
 package tqs.backend.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
+import java.util.List;
+import tqs.backend.model.Reservation;
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ClientResponse {
+    private Long id;
     private String email;
     private String name;
     private Double batteryCapacityKwh;
     private Double fullRangeKm;
+    private List<Reservation> reservations;
 }

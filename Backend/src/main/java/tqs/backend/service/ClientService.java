@@ -7,6 +7,7 @@ import tqs.backend.model.Client;
 import tqs.backend.model.enums.UserRole;
 import tqs.backend.repository.ClientRepository;
 import tqs.backend.dto.SignUpRequest;
+import java.util.ArrayList;
 
 @Service
 public class ClientService {
@@ -32,7 +33,9 @@ public class ClientService {
         client.setBatteryCapacityKwh(request.getBatteryCapacityKwh());
         client.setFullRangeKm(request.getFullRangeKm());
         client.setRole(UserRole.CLIENT);
+        client.setReservations(new ArrayList<>());
 
         return clientRepository.save(client);
     }
+
 }
