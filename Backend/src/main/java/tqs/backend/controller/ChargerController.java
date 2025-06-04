@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import tqs.backend.dto.ChargerCreationRequest;
 import tqs.backend.model.Charger;
 import tqs.backend.service.ChargerService;
+import tqs.backend.model.enums.ChargerStatus;
 
 @RestController
 @RequestMapping("/api/chargers")
@@ -54,5 +55,29 @@ public class ChargerController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
         }
+    }
+
+    @GetMapping("/count/available/total")
+    public ResponseEntity<Long> countAvailableChargersTotal() {
+        long count = chargerService.countByStatus(ChargerStatus.AVAILABLE);
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/count/available/station/{stationId}")
+    public ResponseEntity<Long> countAvailableChargersByStation(@PathVariable Long stationId) {
+        long count = chargerService.countByStationAndStatus(stationId, ChargerStatus.AVAILABLE);
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/count/in_use/total")
+    public ResponseEntity<Long> countInUseChargersTotal() {
+        long count = chargerService.countByStatus(ChargerStatus.IN_USE);
+        return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/count/in_use/station/{stationId}")
+    public ResponseEntity<Long> countInUseChargersByStation(@PathVariable Long stationId) {
+        long count = chargerService.countByStationAndStatus(stationId, ChargerStatus.IN_USE);
+        return ResponseEntity.ok(count);
     }
 }

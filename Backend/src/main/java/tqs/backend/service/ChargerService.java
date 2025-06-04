@@ -62,4 +62,12 @@ public class ChargerService {
     public List<Charger> getChargersByStatus(ChargerStatus status) {
         return chargerRepository.findByStatus(status);
     }
+
+    public long countByStatus(ChargerStatus status) {
+        return chargerRepository.countByStatus(status);
+    }
+
+    public long countByStationAndStatus(Long stationId, ChargerStatus status) {
+        return chargerRepository.countByStationIdAndStatus(stationId, status);
+    }
 }
