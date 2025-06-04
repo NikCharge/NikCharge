@@ -191,6 +191,6 @@ public class ChargerMaintenanceStepDefs {
 
         Optional<Charger> updatedChargerOpt = chargerRepository.findById(testChargerId);
         assertThat(updatedChargerOpt).isPresent();
-        assertThat(updatedChargerOpt.get().getStatus()).isNotEqualTo(ChargerStatus.AVAILABLE);
+        assertThat(updatedChargerOpt.get().getStatus()).isEqualTo(ChargerStatus.UNDER_MAINTENANCE);
     }
 } 
