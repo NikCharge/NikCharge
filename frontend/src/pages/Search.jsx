@@ -161,6 +161,7 @@ const Search = () => {
                     <StationInfoModal
                         station={selectedStation}
                         onClose={() => setSelectedStation(null)}
+                        selectedDateTime={selectedDateTime}
                     />
                 )}
             </main>
