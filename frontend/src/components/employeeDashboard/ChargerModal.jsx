@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import '../../css/pages/EmployeeDashboard.css';
 
-const ChargerModal = ({ station, chargers, loading, onClose, onDeleteCharger }) => {
+const ChargerModal = ({ station, chargers, loading, onClose, onMarkUnderMaintenance, onMarkAvailable }) => {
     const [filterStatus, setFilterStatus] = useState('All'); // State for filter
 
     const getStatusColor = (status) => {
@@ -142,18 +142,26 @@ const ChargerModal = ({ station, chargers, loading, onClose, onDeleteCharger }) 
                                             <span className="info-value">€{charger.pricePerKwh}/kWh</span>
                                         </div>
                                     </div>
-                                    {/* Delete button */}
-                                    {/* Only show delete button if charger is available */}
-                                    {charger.status === 'AVAILABLE' && (
-                                        <div className="charger-actions">
+                                    <div className="charger-actions">
+                                        {/* Mark Under Maintenance button */}
+                                        {charger.status !== 'UNDER_MAINTENANCE' && (
                                             <button
-                                                className="delete-button"
-                                                onClick={() => onDeleteCharger(charger.id)}
+                                                className="maintenance-button"
+                                                onClick={() => onMarkUnderMaintenance(charger.id)}
                                             >
-                                                Delete
+                                                Mark Under Maintenance
                                             </button>
-                                        </div>
-                                    )}
+                                        )}
+                                        {/* Mark Available button */}
+                                        {charger.status === 'UNDER_MAINTENANCE' && (
+                                            <button
+                                                className="available-button"
+                                                onClick={() => onMarkAvailable(charger.id)}
+                                            >
+                                                Mark as Available
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                         </div>

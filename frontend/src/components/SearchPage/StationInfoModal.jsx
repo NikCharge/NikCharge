@@ -22,16 +22,33 @@ const StationInfoModal = ({ station, onClose }) => {
     }[selectedCharger?.chargerType] || 0;
 
     const validBattery = Number.isInteger(battery) && battery >= 0 && battery < 100;
-    const energyNeeded = useMemo(() => ((100 - battery) * 0.4).toFixed(2), [battery]);
-    const durationMin = useMemo(() => powerKw ? Math.ceil((energyNeeded / powerKw) * 60) : 0, [energyNeeded, powerKw]);
+    const energyNeeded = useMemo(() => {
+        const batt = parseInt(battery, 10);
+        if (isNaN(batt)) {
+            return "0.00";
+        }
+        return ((100 - batt) * 0.4).toFixed(2);
+    }, [battery]);
+    const durationMin = useMemo(() => powerKw ? Math.ceil((parseFloat(energyNeeded) / powerKw) * 60) : 0, [energyNeeded, powerKw]);
     const cost = useMemo(() => selectedCharger ? (energyNeeded * selectedCharger.pricePerKwh).toFixed(2) : "0.00", [energyNeeded, selectedCharger]);
 
     const now = new Date();
-    const startTime = now.toISOString();
-    const estimatedEndTime = new Date(now.getTime() + durationMin * 60000).toISOString();
-    const startTimeDisplay = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const endTimeDisplay = new Date(now.getTime() + durationMin * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const today = now.toLocaleDateString("en-GB", { day: '2-digit', month: 'short', year: 'numeric' });
+    // Format local time manually to avoid UTC conversion
+    const formatLocalDateTime = (date) => {
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
+        const day = date.getDate().toString().padStart(2, '0');
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    };
+    
+    const startTime = formatLocalDateTime(now);
+    const estimatedEndTime = formatLocalDateTime(new Date(now.getTime() + durationMin * 60000));
+
+    const startTimeDisplay = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const estimatedEndTimeDisplay = `${new Date(now.getTime() + durationMin * 60000).toLocaleDateString()} ${new Date(now.getTime() + durationMin * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 
     const handleBook = async () => {
         if (!selectedCharger || !validBattery) return;
@@ -129,9 +146,8 @@ const StationInfoModal = ({ station, onClose }) => {
 
                 {selectedCharger && validBattery && (
                     <>
-                        <p><strong>Date:</strong> {today}</p>
-                        <p><strong>Start time:</strong> {startTimeDisplay}</p>
-                        <p><strong>Expected end time:</strong> {endTimeDisplay}</p>
+                        <p><strong>Start Time:</strong> {startTimeDisplay}</p>
+                        <p><strong>Expected End Time:</strong> {estimatedEndTimeDisplay}</p>
                         <p><strong>Energy needed:</strong> {energyNeeded} kWh</p>
                         <p><strong>Duration:</strong> {durationMin} min</p>
                         <p><strong>Cost:</strong> {cost}€</p>

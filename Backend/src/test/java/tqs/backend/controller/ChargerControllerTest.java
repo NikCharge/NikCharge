@@ -26,6 +26,7 @@ import tqs.backend.dto.ChargerDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -253,5 +254,122 @@ class ChargerControllerTest {
             .andExpect(jsonPath("$[1].status").value("AVAILABLE"))
             .andExpect(jsonPath("$[0].chargerType").value("AC_STANDARD"))
             .andExpect(jsonPath("$[1].chargerType").value("DC_FAST"));
+    }
+
+    // ---------- MARK CHARGER UNDER MAINTENANCE TESTS ----------
+
+    @Test
+    void markChargerUnderMaintenance_ReturnsUpdatedCharger() throws Exception {
+        Long chargerId = 1L;
+        String maintenanceNote = "Faulty cable";
+        Charger updatedCharger = Charger.builder()
+                .id(chargerId)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.UNDER_MAINTENANCE)
+                .pricePerKwh(BigDecimal.valueOf(0.30))
+                .maintenanceNote(maintenanceNote)
+                .build();
+
+        when(chargerService.updateChargerStatus(chargerId, ChargerStatus.UNDER_MAINTENANCE, maintenanceNote))
+                .thenReturn(updatedCharger);
+
+        Map<String, String> requestBody = Map.of(
+                "status", "UNDER_MAINTENANCE",
+                "maintenanceNote", maintenanceNote
+        );
+
+        mockMvc.perform(put("/api/chargers/{id}/status", chargerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(chargerId))
+                .andExpect(jsonPath("$.status").value("UNDER_MAINTENANCE"))
+                .andExpect(jsonPath("$.maintenanceNote").value(maintenanceNote));
+    }
+
+    @Test
+    void markChargerUnderMaintenance_NonExistingId_ReturnsNotFound() throws Exception {
+        Long chargerId = 999L;
+        String maintenanceNote = "Faulty cable";
+
+        when(chargerService.updateChargerStatus(chargerId, ChargerStatus.UNDER_MAINTENANCE, maintenanceNote))
+                .thenThrow(new IllegalArgumentException("Charger not found"));
+
+        Map<String, String> requestBody = Map.of(
+                "status", "UNDER_MAINTENANCE",
+                "maintenanceNote", maintenanceNote
+        );
+
+        mockMvc.perform(put("/api/chargers/{id}/status", chargerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Charger not found"));
+    }
+
+    @Test
+    void markChargerUnderMaintenance_InvalidStatusValue_ReturnsBadRequest() throws Exception {
+        Long chargerId = 1L;
+        String maintenanceNote = "Faulty cable";
+
+        // No need to mock chargerService.updateChargerStatus here as the validation happens in the controller
+
+        Map<String, String> requestBody = Map.of(
+                "status", "INVALID_STATUS",
+                "maintenanceNote", maintenanceNote
+        );
+
+        mockMvc.perform(put("/api/chargers/{id}/status", chargerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Invalid status value: INVALID_STATUS"));
+    }
+
+    @Test
+    void markChargerUnderMaintenance_MissingStatusField_ReturnsBadRequest() throws Exception {
+        Long chargerId = 1L;
+        String maintenanceNote = "Faulty cable";
+
+        // No need to mock chargerService.updateChargerStatus here as the validation happens in the controller
+
+        Map<String, String> requestBody = Map.of(
+                "maintenanceNote", maintenanceNote
+        );
+
+        mockMvc.perform(put("/api/chargers/{id}/status", chargerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Missing 'status' in request body"));
+    }
+
+    // ---------- MARK CHARGER AVAILABLE TESTS ----------
+
+    @Test
+    void markChargerAvailable_ReturnsUpdatedCharger() throws Exception {
+        Long chargerId = 1L;
+        Charger updatedCharger = Charger.builder()
+                .id(chargerId)
+                .chargerType(ChargerType.AC_STANDARD)
+                .status(ChargerStatus.AVAILABLE)
+                .pricePerKwh(BigDecimal.valueOf(0.30))
+                .maintenanceNote(null) // Note should be null when available
+                .build();
+
+        when(chargerService.updateChargerStatus(chargerId, ChargerStatus.AVAILABLE, null))
+                .thenReturn(updatedCharger);
+
+        Map<String, String> requestBody = Map.of(
+                "status", "AVAILABLE"
+        );
+
+        mockMvc.perform(put("/api/chargers/{id}/status", chargerId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(chargerId))
+                .andExpect(jsonPath("$.status").value("AVAILABLE"))
+                .andExpect(jsonPath("$.maintenanceNote").isEmpty()); // Assert maintenance note is empty/null in JSON
     }
 }

@@ -25,18 +25,20 @@ import java.util.Optional;
 public class ClientController {
 
     private static final String CLIENT_NOT_FOUND_MESSAGE = "Client not found";
+    private static final String ERROR_MESSAGE = "error";
+
 
     private final ClientService clientService;
     private final ClientRepository clientRepository;
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
-    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpRequest signUpRequest, BindingResult bindingResult) {
+    public ResponseEntity<Object> signUp(@Valid @RequestBody SignUpRequest signUpRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
                     errors.put(error.getField(), error.getDefaultMessage()));
-            return ResponseEntity.badRequest().body(Map.of("error", errors));
+            return ResponseEntity.badRequest().body(Map.of(ERROR_MESSAGE, errors));
         }
 
         try {
@@ -53,20 +55,20 @@ public class ClientController {
         } catch (RuntimeException e) {
             if ("Email already exists".equals(e.getMessage())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body(Map.of("error", "Email already exists"));
+                        .body(Map.of(ERROR_MESSAGE, "Email already exists"));
             }
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Unexpected error: " + e.getMessage()));
+                    .body(Map.of(ERROR_MESSAGE, "Unexpected error: " + e.getMessage()));
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
+    public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();
             bindingResult.getFieldErrors().forEach(error ->
                     errors.put(error.getField(), error.getDefaultMessage()));
-            return ResponseEntity.badRequest().body(Map.of("error", errors));
+            return ResponseEntity.badRequest().body(Map.of(ERROR_MESSAGE, errors));
         }
 
         Optional<Client> clientOpt = clientRepository.findByEmail(loginRequest.getEmail());
@@ -82,7 +84,7 @@ public class ClientController {
                 .role(client.getRole())
                 .build());
         } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Invalid credentials"));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(ERROR_MESSAGE, "Invalid credentials"));
         }
     }
 
@@ -90,7 +92,7 @@ public class ClientController {
     public ResponseEntity<Object> updateClient(@PathVariable String email, @RequestBody ClientResponse updateData) {
         Optional<Client> clientOpt = clientRepository.findByEmail(email);
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_MESSAGE, CLIENT_NOT_FOUND_MESSAGE));
         }
 
         Client client = clientOpt.get();
@@ -114,11 +116,11 @@ public class ClientController {
     }
 
     @PutMapping("/changeRole/{id}")
-    public ResponseEntity<?> changeRole(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    public ResponseEntity<Object> changeRole(@PathVariable Long id, @RequestBody Map<String, String> body) {
         String newRoleStr = body.get("newRole");
 
         if (newRoleStr == null || newRoleStr.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Missing 'newRole' in request body"));
+            return ResponseEntity.badRequest().body(Map.of(ERROR_MESSAGE, "Missing 'newRole' in request body"));
         }
 
         UserRole newRole;
@@ -130,7 +132,7 @@ public class ClientController {
 
         Optional<Client> clientOpt = clientRepository.findById(id);
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_MESSAGE, CLIENT_NOT_FOUND_MESSAGE));
         }
 
         Client client = clientOpt.get();
@@ -145,10 +147,10 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getClientById(@PathVariable Long id) {
+    public ResponseEntity<Object> getClientById(@PathVariable Long id) {
         Optional<Client> clientOpt = clientRepository.findById(id);
         if (clientOpt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", CLIENT_NOT_FOUND_MESSAGE));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(ERROR_MESSAGE, CLIENT_NOT_FOUND_MESSAGE));
         }
 
         Client client = clientOpt.get();

@@ -20,4 +20,4 @@ jobs:
 
       - name: Run Cucumber Tests
         working-directory: ./Backend
-        run: mvn verify -P cucumber
+        run: mvn test -Dtest=CucumberTests

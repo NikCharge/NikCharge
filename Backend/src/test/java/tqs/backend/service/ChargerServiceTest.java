@@ -113,10 +113,70 @@ class ChargerServiceTest {
         when(chargerRepository.save(any(Charger.class))).thenReturn(charger1);
 
         charger1.setStatus(ChargerStatus.IN_USE);
-        Charger updated = chargerService.updateChargerStatus(1L, ChargerStatus.IN_USE);
+        Charger updated = chargerService.updateChargerStatus(1L, ChargerStatus.IN_USE, null);
 
         assertThat(updated).isNotNull();
         assertThat(updated.getStatus()).isEqualTo(ChargerStatus.IN_USE);
+    }
+
+    @Test
+    void whenUpdateChargerStatusToUnderMaintenance_thenReturnUpdatedChargerWithNote() {
+        Long chargerId = 1L;
+        String maintenanceNote = "Broken screen";
+        Charger initialCharger = new Charger();
+        initialCharger.setId(chargerId);
+        initialCharger.setStatus(ChargerStatus.AVAILABLE);
+        initialCharger.setChargerType(tqs.backend.model.enums.ChargerType.AC_STANDARD);
+        initialCharger.setPricePerKwh(BigDecimal.valueOf(0.25));
+
+        when(chargerRepository.findById(chargerId)).thenReturn(Optional.of(initialCharger));
+        when(chargerRepository.save(any(Charger.class))).thenAnswer(invocation -> {
+            Charger savedCharger = invocation.getArgument(0);
+            // Simulate repository saving the updated charger
+            assertThat(savedCharger.getId()).isEqualTo(chargerId);
+            assertThat(savedCharger.getStatus()).isEqualTo(ChargerStatus.UNDER_MAINTENANCE);
+            assertThat(savedCharger.getMaintenanceNote()).isEqualTo(maintenanceNote);
+            return savedCharger;
+        });
+
+        Charger updated = chargerService.updateChargerStatus(chargerId, ChargerStatus.UNDER_MAINTENANCE, maintenanceNote);
+
+        assertThat(updated).isNotNull();
+        assertThat(updated.getId()).isEqualTo(chargerId);
+        assertThat(updated.getStatus()).isEqualTo(ChargerStatus.UNDER_MAINTENANCE);
+        assertThat(updated.getMaintenanceNote()).isEqualTo(maintenanceNote);
+        verify(chargerRepository, times(1)).findById(chargerId);
+        verify(chargerRepository, times(1)).save(any(Charger.class));
+    }
+
+    @Test
+    void whenUpdateChargerStatusToAvailable_thenReturnUpdatedChargerWithoutNote() {
+        Long chargerId = 3L;
+        Charger initialCharger = new Charger();
+        initialCharger.setId(chargerId);
+        initialCharger.setStatus(ChargerStatus.UNDER_MAINTENANCE);
+        initialCharger.setMaintenanceNote("Faulty cable");
+        initialCharger.setChargerType(tqs.backend.model.enums.ChargerType.DC_ULTRA_FAST);
+        initialCharger.setPricePerKwh(BigDecimal.valueOf(0.45));
+
+        when(chargerRepository.findById(chargerId)).thenReturn(Optional.of(initialCharger));
+        when(chargerRepository.save(any(Charger.class))).thenAnswer(invocation -> {
+            Charger savedCharger = invocation.getArgument(0);
+            // Simulate repository saving the updated charger
+            assertThat(savedCharger.getId()).isEqualTo(chargerId);
+            assertThat(savedCharger.getStatus()).isEqualTo(ChargerStatus.AVAILABLE);
+            assertThat(savedCharger.getMaintenanceNote()).isNull(); // Note should be cleared
+            return savedCharger;
+        });
+
+        Charger updated = chargerService.updateChargerStatus(chargerId, ChargerStatus.AVAILABLE, null);
+
+        assertThat(updated).isNotNull();
+        assertThat(updated.getId()).isEqualTo(chargerId);
+        assertThat(updated.getStatus()).isEqualTo(ChargerStatus.AVAILABLE);
+        assertThat(updated.getMaintenanceNote()).isNull();
+        verify(chargerRepository, times(1)).findById(chargerId);
+        verify(chargerRepository, times(1)).save(any(Charger.class));
     }
 
     @Test
@@ -150,7 +210,7 @@ class ChargerServiceTest {
         assertThat(chargerService.countByStatus(ChargerStatus.AVAILABLE)).isEqualTo(1L);
         assertThat(chargerService.countByStatus(ChargerStatus.IN_USE)).isEqualTo(1L);
         assertThat(chargerService.countByStatus(ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(1L);
-        assertThat(chargerService.countByStatus(ChargerStatus.MAINTENANCE)).isEqualTo(0L);
+        assertThat(chargerService.countByStatus(ChargerStatus.MAINTENANCE)).isZero();
     }
 
     @Test
@@ -170,14 +230,14 @@ class ChargerServiceTest {
         // Act & Assert
         assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.AVAILABLE)).isEqualTo(1L);
         assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.IN_USE)).isEqualTo(1L);
-        assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(station1Id, ChargerStatus.UNDER_MAINTENANCE)).isZero();
 
-        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.AVAILABLE)).isEqualTo(0L);
-        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.IN_USE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.AVAILABLE)).isZero();
+        assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.IN_USE)).isZero();
         assertThat(chargerService.countByStationAndStatus(station2Id, ChargerStatus.UNDER_MAINTENANCE)).isEqualTo(1L);
 
         // Test a station with no chargers
         when(chargerRepository.countByStationIdAndStatus(3L, ChargerStatus.AVAILABLE)).thenReturn(0L);
-        assertThat(chargerService.countByStationAndStatus(3L, ChargerStatus.AVAILABLE)).isEqualTo(0L);
+        assertThat(chargerService.countByStationAndStatus(3L, ChargerStatus.AVAILABLE)).isZero();
     }
 } 

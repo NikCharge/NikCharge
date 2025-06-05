@@ -16,6 +16,8 @@ import tqs.backend.dto.ChargerDTO;
 @RequestMapping("/api/chargers")
 public class ChargerController {
 
+    private static final String ERROR_KEY = "error";
+
     private final ChargerService chargerService;
 
     public ChargerController(ChargerService chargerService) {
@@ -34,7 +36,7 @@ public class ChargerController {
             Charger created = chargerService.addCharger(request.getStationId(), charger);
             return ResponseEntity.ok(created);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, e.getMessage()));
         }
     }
 
@@ -54,7 +56,7 @@ public class ChargerController {
             chargerService.deleteCharger(id);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(404).body(Map.of(ERROR_KEY, e.getMessage()));
         }
     }
 
@@ -85,5 +87,43 @@ public class ChargerController {
     @GetMapping("/available")
     public ResponseEntity<List<ChargerDTO>> getAvailableChargers() {
         return ResponseEntity.ok(chargerService.getChargersByStatus(ChargerStatus.AVAILABLE));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<?> updateChargerStatus(@PathVariable Long id, @RequestBody Map<String, String> requestBody) {
+        try {
+            String statusStr = requestBody.get("status");
+            String maintenanceNote = requestBody.get("maintenanceNote");
+
+            if (statusStr == null || statusStr.isBlank()) {
+                return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "Missing 'status' in request body"));
+            }
+
+            ChargerStatus newStatus;
+            try {
+                newStatus = parseChargerStatus(statusStr);
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, e.getMessage()));
+            }
+
+            // Validate that only UNDER_MAINTENANCE or AVAILABLE status is allowed via this endpoint
+            if (newStatus != ChargerStatus.UNDER_MAINTENANCE && newStatus != ChargerStatus.AVAILABLE) {
+                return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "Invalid status value: " + statusStr + ". Only UNDER_MAINTENANCE or AVAILABLE status allowed via this endpoint."));
+            }
+
+            Charger updatedCharger = chargerService.updateChargerStatus(id, newStatus, maintenanceNote);
+            return ResponseEntity.ok(updatedCharger);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of(ERROR_KEY, e.getMessage()));
+        }
+    }
+
+    private ChargerStatus parseChargerStatus(String statusStr) {
+        try {
+            return ChargerStatus.valueOf(statusStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid status value: " + statusStr, e);
+        }
     }
 }
