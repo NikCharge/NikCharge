@@ -8,9 +8,9 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ChargerType;
 import tqs.backend.util.CommonReservationHelper;
+import static org.hamcrest.Matchers.equalTo;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ViewUpcomingReservationsStepDefs {
@@ -23,16 +23,7 @@ public class ViewUpcomingReservationsStepDefs {
 
     @Before
     public void setup() {
-        helper.clearAllClients();  // optional method to abstract deleteAll
-    }
-
-    @Given("a client is registered")
-    public void a_client_is_registered() {
-        ClientStepDefs.currentClient = helper.createClient(
-                "Test Client",
-                "client" + System.currentTimeMillis() + "@example.com",
-                "hashedPassword"
-        );
+        helper.clearAllClients();
     }
 
     @And("a station with name {string} and address {string} and city {string} exists")
@@ -55,16 +46,6 @@ public class ViewUpcomingReservationsStepDefs {
                 .port(port)
                 .when()
                 .get("/api/reservations/client/" + ClientStepDefs.currentClient.getId());
-    }
-
-    @And("the response should contain exactly {int} reservation(s)")
-    public void the_response_should_contain_exactly_n_reservations(int count) {
-        CommonResponseStepDefs.latestResponse.then().body("$", hasSize(count));
-    }
-
-    @And("one reservation should have status {string}")
-    public void one_reservation_should_have_status(String status) {
-        CommonResponseStepDefs.latestResponse.then().body("status", hasItem(status));
     }
 
     @And("the {string} reservation should include station name {string} and address {string} and city {string}")
