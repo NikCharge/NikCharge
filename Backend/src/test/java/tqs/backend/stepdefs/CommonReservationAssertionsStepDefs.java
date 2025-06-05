@@ -14,8 +14,7 @@ public class CommonReservationAssertionsStepDefs {
 
     @Then("the response should contain exactly {int} reservation")
     public void the_response_should_contain_exactly_reservation(int count) {
-        CommonResponseStepDefs.latestResponse.then().statusCode(200);
-        CommonResponseStepDefs.latestResponse.then().body("$", hasSize(count));
+        the_response_should_contain_exactly_reservations(count);
     }
 
     @And("one reservation should have status {string}")

@@ -43,11 +43,7 @@ public class CancelReservationStepDefs {
 
     @When("the client attempts to cancel the reservation again")
     public void the_client_attempts_to_cancel_the_reservation_again() {
-        Reservation reservation = ReservationStepDefs.currentReservation;
-        // This step intentionally attempts to cancel the same reservation again
-        CommonResponseStepDefs.latestResponse = RestAssured.given()
-                .port(port)
-                .delete("/api/reservations/" + reservation.getId());
+        the_client_cancels_the_reservation();
     }
 
     @Then("the reservation should be deleted from the database")

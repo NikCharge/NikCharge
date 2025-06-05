@@ -103,7 +103,7 @@ public class StationService {
             // Filter out reserved chargers
             chargers = chargers.stream()
                     .filter(c -> !reservedChargerIds.contains(c.getId()))
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         List<ChargerDTO> chargerDTOs = chargers.stream()
