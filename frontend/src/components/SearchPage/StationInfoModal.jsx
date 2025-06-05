@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import "../../css/SearchPage/StationInfoModal.css";
 
-const StationInfoModal = ({ station, onClose }) => {
+const StationInfoModal = ({ station, onClose, selectedDateTime }) => {
     const [selectedChargerId, setSelectedChargerId] = useState(null);
     const [battery, setBattery] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,7 +32,6 @@ const StationInfoModal = ({ station, onClose }) => {
     const durationMin = useMemo(() => powerKw ? Math.ceil((parseFloat(energyNeeded) / powerKw) * 60) : 0, [energyNeeded, powerKw]);
     const cost = useMemo(() => selectedCharger ? (energyNeeded * selectedCharger.pricePerKwh).toFixed(2) : "0.00", [energyNeeded, selectedCharger]);
 
-    const now = new Date();
     // Format local time manually to avoid UTC conversion
     const formatLocalDateTime = (date) => {
         const year = date.getFullYear();
@@ -44,11 +43,11 @@ const StationInfoModal = ({ station, onClose }) => {
         return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
     };
     
-    const startTime = formatLocalDateTime(now);
-    const estimatedEndTime = formatLocalDateTime(new Date(now.getTime() + durationMin * 60000));
+    const startTime = formatLocalDateTime(selectedDateTime || new Date());
+    const estimatedEndTime = formatLocalDateTime(new Date((selectedDateTime || new Date()).getTime() + durationMin * 60000));
 
-    const startTimeDisplay = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-    const estimatedEndTimeDisplay = `${new Date(now.getTime() + durationMin * 60000).toLocaleDateString()} ${new Date(now.getTime() + durationMin * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const startTimeDisplay = `${(selectedDateTime || new Date()).toLocaleDateString()} ${(selectedDateTime || new Date()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    const estimatedEndTimeDisplay = `${new Date((selectedDateTime || new Date()).getTime() + durationMin * 60000).toLocaleDateString()} ${new Date((selectedDateTime || new Date()).getTime() + durationMin * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 
     const handleBook = async () => {
         if (!selectedCharger || !validBattery) return;
