@@ -24,6 +24,8 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    private static final String ERROR_KEY = "error";
+
     @GetMapping
     public List<Reservation> getAllReservations() {
         return reservationService.getAllReservations();
@@ -60,10 +62,10 @@ public class ReservationController {
             logger.error("Error cancelling reservation: {}", e.getMessage());
             if (e.getMessage().equals("Reservation not found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(Map.of(ERROR_KEY, e.getMessage()));
             } else if (e.getMessage().equals("Only active reservations can be cancelled")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(Map.of(ERROR_KEY, e.getMessage()));
             }
             return handleRuntimeException(e);
         }
@@ -73,7 +75,7 @@ public class ReservationController {
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         logger.error("RuntimeException caught by handler: {}", ex.getMessage());
         Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", ex.getMessage());
+        errorBody.put(ERROR_KEY, ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }
 }
