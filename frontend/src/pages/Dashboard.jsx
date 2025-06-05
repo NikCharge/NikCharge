@@ -3,6 +3,11 @@ import "../css/pages/Dashboard.css";
 import Header from "../components/global/Header.jsx";
 import Footer from "../components/global/Footer.jsx";
 
+import { loadStripe } from '@stripe/stripe-js';
+
+// Replace with your actual Stripe publishable key
+const stripePromise = loadStripe("pk_test_51RWUWBJljDlkjMrml2SZROtF5FDoF8yoPbmMZshM0yXqZmaXH2YuvDTxCydyyF3a3v88cLxXdytguWJ31TxOaFjb003TsNj7A0");
+
 const Dashboard = () => {
     const [reservations, setReservations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -77,7 +82,7 @@ const Dashboard = () => {
             if (!response.ok) {
                 let errorMsg = `HTTP error! status: ${response.status}`;
                 try {
-                    const errorData = await response.json();
+                const errorData = await response.json();
                     errorMsg = errorData.error || errorMsg;
                 } catch (e) {
                     // If json parsing fails, try reading as text
@@ -100,6 +105,51 @@ const Dashboard = () => {
             console.error("Marking reservation as completed failed:", error);
         } finally {
             setCompletingId(null);
+        }
+    };
+
+    const handlePayReservation = async (reservationId) => {
+        try {
+            // TODO: Implement loading state for payment button
+            const response = await fetch("http://localhost:8080/api/payment/create-checkout-session", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ reservationId: reservationId })
+            });
+
+            if (!response.ok) {
+                 let errorMsg = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorMsg;
+                } catch (e) {
+                    // If json parsing fails, try reading as text
+                    try {
+                        const errorText = await response.text();
+                        if (errorText) {
+                            errorMsg = `${errorMsg} - ${errorText}`;
+                        }
+                    } catch (e) {
+                        // Ignore if reading as text also fails
+                    }
+                }
+                throw new Error(errorMsg);
+            }
+
+            const { sessionId } = await response.json();
+            const stripe = await stripePromise;
+            const result = await stripe.redirectToCheckout({ sessionId });
+
+            if (result.error) {
+                // If `redirectToCheckout` fails due to a browser or network error
+                setError(result.error.message);
+            }
+
+        } catch (error) {
+            setError("Payment failed: " + error.message);
+            console.error("Payment failed:", error);
+        } finally {
+            // TODO: Implement loading state for payment button
         }
     };
 
@@ -133,11 +183,9 @@ const Dashboard = () => {
                         )}
                         {reservation.status}
                     </div>
-                    {reservation.status === "COMPLETED" && (
-                        <div className={`payment-status-badge ${reservation.chargingSession?.paid ? 'paid' : 'awaiting'}`}>
-                            {reservation.chargingSession?.paid ? 'Paid' : 'Awaiting payment'}
-                        </div>
-                    )}
+                    <div className={`payment-status-badge ${reservation.paid ? 'paid' : 'awaiting'}`}>
+                        {reservation.paid ? 'Paid' : 'Awaiting payment'}
+                    </div>
                 </div>
             </div>
 
@@ -194,62 +242,80 @@ const Dashboard = () => {
 
             {reservation.status === "ACTIVE" && (
                 <div className="card-actions">
-                    <button
-                        className="complete-button"
-                        onClick={() => handleCompleteReservation(reservation.id)}
-                        disabled={completingId === reservation.id}
-                    >
-                        {completingId === reservation.id ? (
-                            <>
-                                <svg className="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M21 12a9 9 0 11-6.219-8.56"/>
-                                </svg>
-                                Completing...
-                            </>
-                        ) : (
-                            <>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                                    <polyline points="22,4 12,14.01 9,11.01"/>
-                                </svg>
-                                Complete
-                            </>
-                        )}
-                    </button>
-                    <button
-                        className="cancel-button"
-                        onClick={() => handleCancelReservation(reservation.id)}
-                        disabled={cancellingId === reservation.id}
-                    >
-                        {cancellingId === reservation.id ? (
-                            <>
-                                <svg className="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <path d="M21 12a9 9 0 11-6.219-8.56"/>
-                                </svg>
-                                Cancelling...
-                            </>
-                        ) : (
-                            <>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <line x1="15" y1="9" x2="9" y2="15"/>
-                                    <line x1="9" y1="9" x2="15" y2="15"/>
-                                </svg>
-                                Cancel
-                            </>
-                        )}
-                    </button>
+                    <div className="action-buttons">
+                        <button
+                            className="complete-button"
+                            onClick={() => handleCompleteReservation(reservation.id)}
+                            disabled={completingId === reservation.id}
+                        >
+                            {completingId === reservation.id ? (
+                                <>
+                                    <svg className="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                                    </svg>
+                                    Completing...
+                                </>
+                            ) : (
+                                <>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                        <polyline points="22,4 12,14.01 9,11.01"/>
+                                    </svg>
+                                    Complete
+                                </>
+                            )}
+                        </button>
+                        <button
+                            className="cancel-button"
+                            onClick={() => handleCancelReservation(reservation.id)}
+                            disabled={cancellingId === reservation.id}
+                        >
+                            {cancellingId === reservation.id ? (
+                                <>
+                                    <svg className="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                                    </svg>
+                                    Cancelling...
+                                </>
+                            ) : (
+                                <>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="15" y1="9" x2="9" y2="15"/>
+                                        <line x1="9" y1="9" x2="15" y2="15"/>
+                                    </svg>
+                                    Cancel
+                                </>
+                            )}
+                        </button>
+                    </div>
+                    {!reservation.paid && (
+                        <button
+                            className="pay-button"
+                            onClick={() => handlePayReservation(reservation.id)}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+                                <path d="M12 18V6"/>
+                            </svg>
+                            Pay Now
+                        </button>
+                    )}
                 </div>
             )}
-            {reservation.status === "COMPLETED" && !reservation.chargingSession?.paid && (
+            {reservation.status === "COMPLETED" && !reservation.paid && (
                 <div className="card-actions">
-                    <button className="pay-button">
+                    <button
+                        className="pay-button"
+                        onClick={() => handlePayReservation(reservation.id)}
+                    >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <circle cx="12" cy="12" r="10"/>
                             <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
                             <path d="M12 18V6"/>
                         </svg>
-                        Pay
+                        Pay Now
                     </button>
                 </div>
             )}

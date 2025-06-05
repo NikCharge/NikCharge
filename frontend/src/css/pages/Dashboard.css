@@ -24,10 +24,10 @@
     --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
     --transition-fast: all 0.2s ease;
+    --primary-hover: #0a4d43;
 }
 
 html, body {
-    height: 100%;
     background: linear-gradient(135deg, var(--primary-light) 0%, #e8f5f3 100%);
     font-size: 16px;
 }
@@ -57,7 +57,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    max-width: 1200px;
+    max-width: 1500px;
     margin: 0 auto;
     padding: 2rem 1rem;
 }
@@ -258,28 +258,23 @@ body {
 }
 
 .payment-status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    margin-top: 0.5rem;
+    gap: 4px;
 }
 
 .payment-status-badge.paid {
-    background: #dcfce7;
-    color: #16a34a;
+    background-color: #e6f4ea;
+    color: #1e7e34;
 }
 
 .payment-status-badge.awaiting {
-    background: #fef3c7;
-    color: #d97706;
+    background-color: #fff3e0;
+    color: #f57c00;
 }
 
 .status-icon {
@@ -354,10 +349,17 @@ body {
 
 .card-actions {
     display: flex;
+    flex-direction: column;
     gap: 0.75rem;
     padding: 1.5rem;
     background: #f8fafc;
     border-top: 1px solid var(--card-border);
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
 }
 
 .complete-button, .cancel-button {
@@ -433,6 +435,7 @@ body {
 
 .pay-button:hover:not(:disabled) {
     background: var(--primary-hover);
+    color: white;
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
 }
@@ -440,6 +443,12 @@ body {
 .pay-button:active:not(:disabled) {
     transform: translateY(0);
     opacity: 0.9;
+}
+
+.pay-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .spinner {
@@ -530,9 +539,10 @@ body {
 
     .card-actions {
         flex-direction: column;
+        gap: 0.75rem;
     }
 
-    .complete-button, .cancel-button {
+    .complete-button, .cancel-button, .pay-button {
         width: 100%;
     }
 }
@@ -555,7 +565,7 @@ body {
         padding: 1rem;
     }
 
-    .complete-button, .cancel-button {
+    .complete-button, .cancel-button, .pay-button {
         padding: 0.6rem 1rem;
         font-size: 0.8rem;
     }
