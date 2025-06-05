@@ -1,5 +1,7 @@
 package tqs.backend.controller;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -116,6 +118,21 @@ public class ChargerController {
 
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of(ERROR_KEY, e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{chargerId}/price")
+    public ResponseEntity<?> getChargerPrice(@PathVariable Long chargerId, @RequestParam String reservationTime) {
+        try {
+            // Parse the reservationTime string to LocalDateTime
+            LocalDateTime time = LocalDateTime.parse(reservationTime);
+            BigDecimal price = chargerService.calculateChargerPrice(chargerId, time);
+            return ResponseEntity.ok(price);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of(ERROR_KEY, e.getMessage()));
+        } catch (Exception e) {
+            // Handle potential parsing errors for reservationTime
+            return ResponseEntity.badRequest().body(Map.of(ERROR_KEY, "Invalid reservation time format"));
         }
     }
 

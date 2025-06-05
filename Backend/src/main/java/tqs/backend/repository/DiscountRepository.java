@@ -13,5 +13,7 @@ public interface DiscountRepository extends JpaRepository<Discount, Long> {
     List<Discount> findByActiveTrueAndDayOfWeekAndStartHourLessThanEqualAndEndHourGreaterThanEqualAndChargerType(
         int dayOfWeek, int startHour, int endHour, ChargerType chargerType
     );
+
+    List<Discount> findByStationAndActiveTrue(tqs.backend.model.Station station);
 }
 
