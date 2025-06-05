@@ -2,6 +2,7 @@ package tqs.backend.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -209,5 +210,53 @@ class ReservationServiceTest {
         assertThat(response.getCharger().getStation().getCity()).isEqualTo(station.getCity());
 
         verify(reservationRepository, times(1)).findByUserId(1L);
+    }
+
+    @Test
+    @DisplayName("Cancel an active reservation successfully")
+    void whenCancelActiveReservation_thenDeleteAndReturnReservation() {
+        // Arrange
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        // Act
+        Reservation result = reservationService.cancelReservation(1L);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.ACTIVE);
+        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).delete(reservation);
+    }
+
+    @Test
+    @DisplayName("Attempt to cancel non-existent reservation")
+    void whenCancelNonExistentReservation_thenThrowException() {
+        // Arrange
+        when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> reservationService.cancelReservation(999L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Reservation not found");
+
+        verify(reservationRepository, times(1)).findById(999L);
+        verify(reservationRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("Attempt to cancel already completed reservation")
+    void whenCancelCompletedReservation_thenThrowException() {
+        // Arrange
+        reservation.setStatus(ReservationStatus.COMPLETED);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        // Act & Assert
+        assertThatThrownBy(() -> reservationService.cancelReservation(1L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Invalid reservation status: only active reservations can be cancelled");
+
+        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, never()).delete(any());
     }
 } 
