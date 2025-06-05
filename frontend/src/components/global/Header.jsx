@@ -23,6 +23,7 @@ const Header = () => {
 
     const handleLogout = () => {
         localStorage.removeItem("client");
+        localStorage.removeItem("role");
         setClient(null);
         navigate("/");
     };
@@ -65,15 +66,19 @@ const Header = () => {
                 <Link to="/about" className="nav-link">About</Link>
                 <Link to="/search" className="nav-link">Search</Link>
                 {client && (
-                    client.role === "CLIENT" ? (
-                        <Link to="/dashboard" className="nav-link">Dashboard</Link>
-                    ) : (
-                        (() => {
-                            console.log("Role is", client.role);
-                            return <Link to="/employee-dashboard" className="nav-link">Employee Dashboard</Link>;
-                        })()
-                    )
+                    <>
+                        {client.role === "CLIENT" && (
+                            <Link to="/dashboard" className="nav-link">Dashboard</Link>
+                        )}
+                        {client.role === "EMPLOYEE" && (
+                            <Link to="/employee-dashboard" className="nav-link">Employee Dashboard</Link>
+                        )}
+                        {client.role === "MANAGER" && (
+                            <Link to="/manager-dashboard" className="nav-link">Manager Dashboard</Link>
+                        )}
+                    </>
                 )}
+
             </nav>
 
 
