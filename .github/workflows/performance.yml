@@ -1,25 +1,72 @@
-# name: Run Performance Tests with K6
+name: Run Performance Tests with K6
 
-# on:
-#   pull_request:
-#     branches: [main, develop]
-#     types: [opened, synchronize, reopened]
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
 
-# jobs:
-#   performance-tests:
-#     runs-on: ubuntu-latest
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
 
-#     steps:
-#       - uses: actions/checkout@v3
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: nikcharge_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
-#       - name: Install k6
-#         run: |
-#           sudo apt-get update
-#           sudo apt-get install -y gnupg software-properties-common
-#           sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 33B2CBAF
-#           echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-#           sudo apt-get update
-#           sudo apt-get install -y k6
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-#       - name: Run k6 Load Tests
-#         run: k6 run performance-tests/script.js
+      - name: Set up Docker
+        run: |
+          docker --version
+          docker compose --version
+
+      - name: Create .env file
+        run: |
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "NODE_ENV=test" >> .env
+          echo "VITE_API_URL=/api" >> .env
+
+      - name: Build and start backend with Docker Compose
+        run: docker compose up -d --build
+
+      - name: Wait for backend to be ready
+        run: |
+          echo "Waiting for backend..."
+          for i in {1..15}; do
+            if curl -s http://127.0.0.1:8080/api/health > /dev/null; then
+              echo "Backend is up!"
+              break
+            fi
+            echo "Backend not ready yet... waiting 5s"
+            sleep 5
+          done
+
+      - name: Install k6
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnupg software-properties-common curl
+          curl -s https://dl.k6.io/key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/k6-archive-keyring.gpg
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+
+      - name: Run K6 Load Tests
+        run: k6 run --address 127.0.0.1:0 Backend/load_test.js
+
+      - name: Shut down backend
+        if: always()
+        run: docker compose down --volumes --remove-orphans
