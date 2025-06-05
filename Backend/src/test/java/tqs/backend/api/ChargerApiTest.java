@@ -37,8 +37,8 @@ class ChargerApiTest {
     void setup() {
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
-        stationRepository.deleteAll();
         chargerRepository.deleteAll();
+        stationRepository.deleteAll();
     }
 
     private int createStation() {
@@ -90,7 +90,7 @@ class ChargerApiTest {
         var charger = Map.of(
                 "stationId", stationId,
                 "chargerType", "DC_FAST",
-                "status", "IN_USE",
+                "status", "AVAILABLE",
                 "pricePerKwh", 0.40
         );
 

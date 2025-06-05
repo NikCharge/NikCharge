@@ -24,14 +24,16 @@ import tqs.backend.model.enums.UserRole;
 import tqs.backend.repository.ClientRepository;
 import tqs.backend.service.ClientService;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ClientController.class)
@@ -92,7 +94,7 @@ class ClientControllerTest {
     @Test
     void validSignUp_shouldReturnOk() throws Exception {
         SignUpRequest request = new SignUpRequest("John Doe", "john@example.com", "password123", 50.0, 300.0);
-        Client client = new Client(null, "John Doe", "john@example.com", "hashed", UserRole.CLIENT, 50.0, 300.0);
+        Client client = new Client(null, "John Doe", "john@example.com", "hashed", UserRole.CLIENT, 50.0, 300.0, new ArrayList<>());
 
         when(clientService.signUp(any(SignUpRequest.class))).thenReturn(client);
 
@@ -161,6 +163,21 @@ class ClientControllerTest {
                 .content(objectMapper.writeValueAsString(req)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.fullRangeKm").exists());
+    }
+
+    @Test
+    void signUpWithUnexpectedError_shouldReturnBadRequest() throws Exception {
+        SignUpRequest request = new SignUpRequest("Jane Doe", "jane.doe@example.com", "securepassword", 60.0, 400.0);
+        String errorMessage = "Some unexpected error occurred";
+
+        when(clientService.signUp(any(SignUpRequest.class)))
+                .thenThrow(new RuntimeException(errorMessage));
+
+        mockMvc.perform(post("/api/clients/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Unexpected error: " + errorMessage));
     }
 
     // ---------- LOGIN TESTS ----------
@@ -263,16 +280,24 @@ class ClientControllerTest {
         when(clientRepository.findByEmail(existingEmail)).thenReturn(Optional.of(client));
         when(clientRepository.save(any(Client.class))).thenReturn(client);
 
-        ClientResponse updatedData = new ClientResponse("new@example.com", "New Name", 60.0, 350.0);
+        ClientResponse updatedData = ClientResponse.builder()
+            .id(1L)
+            .email("email@example.com")
+            .name("Name")
+            .batteryCapacityKwh(50.0)
+            .fullRangeKm(300.0)
+            .reservations(new ArrayList<>())
+            .role(UserRole.CLIENT)
+            .build();
 
         mockMvc.perform(put("/api/clients/{email}", existingEmail)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updatedData)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("new@example.com"))
-                .andExpect(jsonPath("$.name").value("New Name"))
-                .andExpect(jsonPath("$.batteryCapacityKwh").value(60.0))
-                .andExpect(jsonPath("$.fullRangeKm").value(350.0));
+                .andExpect(jsonPath("$.email").value("email@example.com"))
+                .andExpect(jsonPath("$.name").value("Name"))
+                .andExpect(jsonPath("$.batteryCapacityKwh").value(50.0))
+                .andExpect(jsonPath("$.fullRangeKm").value(300.0));
     }
 
     @Test
@@ -280,11 +305,120 @@ class ClientControllerTest {
         String email = "notfound@example.com";
         when(clientRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        ClientResponse updateData = new ClientResponse(email, "Name", 55.0, 310.0);
+        ClientResponse updateData = ClientResponse.builder()
+            .id(1L)
+            .email("email@example.com")
+            .name("Name")
+            .batteryCapacityKwh(50.0)
+            .fullRangeKm(300.0)
+            .reservations(new ArrayList<>())
+            .role(UserRole.CLIENT)
+            .build();
 
         mockMvc.perform(put("/api/clients/{email}", email)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateData)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Client not found"));
+    }
+
+    // ---------- CHANGE ROLE TESTS ----------
+
+    @Test
+    void changeRole_ExistingClientValidRole_shouldReturnOk() throws Exception {
+        Long clientId = 1L;
+        Client client = new Client();
+        client.setId(clientId);
+        client.setEmail("client@example.com");
+        client.setRole(UserRole.CLIENT);
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+        when(clientRepository.save(any(Client.class))).thenReturn(client);
+
+        Map<String, String> requestBody = Map.of("newRole", "EMPLOYEE");
+
+        mockMvc.perform(put("/api/clients/changeRole/{id}", clientId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Role updated successfully"))
+                .andExpect(jsonPath("$.newRole").value("EMPLOYEE"));
+    }
+
+    @Test
+    void changeRole_NonExistentClient_shouldReturnNotFound() throws Exception {
+        Long clientId = 99L;
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
+
+        Map<String, String> requestBody = Map.of("newRole", "EMPLOYEE");
+
+        mockMvc.perform(put("/api/clients/changeRole/{id}", clientId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Client not found"));
+    }
+
+    @Test
+    void changeRole_MissingNewRoleField_shouldReturnBadRequest() throws Exception {
+        Long clientId = 1L;
+        Map<String, String> requestBody = new HashMap<>(); // Missing newRole field
+
+        mockMvc.perform(put("/api/clients/changeRole/{id}", clientId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Missing 'newRole' in request body"));
+    }
+
+    @Test
+    void changeRole_InvalidRoleValue_shouldReturnBadRequest() throws Exception {
+        Long clientId = 1L;
+        Client client = new Client();
+        client.setId(clientId);
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+
+        Map<String, String> requestBody = Map.of("newRole", "INVALID_ROLE");
+
+        mockMvc.perform(put("/api/clients/changeRole/{id}", clientId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error").value("Invalid role: INVALID_ROLE"));
+    }
+
+    // ---------- GET CLIENT BY ID TESTS ----------
+
+    @Test
+    void getClientById_ExistingClient_shouldReturnClientData() throws Exception {
+        Long clientId = 1L;
+        Client client = new Client();
+        client.setId(clientId);
+        client.setName("Test User");
+        client.setEmail("test@example.com");
+        client.setRole(UserRole.CLIENT);
+        client.setBatteryCapacityKwh(50.0);
+        client.setFullRangeKm(300.0);
+
+        when(clientRepository.findById(clientId)).thenReturn(Optional.of(client));
+
+        mockMvc.perform(get("/api/clients/{id}", clientId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(clientId))
+                .andExpect(jsonPath("$.name").value("Test User"))
+                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.role").value("CLIENT"))
+                .andExpect(jsonPath("$.batteryCapacityKwh").value(50.0))
+                .andExpect(jsonPath("$.fullRangeKm").value(300.0));
+    }
+
+    @Test
+    void getClientById_NonExistentClient_shouldReturnNotFound() throws Exception {
+        Long clientId = 99L;
+        when(clientRepository.findById(clientId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/clients/{id}", clientId))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Client not found"));
     }

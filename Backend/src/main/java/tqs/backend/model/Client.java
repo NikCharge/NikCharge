@@ -2,8 +2,12 @@ package tqs.backend.model;
 
 import jakarta.persistence.*;
 import tqs.backend.model.enums.UserRole;
+import com.fasterxml.jackson.annotation.*;
 
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,11 +21,13 @@ public class Client {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     private String name;
 
     @Column(unique = true, nullable = false)
+    @EqualsAndHashCode.Include
     private String email;
 
     @Column(nullable = false)
@@ -33,4 +39,8 @@ public class Client {
     // Fields from EvProfile
     private Double batteryCapacityKwh;
     private Double fullRangeKm;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Reservation> reservations = new ArrayList<>();
 }

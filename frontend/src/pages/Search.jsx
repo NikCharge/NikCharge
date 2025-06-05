@@ -5,6 +5,7 @@ import Footer from "../components/global/Footer.jsx";
 import FiltersPanel from "../components/SearchPage/FiltersPanel.jsx";
 import MapDisplay from "../components/SearchPage/MapDisplay.jsx";
 import StationList from "../components/SearchPage/StationList.jsx";
+import StationInfoModal from "../components/SearchPage/StationInfoModal.jsx";
 import { MdMap, MdList } from "react-icons/md";
 
 // Distância entre dois pontos geográficos
@@ -29,6 +30,7 @@ const Search = () => {
     const [userLocation, setUserLocation] = useState(null);
     const [viewMode, setViewMode] = useState("map");
     const [selectedChargerTypes, setSelectedChargerTypes] = useState([]);
+    const [selectedStation, setSelectedStation] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -89,7 +91,9 @@ const Search = () => {
         );
     }, [stations, selectedChargerTypes]);
 
-
+    const handleStationClick = (station) => {
+        setSelectedStation(station);
+    };
 
     return (
         <div className="search">
@@ -123,14 +127,25 @@ const Search = () => {
                     setSelectedChargerTypes={setSelectedChargerTypes}
                 />
 
-                
-
-               {viewMode === "map" ? (
-                    <MapDisplay stations={filteredStations} userLocation={userLocation} />
+                {viewMode === "map" ? (
+                    <MapDisplay
+                        stations={filteredStations}
+                        userLocation={userLocation}
+                        onStationClick={handleStationClick}
+                    />
                 ) : (
-                    <StationList stations={filteredStations} onStationClick={(station) => console.log(station)} />
+                    <StationList
+                        stations={filteredStations}
+                        onStationClick={handleStationClick}
+                    />
                 )}
 
+                {selectedStation && (
+                    <StationInfoModal
+                        station={selectedStation}
+                        onClose={() => setSelectedStation(null)}
+                    />
+                )}
             </main>
             <Footer />
         </div>
