@@ -51,6 +51,24 @@ public class ReservationController {
         }
     }
 
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<?> cancelReservation(@PathVariable Long reservationId) {
+        try {
+            Reservation reservation = reservationService.cancelReservation(reservationId);
+            return new ResponseEntity<>(reservation, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            logger.error("Error cancelling reservation: {}", e.getMessage());
+            if (e.getMessage().equals("Reservation not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+            } else if (e.getMessage().equals("Only active reservations can be cancelled")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+            }
+            return handleRuntimeException(e);
+        }
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         logger.error("RuntimeException caught by handler: {}", ex.getMessage());

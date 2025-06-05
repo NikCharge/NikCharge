@@ -102,4 +102,16 @@ public class ReservationService {
 
         return reservationRepository.save(reservation);
     }
+
+    public Reservation cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new RuntimeException("Invalid reservation status: only active reservations can be cancelled");
+        }
+
+        reservationRepository.delete(reservation);
+        return reservation;
+    }
 }
