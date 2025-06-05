@@ -88,3 +88,24 @@ body {
     margin-bottom: 0;
 }
 
+.cancel-button {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+.cancel-button:hover {
+    background-color: #dc2626;
+}
+
+.cancel-button:active {
+    opacity: 0.8;
+}
+
