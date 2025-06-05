@@ -185,3 +185,8 @@
 .leaflet-container {
     z-index: 0 !important;
 }
+
+.rdt input {
+    color: black !important;
+  }
+  

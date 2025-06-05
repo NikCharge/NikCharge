@@ -65,8 +65,9 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                 const dayOfWeek = dayjs(datetime).day();
                 const hour = dayjs(datetime).hour();
 
-                const fetches = chargerTypes.map(async type => {
-                    const typeParam = encodeURIComponent(type.toUpperCase().replace(/[\s\-()]/g, "_"));
+                const fetches = chargerTypes.map(async type => {                    
+                    const typeParam = chargerLabelToEnum[type];
+                    
                     const url = `/api/stations/search?dayOfWeek=${dayOfWeek}&hour=${hour}&chargerType=${typeParam}`;
                     console.log("➡️  Fetching filtered stations from:", url);
                     const res = await fetch(url);
@@ -87,7 +88,12 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                         const detailsUrl = `/api/stations/${station.id}/details?datetime=${datetimeParam}`;
                         console.log("🔍 Fetching details from:", detailsUrl);
                         const detailsRes = await fetch(detailsUrl);
+                        if (!detailsRes.ok) {
+                            console.error("❌ Failed to fetch details for station", station.id);
+                            return null;
+                        }
                         const details = await detailsRes.json();
+                        
                         console.log(`✅ Details for station ${station.id}:`, details);
 
                         return {
@@ -126,7 +132,12 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                             : "";
 
                         const detailsRes = await fetch(`/api/stations/${station.id}/details${datetimeParam}`);
+                        if (!detailsRes.ok) {
+                            console.error("❌ Failed to fetch details for station", station.id);
+                            return null;
+                        }
                         const details = await detailsRes.json();
+                        
 
                         return {
                             ...details,
@@ -149,7 +160,9 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
             }
 
             console.log("📊 Setting stations state with:", stations);
-            setStations(stations);
+            const validStations = stations.filter(Boolean);
+            setStations(validStations);
+
         } catch (err) {
             console.error("❌ Error fetching stations:", err);
         }
