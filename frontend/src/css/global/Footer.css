@@ -1,6 +1,6 @@
 .footer {
     background: linear-gradient(135deg, #1db690 0%, #19a683 40%, #158f73 100%);
-    padding: 3rem 2rem;
+    padding: 1.5rem 2rem;
     width: 100%;
     color: white;
     text-align: left;
@@ -22,12 +22,24 @@
 .footer-left,
 .footer-center,
 .footer-right {
-    flex: 1;
     min-width: 250px;
 }
 
 .footer-left {
     text-align: left;
+    margin-right: auto;
+}
+
+.footer-center {
+    /* This will be centered by justify-content: center on the container's remaining space */
+}
+
+.footer-right {
+    text-align: right;
+    margin-left: auto;
+    font-style: italic;
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 .footer-logo {
@@ -40,13 +52,6 @@
 
 .footer-logo:hover {
     transform: scale(1.5);
-}
-
-.footer-right {
-    text-align: right;
-    font-style: italic;
-    font-size: 0.95rem;
-    line-height: 1.6;
 }
 
 .university {
@@ -96,11 +101,17 @@
     .footer-content {
         flex-direction: column;
         text-align: center;
+        gap: 1rem;
     }
 
     .footer-left,
     .footer-right {
         text-align: center;
+        margin: 0;
+    }
+
+    .footer-center {
+        margin: 1rem auto;
     }
 
     .social-icons {
