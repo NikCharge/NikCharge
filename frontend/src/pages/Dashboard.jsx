@@ -75,8 +75,22 @@ const Dashboard = () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to mark reservation as completed');
+                let errorMsg = `HTTP error! status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorMsg;
+                } catch (e) {
+                    // If json parsing fails, try reading as text
+                    try {
+                        const errorText = await response.text();
+                        if (errorText) {
+                            errorMsg = `${errorMsg} - ${errorText}`;
+                        }
+                    } catch (e) {
+                        // Ignore if reading as text also fails
+                    }
+                }
+                throw new Error(errorMsg);
             }
 
             // Refresh the reservations list
@@ -105,18 +119,25 @@ const Dashboard = () => {
                         <span>{reservation.charger?.station ? `${reservation.charger.station.address}, ${reservation.charger.station.city}` : 'N/A'}</span>
                     </div>
                 </div>
-                <div className={`status-badge ${reservation.status.toLowerCase()}`}>
-                    {reservation.status === "COMPLETED" ? (
-                        <svg className="status-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                            <polyline points="22,4 12,14.01 9,11.01"/>
-                        </svg>
-                    ) : (
-                        <svg className="status-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
-                        </svg>
+                <div className="status-tags-container">
+                    <div className={`status-badge ${reservation.status.toLowerCase()}`}>
+                        {reservation.status === "COMPLETED" ? (
+                            <svg className="status-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                                <polyline points="22,4 12,14.01 9,11.01"/>
+                            </svg>
+                        ) : (
+                            <svg className="status-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+                            </svg>
+                        )}
+                        {reservation.status}
+                    </div>
+                    {reservation.status === "COMPLETED" && (
+                        <div className={`payment-status-badge ${reservation.chargingSession?.paid ? 'paid' : 'awaiting'}`}>
+                            {reservation.chargingSession?.paid ? 'Paid' : 'Awaiting payment'}
+                        </div>
                     )}
-                    {reservation.status}
                 </div>
             </div>
 
@@ -217,6 +238,18 @@ const Dashboard = () => {
                                 Cancel
                             </>
                         )}
+                    </button>
+                </div>
+            )}
+            {reservation.status === "COMPLETED" && !reservation.chargingSession?.paid && (
+                <div className="card-actions">
+                    <button className="pay-button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+                            <path d="M12 18V6"/>
+                        </svg>
+                        Pay
                     </button>
                 </div>
             )}

@@ -114,4 +114,21 @@ public class ReservationService {
         reservationRepository.delete(reservation);
         return reservation;
     }
+
+    public Reservation completeReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new RuntimeException("Invalid reservation status: only active reservations can be completed");
+        }
+
+        // Assuming completion means setting the end time to now and status to COMPLETED
+        reservation.setEstimatedEndTime(LocalDateTime.now()); // Or set actual endTime if available
+        reservation.setStatus(ReservationStatus.COMPLETED);
+
+        // TODO: Logic to create/associate ChargingSession and calculate cost if not already done
+
+        return reservationRepository.save(reservation);
+    }
 }
