@@ -255,39 +255,9 @@ class StationApiTest {
     @Test
     @DisplayName("GET /api/stations/{id}/details - Station not found returns 404")
     void getStationDetails_NonExistingStation_ReturnsNotFound() {
-        // 1. Criar cliente
-        var client = Map.of(
-                "email", "test@email.com",
-                "password", "password123",
-                "name", "Test User"
-        );
-
-        given().contentType(ContentType.JSON)
-                .body(client)
-                .when()
-                .post("/api/clients")
-                .then()
-                .statusCode(anyOf(is(200), is(201)));
-
-        // 2. Fazer login
-        var login = Map.of(
-                "email", "test@email.com",
-                "password", "password123"
-        );
-
-        var sessionCookie = given().contentType(ContentType.JSON)
-                .body(login)
-                .when()
-                .post("/api/clients/login")
-                .then()
-                .statusCode(200)
-                .extract()
-                .cookie("JSESSIONID");  // ou o nome correto do cookie da tua sessão
-
-        // 3. Fazer request autenticado
         long nonExistingId = 999999L;
 
-        given().cookie("JSESSIONID", sessionCookie)
+        given()
                 .when()
                 .get("/api/stations/" + nonExistingId + "/details")
                 .then()
