@@ -8,34 +8,56 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const fetchReservations = async () => {
+        const user = JSON.parse(localStorage.getItem("client"));
+        const userId = user?.id;
+
+        if (!userId) {
+            setError("User not logged in.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/reservations/client/${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            setReservations(data);
+        } catch (error) {
+            setError("Failed to fetch reservations.");
+            console.error("Fetching reservations failed:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchReservations = async () => {
-            const user = JSON.parse(localStorage.getItem("client"));
-            const userId = user?.id;
-
-            if (!userId) {
-                setError("User not logged in.");
-                setLoading(false);
-                return;
-            }
-
-            try {
-                const response = await fetch(`http://localhost:8080/api/reservations/client/${userId}`);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                setReservations(data);
-            } catch (error) {
-                setError("Failed to fetch reservations.");
-                console.error("Fetching reservations failed:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchReservations();
     }, []); // Empty dependency array means this effect runs once on mount
+
+    const handleCancelReservation = async (reservationId) => {
+        try {
+            const response = await fetch(`http://localhost:8080/api/reservations/${reservationId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to cancel reservation');
+            }
+
+            // Refresh the reservations list
+            await fetchReservations();
+        } catch (error) {
+            setError(error.message);
+            console.error("Cancelling reservation failed:", error);
+        }
+    };
 
     const activeReservations = reservations.filter(res => res.status === "ACTIVE");
     const completedReservations = reservations.filter(res => res.status === "COMPLETED");
@@ -48,6 +70,14 @@ const Dashboard = () => {
             <p><strong>Start Time:</strong> {new Date(reservation.startTime).toLocaleDateString()} {new Date(reservation.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
             <p><strong>Expected End Time:</strong> {new Date(reservation.estimatedEndTime).toLocaleDateString()} {new Date(reservation.estimatedEndTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
             <p><strong>Cost:</strong> {reservation.estimatedCost ? reservation.estimatedCost.toFixed(2) + '€' : 'N/A'}</p>
+            {reservation.status === "ACTIVE" && (
+                <button 
+                    className="cancel-button"
+                    onClick={() => handleCancelReservation(reservation.id)}
+                >
+                    Cancel Reservation
+                </button>
+            )}
         </li>
     );
 
