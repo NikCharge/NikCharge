@@ -21,6 +21,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import tqs.backend.repository.ReservationRepository;
+import java.time.LocalDateTime;
 
 class StationServiceTest {
 
@@ -28,14 +30,20 @@ class StationServiceTest {
     private ChargerRepository chargerRepository;
     private DiscountRepository discountRepository;
     private StationService stationService;
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setup() {
         stationRepository = mock(StationRepository.class);
         chargerRepository = mock(ChargerRepository.class);
         discountRepository = mock(DiscountRepository.class);
-        stationService = new StationService(stationRepository, chargerRepository, discountRepository);
+        reservationRepository = mock(ReservationRepository.class); // NOVO
+
+        stationService = new StationService(
+                stationRepository, chargerRepository, discountRepository, reservationRepository
+        );
     }
+
 
     @Test
     void getAllStations_ReturnsList() {
@@ -111,7 +119,7 @@ class StationServiceTest {
         when(stationRepository.findById(5L)).thenReturn(Optional.of(station));
         when(chargerRepository.findByStationId(5L)).thenReturn(List.of(charger));
 
-        StationDetailsDTO dto = stationService.getStationDetails(5L);
+        StationDetailsDTO dto = stationService.getStationDetails(5L, LocalDateTime.of(2025, 6, 6, 0, 0));
 
         assertThat(dto).isNotNull();
         assertThat(dto.getId()).isEqualTo(5L);

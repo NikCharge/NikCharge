@@ -31,6 +31,7 @@ const Search = () => {
     const [viewMode, setViewMode] = useState("map");
     const [selectedChargerTypes, setSelectedChargerTypes] = useState([]);
     const [selectedStation, setSelectedStation] = useState(null);
+    const [selectedDateTime, setSelectedDateTime] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -40,7 +41,12 @@ const Search = () => {
 
                 const detailedStations = await Promise.all(
                     baseStations.map(async (station) => {
-                        const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details`);
+                        const datetimeParam = selectedDateTime
+                            ? `?datetime=${encodeURIComponent(dayjs(selectedDateTime).format("YYYY-MM-DDTHH:mm"))}`
+                            : "";
+
+                        const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details${datetimeParam}`);
+
                         const details = await detailsRes.json();
 
                         let distance = "–";
@@ -125,7 +131,11 @@ const Search = () => {
                     setUserLocation={setUserLocation}
                     selectedChargerTypes={selectedChargerTypes}
                     setSelectedChargerTypes={setSelectedChargerTypes}
+                    setStations={setStations}
+                    selectedDateTime={selectedDateTime}
+                    setSelectedDateTime={setSelectedDateTime}
                 />
+
 
                 {viewMode === "map" ? (
                     <MapDisplay
