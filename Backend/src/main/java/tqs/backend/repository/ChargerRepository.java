@@ -13,4 +13,3 @@ public interface ChargerRepository extends JpaRepository<Charger, Long> {
     long countByStatus(ChargerStatus status);
     long countByStationIdAndStatus(Long stationId, ChargerStatus status);
 }
- 

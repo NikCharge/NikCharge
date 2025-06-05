@@ -12,16 +12,25 @@ class ChargerDTOTest {
 
     @Test
     void testNoArgsConstructorAndSetters() {
-        ChargerDTO charger = new ChargerDTO();  // <- cobre @NoArgsConstructor
+        // Usa o construtor sem argumentos
+        ChargerDTO chargerDTO = new ChargerDTO();
 
-        charger.setId(5L);
-        charger.setChargerType(ChargerType.DC_ULTRA_FAST);
-        charger.setStatus(ChargerStatus.IN_USE);
-        charger.setPricePerKwh(new BigDecimal("0.45"));  // <- cobre @Setter
+        // Define os valores usando os setters
+        chargerDTO.setId(1L);
+        chargerDTO.setChargerType(ChargerType.DC_FAST);
+        chargerDTO.setStatus(ChargerStatus.AVAILABLE);
+        chargerDTO.setPricePerKwh(BigDecimal.valueOf(0.25));
+        chargerDTO.setStationId(10L);
+        chargerDTO.setStationName("Estação Central");
+        chargerDTO.setStationCity("Lisboa");
 
-        assertEquals(5L, charger.getId());
-        assertEquals(ChargerType.DC_ULTRA_FAST, charger.getChargerType());
-        assertEquals(ChargerStatus.IN_USE, charger.getStatus());
-        assertEquals(new BigDecimal("0.45"), charger.getPricePerKwh());
+        // Verifica se os valores foram definidos corretamente
+        assertEquals(1L, chargerDTO.getId());
+        assertEquals(ChargerType.DC_FAST, chargerDTO.getChargerType());
+        assertEquals(ChargerStatus.AVAILABLE, chargerDTO.getStatus());
+        assertEquals(BigDecimal.valueOf(0.25), chargerDTO.getPricePerKwh());
+        assertEquals(10L, chargerDTO.getStationId());
+        assertEquals("Estação Central", chargerDTO.getStationName());
+        assertEquals("Lisboa", chargerDTO.getStationCity());
     }
 }

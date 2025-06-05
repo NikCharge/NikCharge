@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class StationIntegrationTest {
+class StationIntegrationTest {
 
     @LocalServerPort
     private int port;
@@ -153,7 +153,7 @@ public class StationIntegrationTest {
         Charger c2 = Charger.builder()
                 .station(station)
                 .chargerType(ChargerType.AC_STANDARD)
-                .status(ChargerStatus.IN_USE)
+                .status(ChargerStatus.AVAILABLE)
                 .pricePerKwh(BigDecimal.valueOf(0.20))
                 .build();
 

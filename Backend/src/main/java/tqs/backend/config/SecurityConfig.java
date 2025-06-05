@@ -11,6 +11,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import java.util.List;
 
@@ -23,18 +25,24 @@ public class SecurityConfig {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(
-                            "/api/clients/**",
-                            "/api/stations/**",          // cobre POST, GET, etc. para /api/stations
-                            "/api/stations/*/details",  
-                            "/api/chargers/**",
-                            "/swagger-ui/**",
-                            "/v3/api-docs/**",
-                            "/swagger-ui.html"
+                        .requestMatchers(HttpMethod.POST, "/api/clients").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/clients/login").permitAll()
+                        .requestMatchers(
+                                "/api/clients/**",
+                                "/api/stations/**",
+                                "/api/stations/*/details",
+                                "/api/chargers/**",
+                                "/api/reservations/**",
+                                "/swagger-ui/**",
+                                "/api/discounts/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
                         ).permitAll()
-
-                        .anyRequest().authenticated());
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated()
+                );
 
         return http.build();
     }

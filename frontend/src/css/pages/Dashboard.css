@@ -44,3 +44,47 @@ body {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
 }
 
+.reservations-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.reservations-section h2 {
+    color: #0e6355;
+    margin-bottom: 1rem;
+}
+
+.reservations-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.reservations-list.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Adjust minmax as needed */
+    gap: 1rem; /* Space between grid items */
+}
+
+.reservation-item {
+    background-color: #f8fcfb; /* Light background for items */
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0; /* Remove bottom margin in grid */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute space within item */
+}
+
+.reservation-item p {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.reservation-item p:last-child {
+    margin-bottom: 0;
+}
+

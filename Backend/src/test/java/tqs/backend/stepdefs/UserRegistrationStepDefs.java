@@ -5,7 +5,6 @@ import io.cucumber.java.en.When;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.And;
 import io.cucumber.datatable.DataTable;
-import io.cucumber.spring.CucumberContextConfiguration;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,8 +14,9 @@ import tqs.backend.BackendApplication;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import io.cucumber.java.Before;
+import tqs.backend.repository.ClientRepository;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 // @CucumberContextConfiguration
@@ -24,14 +24,21 @@ import static org.hamcrest.Matchers.*;
 @ContextConfiguration(classes = BackendApplication.class)
 public class UserRegistrationStepDefs {
 
-        @Autowired
-        private ObjectMapper objectMapper;
+        
 
         @LocalServerPort
         private int port;
 
         private Response response;
         private Map<String, String> registrationData;
+
+        @Autowired
+        private ClientRepository clientRepository;
+
+        @Before
+        public void setup() {
+                clientRepository.deleteAll();
+        }
 
         @Given("a user with email {string} exists in the system")
         public void aUserWithEmailExistsInTheSystem(String email) {
