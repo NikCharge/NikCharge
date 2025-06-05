@@ -16,6 +16,7 @@ import java.util.List;
 import tqs.backend.dto.ReservationResponse;
 import tqs.backend.dto.ReservationResponse.ChargerDto;
 import tqs.backend.dto.ReservationResponse.StationDto;
+import tqs.backend.exception.InvalidReservationStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -101,5 +102,17 @@ public class ReservationService {
                 .build();
 
         return reservationRepository.save(reservation);
+    }
+
+    public Reservation cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new InvalidReservationStatusException("Invalid reservation status: only active reservations can be cancelled");
+        }
+
+        reservationRepository.delete(reservation);
+        return reservation;
     }
 }

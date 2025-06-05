@@ -3,6 +3,7 @@ package tqs.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -34,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReservationController.class)
@@ -230,6 +232,45 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.error", is("Client not found")));
 
         verify(reservationService, times(1)).getReservationsByClientId(1L);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/reservations/{id} - Successfully cancel an active reservation")
+    void whenCancelActiveReservation_thenReturnOk() throws Exception {
+        when(reservationService.cancelReservation(1L)).thenReturn(reservation);
+
+        mockMvc.perform(delete("/api/reservations/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.status", is("ACTIVE")));
+
+        verify(reservationService, times(1)).cancelReservation(1L);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/reservations/{id} - Attempt to cancel non-existent reservation")
+    void whenCancelNonExistentReservation_thenReturnNotFound() throws Exception {
+        when(reservationService.cancelReservation(999L))
+                .thenThrow(new RuntimeException("Reservation not found"));
+
+        mockMvc.perform(delete("/api/reservations/{id}", 999L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error", is("Reservation not found")));
+
+        verify(reservationService, times(1)).cancelReservation(999L);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/reservations/{id} - Attempt to cancel already cancelled reservation")
+    void whenCancelCompletedReservation_thenReturnBadRequest() throws Exception {
+        when(reservationService.cancelReservation(1L))
+                .thenThrow(new RuntimeException("Invalid reservation status: only active reservations can be cancelled"));
+
+        mockMvc.perform(delete("/api/reservations/{id}", 1L))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Invalid reservation status: only active reservations can be cancelled")));
+
+        verify(reservationService, times(1)).cancelReservation(1L);
     }
 
     @TestConfiguration

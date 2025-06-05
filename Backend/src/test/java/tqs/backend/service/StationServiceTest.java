@@ -21,6 +21,8 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import tqs.backend.repository.ReservationRepository;
+import java.time.LocalDateTime;
 
 class StationServiceTest {
 
@@ -28,14 +30,20 @@ class StationServiceTest {
     private ChargerRepository chargerRepository;
     private DiscountRepository discountRepository;
     private StationService stationService;
+    private ReservationRepository reservationRepository;
 
     @BeforeEach
     void setup() {
         stationRepository = mock(StationRepository.class);
         chargerRepository = mock(ChargerRepository.class);
         discountRepository = mock(DiscountRepository.class);
-        stationService = new StationService(stationRepository, chargerRepository, discountRepository);
+        reservationRepository = mock(ReservationRepository.class); // NOVO
+
+        stationService = new StationService(
+                stationRepository, chargerRepository, discountRepository, reservationRepository
+        );
     }
+
 
     @Test
     void getAllStations_ReturnsList() {
@@ -111,7 +119,7 @@ class StationServiceTest {
         when(stationRepository.findById(5L)).thenReturn(Optional.of(station));
         when(chargerRepository.findByStationId(5L)).thenReturn(List.of(charger));
 
-        StationDetailsDTO dto = stationService.getStationDetails(5L);
+        StationDetailsDTO dto = stationService.getStationDetails(5L, LocalDateTime.of(2025, 6, 6, 0, 0));
 
         assertThat(dto).isNotNull();
         assertThat(dto.getId()).isEqualTo(5L);
@@ -141,23 +149,38 @@ class StationServiceTest {
 
     @Test
 void searchStationsWithDiscount_ReturnsMappedStations() {
-    // Station com desconto
-    var discountedStation = Station.builder()
-            .id(1L)
-            .name("Discounted")
-            .latitude(1.1)
-            .longitude(2.2)
-            .build();
+        var discountedStation = Station.builder()
+                .id(1L)
+                .name("Discounted")
+                .latitude(1.1)
+                .longitude(2.2)
+                .chargers(List.of(
+                        Charger.builder()
+                                .id(1L)
+                                .chargerType(ChargerType.AC_STANDARD)
+                                .status(ChargerStatus.AVAILABLE)
+                                .pricePerKwh(BigDecimal.valueOf(0.30))
+                                .build()
+                ))
+                .build();
 
-    // Station sem desconto
-    var noDiscountStation = Station.builder()
-            .id(2L)
-            .name("NoDiscount")
-            .latitude(3.3)
-            .longitude(4.4)
-            .build();
+        var noDiscountStation = Station.builder()
+                .id(2L)
+                .name("NoDiscount")
+                .latitude(3.3)
+                .longitude(4.4)
+                .chargers(List.of(
+                        Charger.builder()
+                                .id(2L)
+                                .chargerType(ChargerType.AC_STANDARD)
+                                .status(ChargerStatus.AVAILABLE)
+                                .pricePerKwh(BigDecimal.valueOf(0.30))
+                                .build()
+                ))
+                .build();
 
-    when(stationRepository.findAll()).thenReturn(List.of(discountedStation, noDiscountStation));
+
+        when(stationRepository.findAll()).thenReturn(List.of(discountedStation, noDiscountStation));
 
     var discount = Discount.builder()
             .station(discountedStation)

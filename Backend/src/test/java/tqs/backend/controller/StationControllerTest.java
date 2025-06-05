@@ -41,6 +41,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import tqs.backend.repository.ReservationRepository;
 
 @WebMvcTest(StationController.class)
 @Import({ StationControllerTest.MockConfig.class, StationControllerTest.SecurityConfig.class })
@@ -56,7 +57,7 @@ class StationControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    
+
     @TestConfiguration
     static class MockConfig {
         @Bean
@@ -75,9 +76,20 @@ class StationControllerTest {
         }
 
         @Bean
-        public StationService stationService(StationRepository stationRepository, ChargerRepository chargerRepository, DiscountRepository discountRepository) {
-            return new StationService(stationRepository, chargerRepository, discountRepository);
+        public ReservationRepository reservationRepository() {
+            return mock(ReservationRepository.class);
         }
+
+        @Bean
+        public StationService stationService(
+                StationRepository stationRepository,
+                ChargerRepository chargerRepository,
+                DiscountRepository discountRepository,
+                ReservationRepository reservationRepository
+        ) {
+            return new StationService(stationRepository, chargerRepository, discountRepository, reservationRepository);
+        }
+
 
         @Bean
         public Validator validator() {
@@ -92,7 +104,7 @@ class StationControllerTest {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http.csrf(csrf -> csrf.disable())
                     .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/clients/**", "/api/stations/**", "/api/stations/search" , "/api/stations/*/details",  
+                            .requestMatchers("/api/clients/**", "/api/stations/**", "/api/stations/search" , "/api/stations/*/details",
                             "/api/chargers/**",                             "/api/discounts/**").permitAll()
                             .anyRequest().authenticated());
             return http.build();
@@ -287,14 +299,23 @@ class StationControllerTest {
         @DisplayName("GET /api/stations/search - Should include discount tag when active")
         void searchStations_withActiveDiscount_shouldIncludeDiscountTag() throws Exception {
                 // Simula estação real
-                Station station = Station.builder()
-                        .id(1L)
-                        .name("Station Discount")
-                        .latitude(37.019)
-                        .longitude(-7.93)
-                        .build();
+            Station station = Station.builder()
+                    .id(1L)
+                    .name("Station Discount")
+                    .latitude(37.019)
+                    .longitude(-7.93)
+                    .chargers(List.of(
+                            Charger.builder()
+                                    .id(1L)
+                                    .chargerType(ChargerType.AC_STANDARD)
+                                    .status(ChargerStatus.AVAILABLE)
+                                    .pricePerKwh(BigDecimal.valueOf(0.30))
+                                    .build()
+                    ))
+                    .build();
 
-                // Simula desconto real
+
+            // Simula desconto real
                 Discount discount = Discount.builder()
                         .station(station)
                         .chargerType(ChargerType.AC_STANDARD)

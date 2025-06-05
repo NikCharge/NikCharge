@@ -12,15 +12,25 @@
     flex: 1;
     width: 100%;
     background: linear-gradient(135deg, #f8fcfb 0%, #e8f5f3 100%);
-    padding: 1rem 2rem 2rem 2rem;
+    padding: 1rem 2rem 2rem 2rem; /* Adjusted padding to add horizontal space */
     padding-top: calc(1rem + 80px); /* Reduced top padding for closer header */
+    margin: 0; /* Set margin to 0 for full width */
+    /* Removed max-width property */
 }
 
 /* Dashboard Header */
 .dashboard-header {
-    text-align: center;
     margin-bottom: 2rem; /* Reduced margin for closer positioning */
     padding: 1rem 0; /* Reduced padding */
+    width: 100%;
+    display: flex; /* Added flexbox */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center children horizontally */
+}
+
+.header-title-section {
+    width: 100%; /* Ensure it takes full width */
+    text-align: center; /* Center the text inside */
 }
 
 .dashboard-header h1 {
@@ -83,6 +93,7 @@
     justify-content: center;
     gap: 3rem;
     margin-top: 2rem;
+    margin-bottom: 3rem; /* Added margin-bottom */
 }
 
 .stat-item {
@@ -106,6 +117,8 @@
     font-weight: 700;
     color: #1db690;
     margin-bottom: 0.5rem;
+    width: 100%;
+    text-align: center;
 }
 
 .stat-label {
