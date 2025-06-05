@@ -31,7 +31,7 @@ jobs:
       - name: Set up Docker
         run: |
           docker --version
-          docker-compose --version
+          docker compose --version
 
       - name: Create .env file
         run: |
@@ -41,7 +41,7 @@ jobs:
           echo "VITE_API_URL=/api" >> .env
 
       - name: Build and start backend with Docker Compose
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
 
       - name: Wait for backend to be ready
         run: |
@@ -69,4 +69,4 @@ jobs:
 
       - name: Shut down backend
         if: always()
-        run: docker-compose down --volumes --remove-orphans
+        run: docker compose down --volumes --remove-orphans
