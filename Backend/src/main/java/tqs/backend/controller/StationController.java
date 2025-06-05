@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -91,7 +92,7 @@ public class StationController {
     ) {
         StationDetailsDTO dto = stationService.getStationDetails(id, datetime);
         if (dto == null) {
-            return ResponseEntity.notFound().build();
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Station not found");
         }
         return ResponseEntity.ok(dto);
     }

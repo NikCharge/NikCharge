@@ -149,23 +149,38 @@ class StationServiceTest {
 
     @Test
 void searchStationsWithDiscount_ReturnsMappedStations() {
-    // Station com desconto
-    var discountedStation = Station.builder()
-            .id(1L)
-            .name("Discounted")
-            .latitude(1.1)
-            .longitude(2.2)
-            .build();
+        var discountedStation = Station.builder()
+                .id(1L)
+                .name("Discounted")
+                .latitude(1.1)
+                .longitude(2.2)
+                .chargers(List.of(
+                        Charger.builder()
+                                .id(1L)
+                                .chargerType(ChargerType.AC_STANDARD)
+                                .status(ChargerStatus.AVAILABLE)
+                                .pricePerKwh(BigDecimal.valueOf(0.30))
+                                .build()
+                ))
+                .build();
 
-    // Station sem desconto
-    var noDiscountStation = Station.builder()
-            .id(2L)
-            .name("NoDiscount")
-            .latitude(3.3)
-            .longitude(4.4)
-            .build();
+        var noDiscountStation = Station.builder()
+                .id(2L)
+                .name("NoDiscount")
+                .latitude(3.3)
+                .longitude(4.4)
+                .chargers(List.of(
+                        Charger.builder()
+                                .id(2L)
+                                .chargerType(ChargerType.AC_STANDARD)
+                                .status(ChargerStatus.AVAILABLE)
+                                .pricePerKwh(BigDecimal.valueOf(0.30))
+                                .build()
+                ))
+                .build();
 
-    when(stationRepository.findAll()).thenReturn(List.of(discountedStation, noDiscountStation));
+
+        when(stationRepository.findAll()).thenReturn(List.of(discountedStation, noDiscountStation));
 
     var discount = Discount.builder()
             .station(discountedStation)

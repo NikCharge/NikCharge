@@ -252,20 +252,51 @@ class StationApiTest {
 
 
 
-        @Test
-        @DisplayName("GET /api/stations/{id}/details - Station not found returns 404")
-        void getStationDetails_NonExistingStation_ReturnsNotFound() {
+    @Test
+    @DisplayName("GET /api/stations/{id}/details - Station not found returns 404")
+    void getStationDetails_NonExistingStation_ReturnsNotFound() {
+        // 1. Criar cliente
+        var client = Map.of(
+                "email", "test@email.com",
+                "password", "password123",
+                "name", "Test User"
+        );
+
+        given().contentType(ContentType.JSON)
+                .body(client)
+                .when()
+                .post("/api/clients")
+                .then()
+                .statusCode(anyOf(is(200), is(201)));
+
+        // 2. Fazer login
+        var login = Map.of(
+                "email", "test@email.com",
+                "password", "password123"
+        );
+
+        var sessionCookie = given().contentType(ContentType.JSON)
+                .body(login)
+                .when()
+                .post("/api/clients/login")
+                .then()
+                .statusCode(200)
+                .extract()
+                .cookie("JSESSIONID");  // ou o nome correto do cookie da tua sessão
+
+        // 3. Fazer request autenticado
         long nonExistingId = 999999L;
 
-        given()
+        given().cookie("JSESSIONID", sessionCookie)
                 .when()
                 .get("/api/stations/" + nonExistingId + "/details")
                 .then()
                 .statusCode(404)
-                .body("error", equalTo("Station not found")); // cobre Map.of(ERROR_KEY, ...)
-        }
+                .body("error", equalTo("Station not found"));
+    }
 
-        @Test
+
+    @Test
         @DisplayName("GET /api/stations/search - Shows discount tag when active")
         void searchStations_WithActiveDiscount_ShowsDiscountTag() {
         // Criar estação
