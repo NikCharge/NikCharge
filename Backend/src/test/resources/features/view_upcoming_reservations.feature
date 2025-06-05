@@ -6,7 +6,7 @@ Feature: View Reservations
 
   @SCRUM-173 @active
   Scenario: View active reservations when logged in
-    Given a client is registered
+    Given a client is registered with email "client@example.com" and password "securepass123"
     And a station with name "Station Active" and address "Address Active" and city "City Active" exists
     And a charger with type "AC_STANDARD" and status "AVAILABLE" at station "Station Active" exists
     And the client has a reservation at that charger with status "ACTIVE"
