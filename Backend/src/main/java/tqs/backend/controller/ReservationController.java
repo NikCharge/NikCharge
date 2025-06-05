@@ -63,7 +63,7 @@ public class ReservationController {
             if (e.getMessage().equals("Reservation not found")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of(ERROR_KEY, e.getMessage()));
-            } else if (e.getMessage().equals("Only active reservations can be cancelled")) {
+            } else if (e.getMessage().equals("Invalid reservation status: only active reservations can be cancelled")) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of(ERROR_KEY, e.getMessage()));
             }
