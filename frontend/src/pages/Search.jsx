@@ -7,6 +7,7 @@ import MapDisplay from "../components/SearchPage/MapDisplay.jsx";
 import StationList from "../components/SearchPage/StationList.jsx";
 import StationInfoModal from "../components/SearchPage/StationInfoModal.jsx";
 import { MdMap, MdList } from "react-icons/md";
+import dayjs from "dayjs";
 
 // Distância entre dois pontos geográficos
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -46,7 +47,6 @@ const Search = () => {
                             : "";
 
                         const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details${datetimeParam}`);
-
                         const details = await detailsRes.json();
 
                         let distance = "–";
@@ -59,15 +59,18 @@ const Search = () => {
                             );
                         }
 
+                        console.log(`📦 Details for ${station.name}:`, details);
+
                         return {
                             ...details,
                             imageUrl: station.imageUrl || null,
                             distance,
-                            availableChargers: details.chargers.filter(c => c.status === "AVAILABLE").length
+                            availableChargers: details.chargers.length
                         };
                     })
                 );
 
+                console.log("📊 Final detailed stations:", detailedStations);
                 setStations(detailedStations);
             } catch (error) {
                 console.error("Erro ao buscar estações:", error);
@@ -77,7 +80,8 @@ const Search = () => {
         if (userLocation?.lat && userLocation?.lng) {
             fetchData();
         }
-    }, [userLocation]);
+    }, [userLocation, selectedDateTime]); // <- Certifica-te que isto inclui `selectedDateTime`
+
 
     const filteredStations = useMemo(() => {
         const typeMap = {
@@ -91,10 +95,12 @@ const Search = () => {
 
         // Caso contrário, aplica o filtro por tipo
         return stations.filter(station =>
+            Array.isArray(station.chargers) &&
             station.chargers.some(charger =>
                 selectedChargerTypes.includes(typeMap[charger.chargerType])
             )
         );
+
     }, [stations, selectedChargerTypes]);
 
     const handleStationClick = (station) => {
@@ -129,6 +135,7 @@ const Search = () => {
 
                 <FiltersPanel
                     setUserLocation={setUserLocation}
+                    userLocation={userLocation}
                     selectedChargerTypes={selectedChargerTypes}
                     setSelectedChargerTypes={setSelectedChargerTypes}
                     setStations={setStations}

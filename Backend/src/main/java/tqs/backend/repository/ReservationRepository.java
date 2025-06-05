@@ -8,5 +8,11 @@ import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     boolean existsByChargerIdAndEstimatedEndTimeAfterAndStartTimeBefore(Long chargerId, LocalDateTime startTime, LocalDateTime endTime);
-    List<Reservation> findByStartTimeBeforeAndEstimatedEndTimeAfter(LocalDateTime start, LocalDateTime end);
+    List<Reservation> findByStartTimeLessThanEqualAndEstimatedEndTimeAfter(LocalDateTime start, LocalDateTime end);
+    boolean existsByChargerIdAndEstimatedEndTimeAfterAndStartTimeLessThanEqual(
+            Long chargerId,
+            LocalDateTime estimatedEndTime,
+            LocalDateTime startTime
+    );
+
 }

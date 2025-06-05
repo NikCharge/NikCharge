@@ -12,7 +12,23 @@ const chargerLabelToEnum = {
     "Ultra-fast (DC)": "DC_ULTRAFAST"
 };
 
-const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedChargerTypes, setStations, selectedDateTime, setSelectedDateTime }) => {
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const toRad = value => (value * Math.PI) / 180;
+    const R = 6371;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) ** 2;
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+
+    return d < 1 ? `${Math.round(d * 1000)}m` : `${d.toFixed(1)}km`;
+};
+
+const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, setSelectedChargerTypes, setStations, selectedDateTime, setSelectedDateTime }) => {
     const [locationText, setLocationText] = useState("Detecting location...");
     const [customLocation, setCustomLocation] = useState("");
 
@@ -35,46 +51,110 @@ const FiltersPanel = ({ setUserLocation, selectedChargerTypes, setSelectedCharge
         });
     };
 
-    const fetchStations = async (lat, lng, datetime = null) => {
+    const fetchStations = async (lat, lng, datetime = null, chargerTypesOverride = null) => {
         try {
             let stations = [];
 
-            // Se houver tipos selecionados, faz chamadas ao /search
-            if (selectedChargerTypes.length > 0 && datetime) {
-                const dayOfWeek = dayjs(datetime).day(); // 0 (Sunday) to 6 (Saturday)
+            const chargerTypes = chargerTypesOverride || selectedChargerTypes;
+            console.log("🚀 Fetching stations with:");
+            console.log("Latitude:", lat, "Longitude:", lng);
+            console.log("Datetime:", datetime);
+            console.log("Charger types:", chargerTypes);
+
+            if (chargerTypes.length > 0 && datetime) {
+                const dayOfWeek = dayjs(datetime).day();
                 const hour = dayjs(datetime).hour();
 
-                const fetches = selectedChargerTypes.map(async type => {
+                const fetches = chargerTypes.map(async type => {
                     const typeParam = encodeURIComponent(type.toUpperCase().replace(/[\s\-()]/g, "_"));
-                    const res = await fetch(`/api/stations/search?dayOfWeek=${dayOfWeek}&hour=${hour}&chargerType=${typeParam}`);
+                    const url = `/api/stations/search?dayOfWeek=${dayOfWeek}&hour=${hour}&chargerType=${typeParam}`;
+                    console.log("➡️  Fetching filtered stations from:", url);
+                    const res = await fetch(url);
                     return res.json();
                 });
 
                 const results = await Promise.all(fetches);
-
-                // Junta os resultados e remove duplicados por ID
                 const allStations = results.flat();
+                console.log("📦 Filtered station search results:", allStations);
+
                 const uniqueStations = Array.from(
                     new Map(allStations.map(station => [station.id, station])).values()
                 );
 
-                stations = uniqueStations;
+                const detailedStations = await Promise.all(
+                    uniqueStations.map(async (station) => {
+                        const datetimeParam = encodeURIComponent(dayjs(datetime).format("YYYY-MM-DDTHH:mm"));
+                        const detailsUrl = `/api/stations/${station.id}/details?datetime=${datetimeParam}`;
+                        console.log("🔍 Fetching details from:", detailsUrl);
+                        const detailsRes = await fetch(detailsUrl);
+                        const details = await detailsRes.json();
+                        console.log(`✅ Details for station ${station.id}:`, details);
+
+                        return {
+                            ...details,
+                            imageUrl: station.imageUrl || null,
+                            distance: (userLocation?.lat && userLocation?.lng)
+                                ? calculateDistance(
+                                    userLocation.lat,
+                                    userLocation.lng,
+                                    details.latitude,
+                                    details.longitude
+                                )
+                                : "–",
+                            availableChargers: details.chargers.length
+                        };
+                    })
+                );
+
+                console.log("🧩 Final detailedStations list:", detailedStations);
+                stations = detailedStations;
             } else {
-                // fallback: carregar todas as estações (sem filtragem de disponibilidade)
+                // fallback: fetch all
                 let url = `/api/stations?lat=${lat}&lng=${lng}`;
                 if (datetime) {
                     const isoDate = dayjs(datetime).format("YYYY-MM-DDTHH:mm");
                     url += `&datetime=${encodeURIComponent(isoDate)}`;
                 }
+                console.log("📡 Fallback fetch from:", url);
                 const res = await fetch(url);
-                stations = await res.json();
+                const baseStations = await res.json();
+
+                const detailedStations = await Promise.all(
+                    baseStations.map(async (station) => {
+                        const datetimeParam = datetime
+                            ? `?datetime=${encodeURIComponent(dayjs(datetime).format("YYYY-MM-DDTHH:mm"))}`
+                            : "";
+
+                        const detailsRes = await fetch(`/api/stations/${station.id}/details${datetimeParam}`);
+                        const details = await detailsRes.json();
+
+                        return {
+                            ...details,
+                            imageUrl: station.imageUrl || null,
+                            distance: (userLocation?.lat && userLocation?.lng)
+                                ? calculateDistance(
+                                    userLocation.lat,
+                                    userLocation.lng,
+                                    details.latitude,
+                                    details.longitude
+                                )
+                                : "–",
+                            availableChargers: Array.isArray(details.chargers) ? details.chargers.length : 0
+                        };
+                    })
+                );
+
+                stations = detailedStations;
+
             }
 
+            console.log("📊 Setting stations state with:", stations);
             setStations(stations);
         } catch (err) {
-            console.error("Error fetching stations:", err);
+            console.error("❌ Error fetching stations:", err);
         }
     };
+
 
 
     const handleLocationSearch = async () => {

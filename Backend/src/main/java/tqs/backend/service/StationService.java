@@ -94,7 +94,7 @@ public class StationService {
 
         if (datetime != null) {
             // Fetch reservations that conflict with this datetime
-            List<Reservation> reservations = reservationRepository.findByStartTimeBeforeAndEstimatedEndTimeAfter(datetime, datetime);
+            List<Reservation> reservations = reservationRepository.findByStartTimeLessThanEqualAndEstimatedEndTimeAfter(datetime, datetime);
 
             Set<Long> reservedChargerIds = reservations.stream()
                     .map(r -> r.getCharger().getId())
@@ -110,8 +110,11 @@ public class StationService {
                 .map(c -> ChargerDTO.builder()
                         .id(c.getId())
                         .chargerType(c.getChargerType())
-                        .status(c.getStatus()) // Note: still shows DB status
+                        .status(c.getStatus())
                         .pricePerKwh(c.getPricePerKwh())
+                        .stationId(c.getStation() != null ? c.getStation().getId() : null)
+                        .stationName(c.getStation() != null ? c.getStation().getName() : null)
+                        .stationCity(c.getStation() != null ? c.getStation().getCity() : null)
                         .build())
                 .toList();
 
@@ -154,7 +157,7 @@ public class StationService {
                 .map(station -> {
                     List<Charger> availableChargers = station.getChargers().stream()
                             .filter(ch -> ch.getChargerType() == type)
-                            .filter(ch -> !reservationRepository.existsByChargerIdAndEstimatedEndTimeAfterAndStartTimeBefore(
+                            .filter(ch -> !reservationRepository.existsByChargerIdAndEstimatedEndTimeAfterAndStartTimeLessThanEqual(
                                     ch.getId(), targetStart, targetEnd))
                             .toList();
 
