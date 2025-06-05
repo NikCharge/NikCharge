@@ -128,7 +128,8 @@ class ReservationControllerTest {
                 80.0,
                 50.0,
                 estimatedCost,
-                ReservationStatus.ACTIVE
+                ReservationStatus.ACTIVE,
+                false
         );
 
         List<ReservationResponse> reservationResponses = Arrays.asList(reservationResponse);
@@ -169,8 +170,8 @@ class ReservationControllerTest {
         when(reservationService.createReservation(any(ReservationRequest.class))).thenReturn(reservation);
 
         mockMvc.perform(post("/api/reservations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(1)))
                 .andExpect(jsonPath("$.status", is("ACTIVE")))
@@ -186,8 +187,8 @@ class ReservationControllerTest {
                 .thenThrow(new RuntimeException("Client not found"));
 
         mockMvc.perform(post("/api/reservations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("Client not found")));
 
@@ -200,8 +201,8 @@ class ReservationControllerTest {
                 .thenThrow(new RuntimeException("This charger is currently under maintenance and cannot be reserved."));
 
         mockMvc.perform(post("/api/reservations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("This charger is currently under maintenance and cannot be reserved.")));
 
@@ -214,8 +215,8 @@ class ReservationControllerTest {
                 .thenThrow(new RuntimeException("Charger is already reserved for the requested time."));
 
         mockMvc.perform(post("/api/reservations")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error", is("Charger is already reserved for the requested time.")));
 
@@ -287,9 +288,9 @@ class ReservationControllerTest {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
             http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                    .requestMatchers("/api/reservations/**").permitAll()
-                    .anyRequest().authenticated());
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/api/reservations/**").permitAll()
+                            .anyRequest().authenticated());
             return http.build();
         }
     }

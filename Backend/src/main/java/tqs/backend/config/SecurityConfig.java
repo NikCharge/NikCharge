@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 "/api/stations/*/details",
                                 "/api/chargers/**",
                                 "/api/reservations/**",
+                                "/api/payment/**",
                                 "/swagger-ui/**",
                                 "/api/discounts/**",
                                 "/v3/api-docs/**",

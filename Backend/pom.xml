@@ -248,6 +248,14 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.17.0</version>
         </dependency>
+
+        <!-- Stripe for Payments -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>22.16.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

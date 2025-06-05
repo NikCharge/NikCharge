@@ -36,6 +36,10 @@ public class ReservationService {
                 .toList();
     }
 
+    public Reservation getReservationById(Long reservationId) {
+        return reservationRepository.findById(reservationId).orElse(null);
+    }
+
     private ReservationResponse convertToDto(Reservation reservation) {
         StationDto stationDto = null;
         if (reservation.getCharger() != null && reservation.getCharger().getStation() != null) {
@@ -64,7 +68,8 @@ public class ReservationService {
                 reservation.getBatteryLevelStart(),
                 reservation.getEstimatedKwh(),
                 reservation.getEstimatedCost(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                reservation.isPaid()
         );
     }
 
@@ -123,12 +128,13 @@ public class ReservationService {
             throw new RuntimeException("Invalid reservation status: only active reservations can be completed");
         }
 
-        // Assuming completion means setting the end time to now and status to COMPLETED
-        reservation.setEstimatedEndTime(LocalDateTime.now()); // Or set actual endTime if available
+        reservation.setEstimatedEndTime(LocalDateTime.now());
         reservation.setStatus(ReservationStatus.COMPLETED);
 
-        // TODO: Logic to create/associate ChargingSession and calculate cost if not already done
+        return reservationRepository.save(reservation);
+    }
 
+    public Reservation saveReservation(Reservation reservation) {
         return reservationRepository.save(reservation);
     }
 }
