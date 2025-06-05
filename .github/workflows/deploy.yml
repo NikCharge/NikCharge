@@ -1,0 +1,31 @@
+name: Deploy project
+
+on:
+  push:
+    branches:
+      - develop
+  
+
+jobs:
+  deploy:
+    runs-on: self-hosted  # ALTERADO: usar o runner no teu PC
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run deploy on remote server
+        run: |
+          ssh carolinaspsilva@deti-tqs-02 << 'EOF'
+            cd ~/NikCharge
+            git reset --hard HEAD
+            git pull origin develop
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" > .env
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+            echo "NODE_ENV=development" >> .env
+            echo "VITE_API_URL=/api" >> .env
+            docker-compose down --remove-orphans --volumes
+            docker-system prune -af
+            docker-volume prune -f
+            docker-compose up -d --build --remove-orphans
+          EOF

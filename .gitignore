@@ -1,0 +1,13 @@
+# IntelliJ project folder
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Python virtual environment
+venv/
+
+# Environment variables
+.env
+
+actions-runner/
