@@ -10,13 +10,10 @@ import io.restassured.response.Response;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ContextConfiguration;
-import tqs.backend.BackendApplication;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import io.cucumber.java.Before;
 import tqs.backend.repository.ClientRepository;
-import tqs.backend.stepdefs.CucumberSpringConfiguration;
 
 import static org.hamcrest.Matchers.*;
 

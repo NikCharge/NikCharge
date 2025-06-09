@@ -5,14 +5,10 @@ import io.cucumber.java.en.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import tqs.backend.model.enums.ChargerStatus;
-import tqs.backend.model.enums.ChargerType;
-import tqs.backend.model.enums.ReservationStatus;
 import tqs.backend.util.CommonReservationHelper;
 import org.springframework.test.context.ContextConfiguration;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = tqs.backend.stepdefs.CucumberSpringConfiguration.class)

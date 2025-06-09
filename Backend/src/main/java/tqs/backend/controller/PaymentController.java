@@ -32,7 +32,6 @@ public class PaymentController {
     @PostMapping("/create-checkout-session")
     public ResponseEntity<?> createCheckoutSession(@RequestBody Map<String, Long> request) {
         Long reservationId = request.get("reservationId");
-        logger.info("Attempting to create checkout session for reservation ID: {}", reservationId);
 
         if (reservationId == null) {
             logger.error("Error: Missing reservationId");

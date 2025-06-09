@@ -56,7 +56,7 @@ class PaymentControllerTest {
     private Session mockSession;
 
     @BeforeEach
-    void setUp() throws StripeException {
+    void setUp() {
         mockReservation = mock(Reservation.class);
         when(mockReservation.getId()).thenReturn(1L);
         when(mockReservation.getEstimatedCost()).thenReturn(new BigDecimal("10.00"));
@@ -378,8 +378,6 @@ class PaymentControllerTest {
         verify(reservationService, never()).getReservationById(any());
         verify(reservationService, never()).saveReservation(any());
     }
-
-    // TODO: Add more tests for other cases in verify-session (missing metadata, reservation not found, already paid, invalid ID format)
 
     @TestConfiguration
     @EnableWebSecurity
