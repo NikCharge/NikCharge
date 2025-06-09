@@ -49,7 +49,8 @@ public class DiscountIntegrationTest {
                     "spring.datasource.password=" + postgres.getPassword(),
                     "spring.jpa.hibernate.ddl-auto=create-drop",
                     "spring.jpa.show-sql=true",
-                    "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect"
+                    "spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect",
+                    "stripe.api.key=sk_test_dummy"
             ).applyTo(context.getEnvironment());
         }
     }

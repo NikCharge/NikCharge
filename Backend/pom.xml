@@ -59,12 +59,6 @@
             <version>2.3.232</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.influxdb</groupId>
-            <artifactId>influxdb-client-java</artifactId>
-            <version>6.10.0</version>
-        </dependency>
-
         <!-- Validation -->
         <dependency>
             <groupId>jakarta.validation</groupId>
@@ -248,6 +242,14 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.17.0</version>
         </dependency>
+
+        <!-- Stripe for Payments -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>22.16.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

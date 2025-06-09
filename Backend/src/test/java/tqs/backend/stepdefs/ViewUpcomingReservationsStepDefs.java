@@ -11,8 +11,10 @@ import tqs.backend.util.CommonReservationHelper;
 import static org.hamcrest.Matchers.equalTo;
 
 import static io.restassured.RestAssured.given;
+import org.springframework.test.context.ContextConfiguration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = tqs.backend.stepdefs.CucumberSpringConfiguration.class)
 public class ViewUpcomingReservationsStepDefs {
 
     @LocalServerPort

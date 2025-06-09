@@ -120,7 +120,7 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                     <input
                         id="location-input"
                         type="text"
-                        placeholder="Enter a location (e.g., Aveiro)"
+                        placeholder="Enter a location..."
                         value={customLocation}
                         onChange={(e) => setCustomLocation(e.target.value)}
                     />

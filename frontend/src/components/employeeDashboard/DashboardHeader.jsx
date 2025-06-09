@@ -11,7 +11,7 @@ const DashboardHeader = ({
                              stationName,
                              onResetView
                          }) => {
-    // const [showAvailableChargers, setShowAvailableChargers] = useState(false); // Moved to EmployeeDashboard.jsx
+    const [showAvailableChargers, setShowAvailableChargers] = useState(false);
 
     return (
         <div className="dashboard-header">
@@ -34,8 +34,6 @@ const DashboardHeader = ({
                 )}
             </div>
 
-            {/* Statistics section moved to EmployeeDashboard.jsx */}
-            {/*
             <div className="dashboard-stats">
                 <div className="stat-item">
                     <div className="stat-icon">
@@ -52,8 +50,8 @@ const DashboardHeader = ({
                         </div>
                     </div>
                 </div>
-                <div
-                    className="stat-item available clickable"
+                <div 
+                    className="stat-item available clickable" 
                     onClick={() => setShowAvailableChargers(true)}
                 >
                     <div className="stat-icon">
@@ -80,14 +78,10 @@ const DashboardHeader = ({
                     </div>
                 </div>
             </div>
-            */}
 
-            {/* AvailableChargersModal moved to EmployeeDashboard.jsx */}
-            {/*
             {showAvailableChargers && (
                 <AvailableChargersModal onClose={() => setShowAvailableChargers(false)} />
             )}
-            */}
         </div>
     );
 };

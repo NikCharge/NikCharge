@@ -5,10 +5,9 @@ import io.restassured.RestAssured;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ContextConfiguration;
-import tqs.backend.BackendApplication;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ContextConfiguration(classes = BackendApplication.class)
+@ContextConfiguration(classes = tqs.backend.stepdefs.CucumberSpringConfiguration.class)
 public class CommonStepDefs {
 
     @LocalServerPort

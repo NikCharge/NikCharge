@@ -16,7 +16,6 @@ import java.util.List;
 import tqs.backend.dto.ReservationResponse;
 import tqs.backend.dto.ReservationResponse.ChargerDto;
 import tqs.backend.dto.ReservationResponse.StationDto;
-import tqs.backend.exception.InvalidReservationStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +34,10 @@ public class ReservationService {
         return reservations.stream()
                 .map(this::convertToDto)
                 .toList();
+    }
+
+    public Reservation getReservationById(Long reservationId) {
+        return reservationRepository.findById(reservationId).orElse(null);
     }
 
     private ReservationResponse convertToDto(Reservation reservation) {
@@ -65,7 +68,8 @@ public class ReservationService {
                 reservation.getBatteryLevelStart(),
                 reservation.getEstimatedKwh(),
                 reservation.getEstimatedCost(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                reservation.isPaid()
         );
     }
 
@@ -109,10 +113,28 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Reservation not found"));
 
         if (reservation.getStatus() != ReservationStatus.ACTIVE) {
-            throw new InvalidReservationStatusException("Invalid reservation status: only active reservations can be cancelled");
+            throw new RuntimeException("Invalid reservation status: only active reservations can be cancelled");
         }
 
         reservationRepository.delete(reservation);
         return reservation;
+    }
+
+    public Reservation completeReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+
+        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new RuntimeException("Invalid reservation status: only active reservations can be completed");
+        }
+
+        reservation.setEstimatedEndTime(LocalDateTime.now());
+        reservation.setStatus(ReservationStatus.COMPLETED);
+
+        return reservationRepository.save(reservation);
+    }
+
+    public Reservation saveReservation(Reservation reservation) {
+        return reservationRepository.save(reservation);
     }
 }

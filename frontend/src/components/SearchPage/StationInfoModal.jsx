@@ -30,7 +30,11 @@ const StationInfoModal = ({ station, onClose, selectedDateTime }) => {
         return ((100 - batt) * 0.4).toFixed(2);
     }, [battery]);
     const durationMin = useMemo(() => powerKw ? Math.ceil((parseFloat(energyNeeded) / powerKw) * 60) : 0, [energyNeeded, powerKw]);
-    const cost = useMemo(() => selectedCharger ? (energyNeeded * selectedCharger.pricePerKwh).toFixed(2) : "0.00", [energyNeeded, selectedCharger]);
+    const cost = useMemo(() => {
+        if (!selectedCharger) return "0.00";
+        const calculatedCost = energyNeeded * selectedCharger.pricePerKwh;
+        return Math.max(0.50, calculatedCost).toFixed(2);
+    }, [energyNeeded, selectedCharger]);
 
     // Format local time manually to avoid UTC conversion
     const formatLocalDateTime = (date) => {

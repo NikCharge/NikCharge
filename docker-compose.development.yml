@@ -1,14 +1,6 @@
 version: '3.9'
 
 services:
-  # maven-build:
-  #   image: maven:3.9-eclipse-temurin-21
-  #   container_name: maven-build
-  #   working_dir: /app
-  #   volumes:
-  #     - ./Backend:/app
-  #   command: mvn package -DskipTests
-  #   restart: "no"
 
   postgres:
     image: postgres:15
@@ -22,6 +14,7 @@ services:
       POSTGRES_DB: admin
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
       test: [ "CMD", "pg_isready", "-U", "${POSTGRES_USER}" ]
       interval: 10s
@@ -47,6 +40,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
       SPRING_JPA_SHOW_SQL: "true"
       SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      stripe.api.key: "${STRIPE_API_KEY}"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
       interval: 30s
