@@ -36,6 +36,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(ReservationController.class)
@@ -272,6 +273,71 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.error", is("Invalid reservation status: only active reservations can be cancelled")));
 
         verify(reservationService, times(1)).cancelReservation(1L);
+    }
+
+    @Test
+    @DisplayName("DELETE /api/reservations/{id} - Generic RuntimeException")
+    void whenCancelReservationThrowsGenericException_thenReturnBadRequest() throws Exception {
+        when(reservationService.cancelReservation(1L))
+                .thenThrow(new RuntimeException("Something unexpected happened during cancellation"));
+
+        mockMvc.perform(delete("/api/reservations/{id}", 1L))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Something unexpected happened during cancellation")));
+
+        verify(reservationService, times(1)).cancelReservation(1L);
+    }
+
+    @Test
+    @DisplayName("PUT /api/reservations/{id}/complete - Successfully complete an active reservation")
+    void whenCompleteActiveReservation_thenReturnOk() throws Exception {
+        when(reservationService.completeReservation(1L)).thenReturn(reservation);
+
+        mockMvc.perform(put("/api/reservations/{id}/complete", 1L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(1)))
+                .andExpect(jsonPath("$.status", is("ACTIVE")));
+
+        verify(reservationService, times(1)).completeReservation(1L);
+    }
+
+    @Test
+    @DisplayName("PUT /api/reservations/{id}/complete - Attempt to complete non-existent reservation")
+    void whenCompleteNonExistentReservation_thenReturnNotFound() throws Exception {
+        when(reservationService.completeReservation(999L))
+                .thenThrow(new RuntimeException("Reservation not found"));
+
+        mockMvc.perform(put("/api/reservations/{id}/complete", 999L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error", is("Reservation not found")));
+
+        verify(reservationService, times(1)).completeReservation(999L);
+    }
+
+    @Test
+    @DisplayName("PUT /api/reservations/{id}/complete - Attempt to complete reservation with invalid status")
+    void whenCompleteReservationWithInvalidStatus_thenReturnBadRequest() throws Exception {
+        when(reservationService.completeReservation(1L))
+                .thenThrow(new RuntimeException("Invalid reservation status: already completed"));
+
+        mockMvc.perform(put("/api/reservations/{id}/complete", 1L))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Invalid reservation status: already completed")));
+
+        verify(reservationService, times(1)).completeReservation(1L);
+    }
+
+    @Test
+    @DisplayName("PUT /api/reservations/{id}/complete - Generic RuntimeException")
+    void whenCompleteReservationThrowsGenericException_thenReturnBadRequest() throws Exception {
+        when(reservationService.completeReservation(1L))
+                .thenThrow(new RuntimeException("Unexpected error during completion"));
+
+        mockMvc.perform(put("/api/reservations/{id}/complete", 1L))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error", is("Unexpected error during completion")));
+
+        verify(reservationService, times(1)).completeReservation(1L);
     }
 
     @TestConfiguration

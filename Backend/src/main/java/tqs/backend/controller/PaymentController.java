@@ -5,6 +5,8 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,51 +24,53 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class PaymentController {
 
+    private static final Logger logger = LoggerFactory.getLogger(PaymentController.class);
+
     private final ReservationService reservationService;
     private final StripeClient stripeClient;
 
     @PostMapping("/create-checkout-session")
     public ResponseEntity<?> createCheckoutSession(@RequestBody Map<String, Long> request) {
         Long reservationId = request.get("reservationId");
-        System.out.println("Attempting to create checkout session for reservation ID: " + reservationId);
+        logger.info("Attempting to create checkout session for reservation ID: {}", reservationId);
 
         if (reservationId == null) {
-            System.out.println("Error: Missing reservationId");
+            logger.error("Error: Missing reservationId");
             return ResponseEntity.badRequest().body(Map.of("error", "Missing reservationId"));
         }
 
         try {
             Reservation reservation = reservationService.getReservationById(reservationId);
-            System.out.println("Found reservation: " + (reservation != null ? "yes" : "no"));
+            logger.debug("Found reservation: {}", (reservation != null ? "yes" : "no"));
             if (reservation != null) {
-                System.out.println("Reservation details:");
-                System.out.println("- Status: " + reservation.getStatus());
-                System.out.println("- Is Paid: " + reservation.isPaid());
-                System.out.println("- Estimated Cost: " + reservation.getEstimatedCost());
+                logger.debug("Reservation details:");
+                logger.debug("- Status: {}", reservation.getStatus());
+                logger.debug("- Is Paid: {}", reservation.isPaid());
+                logger.debug("- Estimated Cost: {}", reservation.getEstimatedCost());
             }
 
             if (reservation == null) {
-                System.out.println("Error: Reservation not found");
+                logger.error("Error: Reservation not found");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Reservation not found"));
             }
 
             if (reservation.isPaid()) {
-                System.out.println("Error: Reservation is already paid");
+                logger.error("Error: Reservation is already paid");
                 return ResponseEntity.badRequest().body(Map.of("error", "Reservation is already paid"));
             }
 
             if (reservation.getEstimatedCost() == null) {
-                System.out.println("Error: Reservation has no estimated cost");
+                logger.error("Error: Reservation has no estimated cost");
                 return ResponseEntity.badRequest().body(Map.of("error", "Reservation cannot be paid"));
             }
 
             if (reservation.getStatus() != tqs.backend.model.enums.ReservationStatus.ACTIVE &&
                 reservation.getStatus() != tqs.backend.model.enums.ReservationStatus.COMPLETED) {
-                System.out.println("Error: Invalid reservation status: " + reservation.getStatus());
+                logger.error("Error: Invalid reservation status: {}", reservation.getStatus());
                 return ResponseEntity.badRequest().body(Map.of("error", "Reservation cannot be paid"));
             }
 
-            System.out.println("Creating checkout session for reservation with cost: " + reservation.getEstimatedCost());
+            logger.info("Creating checkout session for reservation with cost: {}", reservation.getEstimatedCost());
 
             SessionCreateParams params = SessionCreateParams.builder()
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
@@ -96,8 +100,8 @@ public class PaymentController {
 
             Session session = stripeClient.createCheckoutSession(params);
             if (session == null) {
-                System.out.println("Error: Failed to create Stripe session");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to create payment session"));
+                logger.error("Error: Failed to create Stripe session");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to create checkout session"));
             }
 
             Map<String, String> responseData = new HashMap<>();
@@ -106,9 +110,8 @@ public class PaymentController {
             return ResponseEntity.ok(responseData);
 
         } catch (StripeException e) {
-            // Log the error for debugging
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error creating checkout session: " + e.getMessage()));
+            logger.error("Error creating checkout session: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error creating checkout session: " + e.getMessage().split(";")[0]));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
@@ -150,8 +153,8 @@ public class PaymentController {
             return ResponseEntity.ok(Map.of("message", "Payment successfully verified and reservation updated"));
 
         } catch (StripeException e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error verifying checkout session: " + e.getMessage()));
+            logger.error("Error verifying checkout session: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error verifying checkout session: " + e.getMessage().split(";")[0]));
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid reservation ID in session metadata"));
         } catch (RuntimeException e) {

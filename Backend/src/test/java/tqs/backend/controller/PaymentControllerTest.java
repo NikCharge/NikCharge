@@ -181,6 +181,45 @@ class PaymentControllerTest {
         verify(stripeClient, never()).createCheckoutSession(any());
     }
 
+    @Test
+    @DisplayName("Create checkout session - Stripe API error")
+    void whenCreateCheckoutSessionThrowsStripeException_thenReturnInternalServerError() throws Exception {
+        when(reservationService.getReservationById(1L)).thenReturn(mockReservation);
+        when(stripeClient.createCheckoutSession(any(SessionCreateParams.class)))
+                .thenThrow(new com.stripe.exception.ApiException("Stripe API error", "req_test_123", "api_error", 500, null));
+
+        Map<String, Long> requestBody = new HashMap<>();
+        requestBody.put("reservationId", 1L);
+
+        mockMvc.perform(post("/api/payment/create-checkout-session")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error", is("Error creating checkout session: Stripe API error")));
+
+        verify(reservationService, times(1)).getReservationById(1L);
+        verify(stripeClient, times(1)).createCheckoutSession(any(SessionCreateParams.class));
+    }
+
+    @Test
+    @DisplayName("Create checkout session - Failed to create Stripe session (returns null)")
+    void whenCreateCheckoutSessionReturnsNull_thenReturnInternalServerError() throws Exception {
+        when(reservationService.getReservationById(1L)).thenReturn(mockReservation);
+        when(stripeClient.createCheckoutSession(any(SessionCreateParams.class))).thenReturn(null);
+
+        Map<String, Long> requestBody = new HashMap<>();
+        requestBody.put("reservationId", 1L);
+
+        mockMvc.perform(post("/api/payment/create-checkout-session")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(requestBody)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error", is("Failed to create checkout session")));
+
+        verify(reservationService, times(1)).getReservationById(1L);
+        verify(stripeClient, times(1)).createCheckoutSession(any(SessionCreateParams.class));
+    }
+
     // Test cases for /api/payment/verify-session
     @Test
     @DisplayName("Verify checkout session - Success")
@@ -319,6 +358,24 @@ class PaymentControllerTest {
         verify(mockSession, times(1)).getPaymentStatus();
         verify(mockSession, times(1)).getMetadata();
         verify(reservationService, times(1)).getReservationById(1L);
+        verify(reservationService, never()).saveReservation(any());
+    }
+
+    @Test
+    @DisplayName("Verify checkout session - Stripe API error")
+    void whenVerifyCheckoutSessionThrowsStripeException_thenReturnInternalServerError() throws Exception {
+        String testSessionId = "cs_test_stripe_error";
+
+        when(stripeClient.retrieveCheckoutSession(testSessionId))
+                .thenThrow(new com.stripe.exception.ApiException("Stripe API error during verification", "req_test_456", "api_error", 500, null));
+
+        mockMvc.perform(get("/api/payment/verify-session")
+                .param("session_id", testSessionId))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error", is("Error verifying checkout session: Stripe API error during verification")));
+
+        verify(stripeClient, times(1)).retrieveCheckoutSession(testSessionId);
+        verify(reservationService, never()).getReservationById(any());
         verify(reservationService, never()).saveReservation(any());
     }
 

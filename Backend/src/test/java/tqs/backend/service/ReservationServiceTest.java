@@ -259,4 +259,89 @@ class ReservationServiceTest {
         verify(reservationRepository, times(1)).findById(1L);
         verify(reservationRepository, never()).delete(any());
     }
+
+    @Test
+    @DisplayName("Successfully save a reservation")
+    void whenSaveReservation_thenReturnSavedReservation() {
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+
+        Reservation saved = reservationService.saveReservation(reservation);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getId()).isEqualTo(1L);
+        verify(reservationRepository, times(1)).save(reservation);
+    }
+
+    @Test
+    @DisplayName("Get reservation by ID - Found")
+    void whenGetReservationById_thenReturnsReservation() {
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        Reservation found = reservationService.getReservationById(1L);
+
+        assertThat(found).isNotNull();
+        assertThat(found.getId()).isEqualTo(1L);
+        verify(reservationRepository, times(1)).findById(1L);
+    }
+
+    @Test
+    @DisplayName("Get reservation by ID - Not Found")
+    void whenGetReservationById_thenReturnsNull() {
+        when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
+
+        Reservation found = reservationService.getReservationById(999L);
+
+        assertThat(found).isNull();
+        verify(reservationRepository, times(1)).findById(999L);
+    }
+
+    @Test
+    @DisplayName("Complete an active reservation successfully")
+    void whenCompleteActiveReservation_thenUpdateStatusAndReturnReservation() {
+        // Arrange
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+
+        // Act
+        Reservation result = reservationService.completeReservation(1L);
+
+        // Assert
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getStatus()).isEqualTo(ReservationStatus.COMPLETED);
+        assertThat(result.getEstimatedEndTime()).isNotNull(); // should be updated to now
+        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, times(1)).save(reservation);
+    }
+
+    @Test
+    @DisplayName("Attempt to complete non-existent reservation")
+    void whenCompleteNonExistentReservation_thenThrowException() {
+        // Arrange
+        when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThatThrownBy(() -> reservationService.completeReservation(999L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Reservation not found");
+
+        verify(reservationRepository, times(1)).findById(999L);
+        verify(reservationRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Attempt to complete already completed reservation")
+    void whenCompleteCompletedReservation_thenThrowException() {
+        // Arrange
+        reservation.setStatus(ReservationStatus.COMPLETED);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        // Act & Assert
+        assertThatThrownBy(() -> reservationService.completeReservation(1L))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Invalid reservation status: only active reservations can be completed");
+
+        verify(reservationRepository, times(1)).findById(1L);
+        verify(reservationRepository, never()).save(any());
+    }
 } 
