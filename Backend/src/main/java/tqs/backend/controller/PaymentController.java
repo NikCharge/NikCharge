@@ -28,22 +28,45 @@ public class PaymentController {
     @PostMapping("/create-checkout-session")
     public ResponseEntity<?> createCheckoutSession(@RequestBody Map<String, Long> request) {
         Long reservationId = request.get("reservationId");
+        System.out.println("Attempting to create checkout session for reservation ID: " + reservationId);
 
         if (reservationId == null) {
+            System.out.println("Error: Missing reservationId");
             return ResponseEntity.badRequest().body(Map.of("error", "Missing reservationId"));
         }
 
         try {
             Reservation reservation = reservationService.getReservationById(reservationId);
+            System.out.println("Found reservation: " + (reservation != null ? "yes" : "no"));
+            if (reservation != null) {
+                System.out.println("Reservation details:");
+                System.out.println("- Status: " + reservation.getStatus());
+                System.out.println("- Is Paid: " + reservation.isPaid());
+                System.out.println("- Estimated Cost: " + reservation.getEstimatedCost());
+            }
 
             if (reservation == null) {
-                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Reservation not found"));
+                System.out.println("Error: Reservation not found");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Reservation not found"));
             }
 
-            // Ensure reservation has an estimated cost and it's not already paid
-            if (reservation.getEstimatedCost() == null || reservation.isPaid()) {
-                 return ResponseEntity.badRequest().body(Map.of("error", "Reservation cannot be paid"));
+            if (reservation.isPaid()) {
+                System.out.println("Error: Reservation is already paid");
+                return ResponseEntity.badRequest().body(Map.of("error", "Reservation is already paid"));
             }
+
+            if (reservation.getEstimatedCost() == null) {
+                System.out.println("Error: Reservation has no estimated cost");
+                return ResponseEntity.badRequest().body(Map.of("error", "Reservation cannot be paid"));
+            }
+
+            if (reservation.getStatus() != tqs.backend.model.enums.ReservationStatus.ACTIVE &&
+                reservation.getStatus() != tqs.backend.model.enums.ReservationStatus.COMPLETED) {
+                System.out.println("Error: Invalid reservation status: " + reservation.getStatus());
+                return ResponseEntity.badRequest().body(Map.of("error", "Reservation cannot be paid"));
+            }
+
+            System.out.println("Creating checkout session for reservation with cost: " + reservation.getEstimatedCost());
 
             SessionCreateParams params = SessionCreateParams.builder()
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
@@ -72,6 +95,10 @@ public class PaymentController {
                     .build();
 
             Session session = stripeClient.createCheckoutSession(params);
+            if (session == null) {
+                System.out.println("Error: Failed to create Stripe session");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Failed to create payment session"));
+            }
 
             Map<String, String> responseData = new HashMap<>();
             responseData.put("sessionId", session.getId());
@@ -83,7 +110,7 @@ public class PaymentController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error creating checkout session: " + e.getMessage()));
         } catch (RuntimeException e) {
-             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         }
     }
 

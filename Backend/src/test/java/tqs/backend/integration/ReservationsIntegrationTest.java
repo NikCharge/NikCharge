@@ -1,5 +1,7 @@
 package tqs.backend.integration;
 
+import com.stripe.exception.StripeException;
+import com.stripe.model.checkout.Session;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,8 +9,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig;
+import org.springframework.test.context.web.WebAppConfiguration;
+import org.springframework.web.context.WebApplicationContext;
 import tqs.backend.model.Charger;
 import tqs.backend.model.Client;
 import tqs.backend.model.Reservation;
@@ -21,14 +29,17 @@ import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.ClientRepository;
 import tqs.backend.repository.ReservationRepository;
 import tqs.backend.repository.StationRepository;
+import tqs.backend.service.StripeClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -49,15 +60,28 @@ class ReservationsIntegrationTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    @MockBean
+    private StripeClient stripeClient;
+
     private Client testClient;
     private Charger testCharger;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
 
     @BeforeEach
-    void setup() {
+    void setup() throws StripeException {
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+
+        // Mock Stripe client responses
+        Session mockSession = mock(Session.class);
+        when(mockSession.getId()).thenReturn("cs_test_123");
+        when(mockSession.getPaymentStatus()).thenReturn("paid");
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("reservationId", "1");
+        when(mockSession.getMetadata()).thenReturn(metadata);
+        when(stripeClient.createCheckoutSession(any())).thenReturn(mockSession);
+        when(stripeClient.retrieveCheckoutSession(any())).thenReturn(mockSession);
 
         // Clean up repositories
         reservationRepository.deleteAll();

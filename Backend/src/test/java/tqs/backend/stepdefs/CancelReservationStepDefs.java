@@ -8,6 +8,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import tqs.backend.model.Reservation;
 import tqs.backend.repository.ReservationRepository;
 import tqs.backend.util.CommonReservationHelper;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = tqs.backend.stepdefs.CucumberSpringConfiguration.class)
 public class CancelReservationStepDefs {
 
     @LocalServerPort
