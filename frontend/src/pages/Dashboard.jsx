@@ -5,6 +5,8 @@ import Footer from "../components/global/Footer.jsx";
 
 import { loadStripe } from '@stripe/stripe-js';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+
 // Replace with your actual Stripe publishable key
 const stripePromise = loadStripe("pk_test_51RWUWBJljDlkjMrml2SZROtF5FDoF8yoPbmMZshM0yXqZmaXH2YuvDTxCydyyF3a3v88cLxXdytguWJ31TxOaFjb003TsNj7A0");
 
@@ -26,12 +28,8 @@ const Dashboard = () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:8080/api/reservations/client/${userId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            setReservations(data);
+            const response = await axios.get(`${API_BASE_URL}/api/reservations/client/${userId}`);
+            setReservations(response.data);
         } catch (error) {
             setError("Failed to fetch reservations.");
             console.error("Fetching reservations failed:", error);
@@ -47,22 +45,10 @@ const Dashboard = () => {
     const handleCancelReservation = async (reservationId) => {
         setCancellingId(reservationId);
         try {
-            const response = await fetch(`http://localhost:8080/api/reservations/${reservationId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Failed to cancel reservation');
-            }
-
-            // Refresh the reservations list
+            await axios.delete(`${API_BASE_URL}/api/reservations/${reservationId}`);
             await fetchReservations();
         } catch (error) {
-            setError(error.message);
+            setError(error.response?.data?.error || 'Failed to cancel reservation');
             console.error("Cancelling reservation failed:", error);
         } finally {
             setCancellingId(null);
@@ -72,36 +58,11 @@ const Dashboard = () => {
     const handleCompleteReservation = async (reservationId) => {
         setCompletingId(reservationId);
         try {
-            const response = await fetch(`http://localhost:8080/api/reservations/${reservationId}/complete`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!response.ok) {
-                let errorMsg = `HTTP error! status: ${response.status}`;
-                try {
-                const errorData = await response.json();
-                    errorMsg = errorData.error || errorMsg;
-                } catch (e) {
-                    // If json parsing fails, try reading as text
-                    try {
-                        const errorText = await response.text();
-                        if (errorText) {
-                            errorMsg = `${errorMsg} - ${errorText}`;
-                        }
-                    } catch (e) {
-                        // Ignore if reading as text also fails
-                    }
-                }
-                throw new Error(errorMsg);
-            }
-
-            // Refresh the reservations list
+            await axios.put(`${API_BASE_URL}/api/reservations/${reservationId}/complete`);
             await fetchReservations();
         } catch (error) {
-            setError(error.message);
+            const msg = error.response?.data?.error || error.message;
+            setError(msg);
             console.error("Marking reservation as completed failed:", error);
         } finally {
             setCompletingId(null);
@@ -110,48 +71,24 @@ const Dashboard = () => {
 
     const handlePayReservation = async (reservationId) => {
         try {
-            // TODO: Implement loading state for payment button
-            const response = await fetch("http://localhost:8080/api/payment/create-checkout-session", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ reservationId: reservationId })
+            const response = await axios.post(`${API_BASE_URL}/api/payment/create-checkout-session`, {
+                reservationId: reservationId
             });
 
-            if (!response.ok) {
-                 let errorMsg = `HTTP error! status: ${response.status}`;
-                try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorMsg;
-                } catch (e) {
-                    // If json parsing fails, try reading as text
-                    try {
-                        const errorText = await response.text();
-                        if (errorText) {
-                            errorMsg = `${errorMsg} - ${errorText}`;
-                        }
-                    } catch (e) {
-                        // Ignore if reading as text also fails
-                    }
-                }
-                throw new Error(errorMsg);
-            }
-
-            const { sessionId } = await response.json();
+            const { sessionId } = response.data;
             const stripe = await stripePromise;
             const result = await stripe.redirectToCheckout({ sessionId });
 
             if (result.error) {
-                // If `redirectToCheckout` fails due to a browser or network error
                 setError(result.error.message);
             }
-
         } catch (error) {
-            setError("Payment failed: " + error.message);
+            const msg = error.response?.data?.error || error.message;
+            setError("Payment failed: " + msg);
             console.error("Payment failed:", error);
-        } finally {
-            // TODO: Implement loading state for payment button
         }
     };
+
 
     const activeReservations = reservations.filter(res => res.status === "ACTIVE");
     const completedReservations = reservations.filter(res => res.status === "COMPLETED");

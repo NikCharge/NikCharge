@@ -8,6 +8,11 @@ import StationList from "../components/SearchPage/StationList.jsx";
 import StationInfoModal from "../components/SearchPage/StationInfoModal.jsx";
 import { MdMap, MdList } from "react-icons/md";
 import dayjs from "dayjs";
+import axios from "axios";
+
+
+
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 
 // Distância entre dois pontos geográficos
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -38,14 +43,13 @@ const Search = () => {
     const fetchData = async () => {
         try {
             const [baseRes, discountRes] = await Promise.all([
-                fetch("http://localhost:8080/api/stations"),
-                fetch("http://localhost:8080/api/discounts")
+                axios.get(`${API_BASE_URL}/api/stations`),
+                axios.get(`${API_BASE_URL}/api/discounts`)
             ]);
 
-            const baseStations = await baseRes.json();
-            const allDiscounts = await discountRes.json();
+            const baseStations = baseRes.data;
+            const allDiscounts = discountRes.data;
 
-            // Filtrar apenas descontos ativos
             const activeDiscounts = allDiscounts.filter(d => d.active);
 
             const detailedStations = await Promise.all(
@@ -54,15 +58,13 @@ const Search = () => {
                         ? `?datetime=${encodeURIComponent(dayjs(selectedDateTime).format("YYYY-MM-DDTHH:mm"))}`
                         : "";
 
-                    const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details${datetimeParam}`);
-                    const details = await detailsRes.json();
+                    const detailsRes = await axios.get(`${API_BASE_URL}/api/stations/${station.id}/details${datetimeParam}`);
+                    const details = detailsRes.data;
 
-                    // Match com descontos ativos
                     const stationDiscounts = activeDiscounts.filter(
                         d => d.station.id === station.id
                     );
 
-                    // Pegar o maior desconto da estação (se houver)
                     const maxDiscount = stationDiscounts.length > 0
                         ? Math.max(...stationDiscounts.map(d => d.discountPercent))
                         : null;
@@ -82,7 +84,7 @@ const Search = () => {
                         imageUrl: station.imageUrl || null,
                         distance,
                         availableChargers: details.chargers.length,
-                        discount: maxDiscount // novo campo
+                        discount: maxDiscount
                     };
                 })
             );
@@ -97,6 +99,7 @@ const Search = () => {
         fetchData();
     }
 }, [userLocation, selectedDateTime]);
+
 
 
     const filteredStations = useMemo(() => {

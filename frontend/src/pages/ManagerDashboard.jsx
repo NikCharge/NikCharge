@@ -5,6 +5,8 @@ import Footer from "../components/global/Footer";
 import { BarChart3, TrendingUp, Zap, DollarSign, Users, Calendar } from "lucide-react";
 import "../css/pages/ManagerDashboard.css";
 
+
+
 const dummyData = [
     { stationName: "Aveiro Central", sessions: 120, energyKwh: 3400, revenue: 5100, efficiency: 92, status: "active" },
     { stationName: "Porto Norte", sessions: 85, energyKwh: 2300, revenue: 3900, efficiency: 87, status: "active" },
