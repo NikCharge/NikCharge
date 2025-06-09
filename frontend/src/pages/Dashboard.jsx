@@ -16,6 +16,23 @@ const Dashboard = () => {
     const [error, setError] = useState(null);
     const [cancellingId, setCancellingId] = useState(null);
     const [completingId, setCompletingId] = useState(null);
+    const [stations, setStations] = useState([]);
+    const [stationsLoading, setStationsLoading] = useState(true);
+    const [stationsError, setStationsError] = useState(null);
+
+    const fetchStations = async () => {
+        try {
+            setStationsLoading(true);
+            setStationsError(null);
+            const response = await axios.get(`${API_BASE_URL}/api/stations`);
+            setStations(response.data);
+        } catch (err) {
+            setStationsError(err.message || 'Failed to fetch stations');
+            console.error('Error fetching stations:', err);
+        } finally {
+            setStationsLoading(false);
+        }
+    };
 
     const fetchReservations = async () => {
         const user = JSON.parse(localStorage.getItem("client"));
@@ -40,6 +57,10 @@ const Dashboard = () => {
 
     useEffect(() => {
         fetchReservations();
+    }, []);
+
+    useEffect(() => {
+        fetchStations();
     }, []);
 
     const handleCancelReservation = async (reservationId) => {
@@ -290,6 +311,83 @@ const Dashboard = () => {
 
                 {!loading && !error && (
                     <>
+                        <section className="stations-section">
+                            <div className="section-header">
+                                <h2>Available Stations</h2>
+                                <span className="count-badge">{stations.length}</span>
+                            </div>
+                            {stationsLoading ? (
+                                <div className="loading-state">
+                                    <svg className="spinner" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M21 12a9 9 0 11-6.219-8.56"/>
+                                    </svg>
+                                    <p>Loading stations...</p>
+                                </div>
+                            ) : stationsError ? (
+                                <div className="error-state">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <circle cx="12" cy="12" r="10"/>
+                                        <line x1="15" y1="9" x2="9" y2="15"/>
+                                        <line x1="9" y1="9" x2="15" y2="15"/>
+                                    </svg>
+                                    <p>{stationsError}</p>
+                                </div>
+                            ) : stations.length === 0 ? (
+                                <div className="empty-state">
+                                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+                                    </svg>
+                                    <p>No stations available.</p>
+                                    <span>Check back later for new stations!</span>
+                                </div>
+                            ) : (
+                                <div className="stations-grid">
+                                    {stations.map((station) => (
+                                        <div key={station.id} className="station-card">
+                                            <div className="card-header">
+                                                <div className="station-info">
+                                                    <h3 className="station-name">{station.name}</h3>
+                                                    <div className="location-info">
+                                                        <svg className="location-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                                            <circle cx="12" cy="10" r="3"/>
+                                                        </svg>
+                                                        <span>{station.address}, {station.city}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="card-body">
+                                                <div className="station-details">
+                                                    <div className="detail-item">
+                                                        <svg className="detail-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <polygon points="13,2 3,14 12,14 11,22 21,10 12,10 13,2"/>
+                                                        </svg>
+                                                        <span>{station.availableChargers} available chargers</span>
+                                                    </div>
+                                                    <div className="detail-item">
+                                                        <svg className="detail-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <circle cx="12" cy="12" r="10"/>
+                                                            <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/>
+                                                            <path d="M12 18V6"/>
+                                                        </svg>
+                                                        <span>€{station.pricePerKwh}/kWh</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div className="card-actions">
+                                                <button
+                                                    className="action-button"
+                                                    onClick={() => window.location.href = `/search?station=${station.id}`}
+                                                >
+                                                    Book Now
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+
                         <section className="reservations-section">
                             <div className="section-header">
                                 <h2>Active Reservations</h2>
