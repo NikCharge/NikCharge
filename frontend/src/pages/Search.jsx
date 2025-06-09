@@ -41,8 +41,8 @@ const Search = () => {
     const fetchData = async () => {
         try {
             const [baseRes, discountRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/api/stations`),
-                axios.get(`${API_BASE_URL}/api/discounts`)
+                axios.get(`/api/stations`),
+                axios.get(`/api/discounts`)
             ]);
 
             const baseStations = baseRes.data;
@@ -56,7 +56,7 @@ const Search = () => {
                         ? `?datetime=${encodeURIComponent(dayjs(selectedDateTime).format("YYYY-MM-DDTHH:mm"))}`
                         : "";
 
-                    const detailsRes = await axios.get(`${API_BASE_URL}/api/stations/${station.id}/details${datetimeParam}`);
+                    const detailsRes = await axios.get(`/api/stations/${station.id}/details${datetimeParam}`);
                     const details = detailsRes.data;
 
                     const stationDiscounts = activeDiscounts.filter(

@@ -43,7 +43,7 @@ const EmployeeDashboard = () => {
         try {
             setLoading(true);
             setError(null);
-            const response = await axios.get(`${API_BASE_URL}/api/stations`);
+            const response = await axios.get(`/api/stations`);
             setStations(response.data);
         } catch (err) {
             setError(err.message || 'Failed to fetch stations');
@@ -56,8 +56,8 @@ const EmployeeDashboard = () => {
     const fetchStatistics = async () => {
         try {
             const [availableRes, inUseRes] = await Promise.all([
-                axios.get(`${API_BASE_URL}/api/chargers/count/available/total`),
-                axios.get(`${API_BASE_URL}/api/chargers/count/in_use/total`)
+                axios.get(`/api/chargers/count/available/total`),
+                axios.get(`/api/chargers/count/in_use/total`)
             ]);
 
             setStatistics({
@@ -73,7 +73,7 @@ const EmployeeDashboard = () => {
     const fetchChargers = async (stationId) => {
         try {
             setChargersLoading(true);
-            const response = await axios.get(`${API_BASE_URL}/api/chargers/station/${stationId}`);
+            const response = await axios.get(`/api/chargers/station/${stationId}`);
             setChargers(response.data);
         } catch (err) {
             console.error('Error fetching chargers:', err);

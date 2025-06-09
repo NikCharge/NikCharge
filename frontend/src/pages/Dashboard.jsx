@@ -28,7 +28,7 @@ const Dashboard = () => {
         }
 
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/reservations/client/${userId}`);
+            const response = await axios.get(`/api/reservations/client/${userId}`);
             setReservations(response.data);
         } catch (error) {
             setError("Failed to fetch reservations.");

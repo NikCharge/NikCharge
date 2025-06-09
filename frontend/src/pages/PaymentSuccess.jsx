@@ -19,7 +19,7 @@ const PaymentSuccess = () => {
     if (sessionId) {
         const verifyPayment = async () => {
             try {
-                const { data } = await axios.get(`${API_BASE_URL}/api/payment/verify-session`, {
+                const { data } = await axios.get(`/api/payment/verify-session`, {
                     params: { session_id: sessionId }
                 });
 
