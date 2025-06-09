@@ -12,6 +12,7 @@ import tqs.backend.model.enums.ChargerType;
 import tqs.backend.model.enums.ReservationStatus;
 import tqs.backend.repository.*;
 import tqs.backend.util.CommonReservationHelper;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = tqs.backend.stepdefs.CucumberSpringConfiguration.class)
 public class MakeReservationStepDefs {
 
     @LocalServerPort

@@ -1,5 +1,9 @@
 import React, { useState, useMemo } from "react";
 import "../../css/SearchPage/StationInfoModal.css";
+import axios from "axios";
+
+
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:8080";
 
 const StationInfoModal = ({ station, onClose, selectedDateTime }) => {
     const [selectedChargerId, setSelectedChargerId] = useState(null);
@@ -30,7 +34,11 @@ const StationInfoModal = ({ station, onClose, selectedDateTime }) => {
         return ((100 - batt) * 0.4).toFixed(2);
     }, [battery]);
     const durationMin = useMemo(() => powerKw ? Math.ceil((parseFloat(energyNeeded) / powerKw) * 60) : 0, [energyNeeded, powerKw]);
-    const cost = useMemo(() => selectedCharger ? (energyNeeded * selectedCharger.pricePerKwh).toFixed(2) : "0.00", [energyNeeded, selectedCharger]);
+    const cost = useMemo(() => {
+        if (!selectedCharger) return "0.00";
+        const calculatedCost = energyNeeded * selectedCharger.pricePerKwh;
+        return Math.max(0.50, calculatedCost).toFixed(2);
+    }, [energyNeeded, selectedCharger]);
 
     // Format local time manually to avoid UTC conversion
     const formatLocalDateTime = (date) => {
@@ -50,65 +58,54 @@ const StationInfoModal = ({ station, onClose, selectedDateTime }) => {
     const estimatedEndTimeDisplay = `${new Date((selectedDateTime || new Date()).getTime() + durationMin * 60000).toLocaleDateString()} ${new Date((selectedDateTime || new Date()).getTime() + durationMin * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
 
     const handleBook = async () => {
-        if (!selectedCharger || !validBattery) return;
-        
-        if (!userId) {
-            setError("You must be logged in to book a charger. Please log in and try again.");
-            return;
-        }
+    if (!selectedCharger || !validBattery) return;
 
-        const body = {
-            clientId: userId,
-            chargerId: selectedCharger.id,
-            startTime,
-            estimatedEndTime,
-            batteryLevelStart: battery,
-            estimatedKwh: parseFloat(energyNeeded),
-            estimatedCost: parseFloat(cost)
-        };
+    if (!userId) {
+        setError("You must be logged in to book a charger. Please log in and try again.");
+        return;
+    }
 
-        try {
-            setIsSubmitting(true);
-            setError(null);
-            const res = await fetch("http://localhost:8080/api/reservations", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(body)
-            });
-
-            if (!res.ok) {
-                let detailedErrorMessage = `Request failed with status ${res.status}.`;
-                try {
-                    const errorData = await res.json();
-                    detailedErrorMessage = errorData.error || errorData.message || JSON.stringify(errorData);
-                } catch (jsonError) {
-                    try {
-                        const textError = await res.text();
-                        if (textError) {
-                            detailedErrorMessage = `Server returned: ${textError}`;
-                        } else {
-                            detailedErrorMessage = `Request failed with status ${res.status}, empty response body.`;
-                        }
-                    } catch (textReadError) {
-                        detailedErrorMessage = `Could not read error response from server (Status: ${res.status}).`;
-                    }
-                }
-                setError(detailedErrorMessage);
-                setIsSubmitting(false);
-                return; // Stop processing on error
-            }
-
-            setSuccess(true);
-            setTimeout(() => {
-                setSuccess(false);
-                onClose();
-            }, 1500);
-        } catch (err) {
-            setError(err.message || "Could not complete reservation. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
+    const body = {
+        clientId: userId,
+        chargerId: selectedCharger.id,
+        startTime,
+        estimatedEndTime,
+        batteryLevelStart: battery,
+        estimatedKwh: parseFloat(energyNeeded),
+        estimatedCost: parseFloat(cost)
     };
+
+    try {
+        setIsSubmitting(true);
+        setError(null);
+
+        const res = await axios.post(`${API_BASE_URL}/api/reservations`, body, {
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (res.status !== 200 && res.status !== 201) {
+            throw new Error(`Unexpected response code: ${res.status}`);
+        }
+
+        setSuccess(true);
+        setTimeout(() => {
+            setSuccess(false);
+            onClose();
+        }, 1500);
+    } catch (err) {
+        const message =
+            err.response?.data?.error ||
+            err.response?.data?.message ||
+            err.message ||
+            "Could not complete reservation. Please try again.";
+        setError(message);
+    } finally {
+        setIsSubmitting(false);
+    }
+};
+
 
     return (
         <div className="modal-backdrop">

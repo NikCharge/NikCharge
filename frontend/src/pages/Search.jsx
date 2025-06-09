@@ -8,6 +8,9 @@ import StationList from "../components/SearchPage/StationList.jsx";
 import StationInfoModal from "../components/SearchPage/StationInfoModal.jsx";
 import { MdMap, MdList } from "react-icons/md";
 import dayjs from "dayjs";
+import axios from "axios";
+
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:8080";
 
 // Distância entre dois pontos geográficos
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -35,52 +38,66 @@ const Search = () => {
     const [selectedDateTime, setSelectedDateTime] = useState(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const baseRes = await fetch("http://localhost:8080/api/stations");
-                const baseStations = await baseRes.json();
+    const fetchData = async () => {
+        try {
+            const [baseRes, discountRes] = await Promise.all([
+                axios.get(`/api/stations`),
+                axios.get(`/api/discounts`)
+            ]);
 
-                const detailedStations = await Promise.all(
-                    baseStations.map(async (station) => {
-                        const datetimeParam = selectedDateTime
-                            ? `?datetime=${encodeURIComponent(dayjs(selectedDateTime).format("YYYY-MM-DDTHH:mm"))}`
-                            : "";
+            const baseStations = baseRes.data;
+            const allDiscounts = discountRes.data;
 
-                        const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details${datetimeParam}`);
-                        const details = await detailsRes.json();
+            const activeDiscounts = allDiscounts.filter(d => d.active);
 
-                        let distance = "–";
-                        if (userLocation?.lat && userLocation?.lng) {
-                            distance = calculateDistance(
-                                userLocation.lat,
-                                userLocation.lng,
-                                details.latitude,
-                                details.longitude
-                            );
-                        }
+            const detailedStations = await Promise.all(
+                baseStations.map(async (station) => {
+                    const datetimeParam = selectedDateTime
+                        ? `?datetime=${encodeURIComponent(dayjs(selectedDateTime).format("YYYY-MM-DDTHH:mm"))}`
+                        : "";
 
-                        console.log(`📦 Details for ${station.name}:`, details);
+                    const detailsRes = await axios.get(`/api/stations/${station.id}/details${datetimeParam}`);
+                    const details = detailsRes.data;
 
-                        return {
-                            ...details,
-                            imageUrl: station.imageUrl || null,
-                            distance,
-                            availableChargers: details.chargers.length
-                        };
-                    })
-                );
+                    const stationDiscounts = activeDiscounts.filter(
+                        d => d.station.id === station.id
+                    );
 
-                console.log("📊 Final detailed stations:", detailedStations);
-                setStations(detailedStations);
-            } catch (error) {
-                console.error("Erro ao buscar estações:", error);
-            }
-        };
+                    const maxDiscount = stationDiscounts.length > 0
+                        ? Math.max(...stationDiscounts.map(d => d.discountPercent))
+                        : null;
 
-        if (userLocation?.lat && userLocation?.lng) {
-            fetchData();
+                    let distance = "–";
+                    if (userLocation?.lat && userLocation?.lng) {
+                        distance = calculateDistance(
+                            userLocation.lat,
+                            userLocation.lng,
+                            details.latitude,
+                            details.longitude
+                        );
+                    }
+
+                    return {
+                        ...details,
+                        imageUrl: station.imageUrl || null,
+                        distance,
+                        availableChargers: details.chargers.length,
+                        discount: maxDiscount
+                    };
+                })
+            );
+
+            setStations(detailedStations);
+        } catch (error) {
+            console.error("Erro ao buscar estações ou descontos:", error);
         }
-    }, [userLocation, selectedDateTime]); // <- Certifica-te que isto inclui `selectedDateTime`
+    };
+
+    if (userLocation?.lat && userLocation?.lng) {
+        fetchData();
+    }
+}, [userLocation, selectedDateTime]);
+
 
 
     const filteredStations = useMemo(() => {

@@ -1,4 +1,4 @@
-    package tqs.backend.dto;
+package tqs.backend.dto;
 
 import lombok.*;
 import tqs.backend.model.enums.ChargerStatus;

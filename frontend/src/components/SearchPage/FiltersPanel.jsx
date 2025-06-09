@@ -56,27 +56,20 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
             let stations = [];
 
             const chargerTypes = chargerTypesOverride || selectedChargerTypes;
-            console.log("🚀 Fetching stations with:");
-            console.log("Latitude:", lat, "Longitude:", lng);
-            console.log("Datetime:", datetime);
-            console.log("Charger types:", chargerTypes);
 
             if (chargerTypes.length > 0 && datetime) {
                 const dayOfWeek = dayjs(datetime).day();
                 const hour = dayjs(datetime).hour();
 
-                const fetches = chargerTypes.map(async type => {                    
+                const fetches = chargerTypes.map(async type => {
                     const typeParam = chargerLabelToEnum[type];
-                    
                     const url = `/api/stations/search?dayOfWeek=${dayOfWeek}&hour=${hour}&chargerType=${typeParam}`;
-                    console.log("➡️  Fetching filtered stations from:", url);
-                    const res = await fetch(url);
-                    return res.json();
+                    const res = await axios.get(url); // ✅ axios
+                    return res.data;
                 });
 
                 const results = await Promise.all(fetches);
                 const allStations = results.flat();
-                console.log("📦 Filtered station search results:", allStations);
 
                 const uniqueStations = Array.from(
                     new Map(allStations.map(station => [station.id, station])).values()
@@ -86,33 +79,29 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                     uniqueStations.map(async (station) => {
                         const datetimeParam = encodeURIComponent(dayjs(datetime).format("YYYY-MM-DDTHH:mm"));
                         const detailsUrl = `/api/stations/${station.id}/details?datetime=${datetimeParam}`;
-                        console.log("🔍 Fetching details from:", detailsUrl);
-                        const detailsRes = await fetch(detailsUrl);
-                        if (!detailsRes.ok) {
+                        try {
+                            const detailsRes = await axios.get(detailsUrl); // ✅ axios
+                            const details = detailsRes.data;
+                            return {
+                                ...details,
+                                imageUrl: station.imageUrl || null,
+                                distance: (userLocation?.lat && userLocation?.lng)
+                                    ? calculateDistance(
+                                        userLocation.lat,
+                                        userLocation.lng,
+                                        details.latitude,
+                                        details.longitude
+                                    )
+                                    : "–",
+                                availableChargers: details.chargers.length
+                            };
+                        } catch (err) {
                             console.error("❌ Failed to fetch details for station", station.id);
                             return null;
                         }
-                        const details = await detailsRes.json();
-                        
-                        console.log(`✅ Details for station ${station.id}:`, details);
-
-                        return {
-                            ...details,
-                            imageUrl: station.imageUrl || null,
-                            distance: (userLocation?.lat && userLocation?.lng)
-                                ? calculateDistance(
-                                    userLocation.lat,
-                                    userLocation.lng,
-                                    details.latitude,
-                                    details.longitude
-                                )
-                                : "–",
-                            availableChargers: details.chargers.length
-                        };
                     })
                 );
 
-                console.log("🧩 Final detailedStations list:", detailedStations);
                 stations = detailedStations;
             } else {
                 // fallback: fetch all
@@ -121,9 +110,9 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                     const isoDate = dayjs(datetime).format("YYYY-MM-DDTHH:mm");
                     url += `&datetime=${encodeURIComponent(isoDate)}`;
                 }
-                console.log("📡 Fallback fetch from:", url);
-                const res = await fetch(url);
-                const baseStations = await res.json();
+
+                const res = await axios.get(url); // ✅ axios
+                const baseStations = res.data;
 
                 const detailedStations = await Promise.all(
                     baseStations.map(async (station) => {
@@ -131,53 +120,47 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                             ? `?datetime=${encodeURIComponent(dayjs(datetime).format("YYYY-MM-DDTHH:mm"))}`
                             : "";
 
-                        const detailsRes = await fetch(`/api/stations/${station.id}/details${datetimeParam}`);
-                        if (!detailsRes.ok) {
+                        try {
+                            const detailsRes = await axios.get(`/api/stations/${station.id}/details${datetimeParam}`); // ✅ axios
+                            const details = detailsRes.data;
+                            return {
+                                ...details,
+                                imageUrl: station.imageUrl || null,
+                                distance: (userLocation?.lat && userLocation?.lng)
+                                    ? calculateDistance(
+                                        userLocation.lat,
+                                        userLocation.lng,
+                                        details.latitude,
+                                        details.longitude
+                                    )
+                                    : "–",
+                                availableChargers: Array.isArray(details.chargers) ? details.chargers.length : 0
+                            };
+                        } catch (err) {
                             console.error("❌ Failed to fetch details for station", station.id);
                             return null;
                         }
-                        const details = await detailsRes.json();
-                        
-
-                        return {
-                            ...details,
-                            imageUrl: station.imageUrl || null,
-                            distance: (userLocation?.lat && userLocation?.lng)
-                                ? calculateDistance(
-                                    userLocation.lat,
-                                    userLocation.lng,
-                                    details.latitude,
-                                    details.longitude
-                                )
-                                : "–",
-                            availableChargers: Array.isArray(details.chargers) ? details.chargers.length : 0
-                        };
                     })
                 );
 
                 stations = detailedStations;
-
             }
 
-            console.log("📊 Setting stations state with:", stations);
             const validStations = stations.filter(Boolean);
             setStations(validStations);
-
         } catch (err) {
             console.error("❌ Error fetching stations:", err);
         }
     };
 
-
-
     const handleLocationSearch = async () => {
         if (!customLocation.trim()) return;
 
         try {
-            const res = await fetch(
+            const res = await axios.get(
                 `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(customLocation)}&format=json&limit=1`
-            );
-            const data = await res.json();
+            ); 
+            const data = res.data;
 
             if (data.length === 0) {
                 setLocationText("Location not found.");
@@ -230,7 +213,6 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
         );
     };
 
-
     const isValidDate = (current) => {
         return current.isAfter(moment());
     };
@@ -244,7 +226,7 @@ const FiltersPanel = ({ userLocation, setUserLocation, selectedChargerTypes, set
                     <input
                         id="location-input"
                         type="text"
-                        placeholder="Enter a location (e.g., Aveiro)"
+                        placeholder="Enter a location..."
                         value={customLocation}
                         onChange={(e) => setCustomLocation(e.target.value)}
                     />

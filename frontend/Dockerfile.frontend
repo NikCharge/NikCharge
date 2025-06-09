@@ -3,6 +3,12 @@ FROM node:20 AS build
 
 WORKDIR /app
 
+# Declara o build arg aqui
+ARG REACT_APP_API_BASE_URL
+# Define como variável de ambiente para o build do React poder usar
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
+
 COPY package*.json ./
 RUN npm config set registry https://registry.npmjs.org
 RUN npm install

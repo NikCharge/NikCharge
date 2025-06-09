@@ -1,15 +1,7 @@
 version: '3.9'
 
 services:
-  # maven-build:
-  #   image: maven:3.9-eclipse-temurin-21
-  #   container_name: maven-build
-  #   working_dir: /app
-  #   volumes:
-  #     - ./Backend:/app
-  #   command: mvn package -DskipTests
-  #   restart: "no"
-
+  
   postgres:
     image: postgres:15
     container_name: postgres
@@ -34,8 +26,6 @@ services:
       context: ./Backend
       dockerfile: Dockerfile.backend
     depends_on:
-      # maven-build:
-      #   condition: service_completed_successfully
       postgres:
         condition: service_healthy
     ports:
@@ -47,25 +37,28 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
       SPRING_JPA_SHOW_SQL: "true"
       SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL: "true"
+      stripe.api.key: "${STRIPE_API_KEY}"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://backend:8080/actuator/health" ]
       interval: 30s
       retries: 3
       start_period: 10s
 
   frontend:
-    image: ghcr.io/nikcharge/frontend:latest
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.frontend
-      args:
+      image: ghcr.io/nikcharge/frontend:latest
+      build:
+        context: ./frontend
+        dockerfile: Dockerfile.frontend
+        args:
+          NODE_ENV: ${NODE_ENV}
+          VITE_APP_API_BASE_URL: /api
+      environment:
         - NODE_ENV=${NODE_ENV}
-    environment:
-      - NODE_ENV=${NODE_ENV}
-    volumes:
-      - /app/node_modules
-    depends_on:
-      - backend
+      volumes:
+        - /app/node_modules
+      depends_on:
+        - backend
+
 
   nginx:
     image: nginx:1.25

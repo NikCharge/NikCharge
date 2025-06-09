@@ -2,6 +2,7 @@ package tqs.backend.api;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ import tqs.backend.model.enums.ChargerStatus;
 import tqs.backend.model.enums.ChargerType;
 import tqs.backend.repository.ChargerRepository;
 import tqs.backend.repository.ClientRepository;
+import tqs.backend.repository.DiscountRepository;
+import tqs.backend.repository.ReservationRepository;
 import tqs.backend.repository.StationRepository;
 
 import java.math.BigDecimal;
@@ -41,6 +44,13 @@ class ReservationsApiTest {
     @Autowired
     private StationRepository stationRepository;
 
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private DiscountRepository discountRepository;
+
+
     private Client testClient;
     private Charger testCharger;
     private LocalDateTime startTime;
@@ -51,10 +61,15 @@ class ReservationsApiTest {
         RestAssured.port = port;
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
 
-        // Clean up repositories
-        clientRepository.deleteAll();
+                // Ordem correta para evitar erros de FK
+        reservationRepository.deleteAll();
         chargerRepository.deleteAll();
+
+        discountRepository.deleteAll(); 
+
         stationRepository.deleteAll();
+        clientRepository.deleteAll();
+
 
         // Create test client
         testClient = Client.builder()
@@ -88,6 +103,8 @@ class ReservationsApiTest {
         startTime = LocalDateTime.now().plusHours(1);
         endTime = startTime.plusHours(2);
     }
+
+    
 
     @Test
     @DisplayName("GET /api/reservations - Get all reservations")

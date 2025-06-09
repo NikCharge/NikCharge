@@ -19,6 +19,7 @@ public class ReservationResponse {
     private Double estimatedKwh;
     private BigDecimal estimatedCost;
     private ReservationStatus status;
+    private boolean paid;
 
     @Getter
     @Setter

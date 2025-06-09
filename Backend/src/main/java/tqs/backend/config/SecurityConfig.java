@@ -30,11 +30,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/clients").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/clients/login").permitAll()
                         .requestMatchers(
+                            "/actuator/health",
                                 "/api/clients/**",
                                 "/api/stations/**",
                                 "/api/stations/*/details",
                                 "/api/chargers/**",
                                 "/api/reservations/**",
+                                "/api/payment/**",
                                 "/swagger-ui/**",
                                 "/api/discounts/**",
                                 "/v3/api-docs/**",
@@ -50,7 +52,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:80", "http://localhost", "http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:80", "http://localhost", "http://deti-tqs-02.ua.pt", "http://172.18.13.13"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

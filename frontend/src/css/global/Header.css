@@ -248,6 +248,28 @@
     background-color: #c51f1f;
 }
 
+.role-options {
+    display: flex;
+    flex-direction: column;
+    margin-top: 10px;
+}
+
+.role-option {
+    background-color: #eee;
+    color: #333;
+    margin: 5px 0;
+    padding: 6px 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.2s ease;
+}
+
+.role-option:hover {
+    background-color: #ddd;
+}
+
+
 /* Form in edit mode */
 .edit-form {
     display: flex;

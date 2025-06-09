@@ -11,6 +11,8 @@ const Header = () => {
     const [editData, setEditData] = useState({});
     const [message, setMessage] = useState("");
     const navigate = useNavigate();
+    const [showRoleOptions, setShowRoleOptions] = useState(false);
+
 
     useEffect(() => {
         const savedClient = localStorage.getItem("client");
@@ -20,6 +22,21 @@ const Header = () => {
             setEditData(parsedClient);
         }
     }, []);
+
+    const handleRoleChange = async (newRole) => {
+        try {
+            await axios.put(`/api/clients/changeRole/${client.id}`, {
+                newRole
+            });
+
+            // Após mudar role, faz logout automaticamente
+            handleLogout();
+        } catch (error) {
+            console.error("Role update failed:", error);
+            setMessage("Failed to change role.");
+        }
+    };
+
 
     const handleLogout = () => {
         localStorage.removeItem("client");
@@ -153,6 +170,31 @@ const Header = () => {
                                         <span><b>Range:</b> {client.fullRangeKm ?? "–"} km</span>
                                     </div>
                                     <button className="edit-btn" onClick={() => setEditing(true)}>Edit Profile</button>
+                                    <div className="role-switch-section">
+                                    <button
+                                        className="edit-btn"
+                                        onClick={() => setShowRoleOptions(!showRoleOptions)}
+                                    >
+                                        Change Role
+                                    </button>
+
+                                    {showRoleOptions && (
+                                        <div className="role-options">
+                                            {["CLIENT", "EMPLOYEE", "MANAGER"]
+                                                .filter((r) => r !== client.role)
+                                                .map((roleOption) => (
+                                                    <button
+                                                        key={roleOption}
+                                                        className="edit-btn role-option"
+                                                        onClick={() => handleRoleChange(roleOption)}
+                                                    >
+                                                        Switch to {roleOption}
+                                                    </button>
+                                                ))}
+                                        </div>
+                                    )}
+                                </div>
+
                                     <button className="logout-btn" onClick={handleLogout}>Log out</button>
                                     {message && <p className="message">{message}</p>}
                                 </>
