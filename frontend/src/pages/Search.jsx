@@ -10,9 +10,7 @@ import { MdMap, MdList } from "react-icons/md";
 import dayjs from "dayjs";
 import axios from "axios";
 
-
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:8080";
 
 // Distância entre dois pontos geográficos
 const calculateDistance = (lat1, lon1, lat2, lon2) => {

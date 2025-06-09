@@ -10,7 +10,7 @@ import Footer from '../components/global/Footer.jsx';
 import AvailableChargersModal from '../components/employeeDashboard/AvailableChargersModal.jsx';
 import '../css/pages/EmployeeDashboard.css';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:8080";
 
 const EmployeeDashboard = () => {
     const [stations, setStations] = useState([]);

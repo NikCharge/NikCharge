@@ -5,7 +5,7 @@ import Footer from '../components/global/Footer';
 import '../css/pages/PaymentSuccess.css';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:8080";
 
 const PaymentSuccess = () => {
     const navigate = useNavigate();
