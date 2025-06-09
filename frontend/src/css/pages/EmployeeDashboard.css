@@ -1,22 +1,31 @@
 /* css/pages/EmployeeDashboard.css */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.employee-dashboard-page,
+.dashboard-content {
+    width: 100%;
+    max-width: 100%; /* Garante que não há restrições */
+    box-sizing: border-box;
+}
 
 .employee-dashboard-page {
-    min-height: 100vh;
-    height: 100%;
-    display: flex;
     flex-direction: column;
     background-color: #f8fcfb;
 }
 
 .dashboard-content {
     flex: 1;
-    width: 100%;
     background: linear-gradient(135deg, #f8fcfb 0%, #e8f5f3 100%);
     padding: 1rem 2rem 2rem 2rem; /* Adjusted padding to add horizontal space */
     padding-top: calc(1rem + 80px); /* Reduced top padding for closer header */
     margin: 0; /* Set margin to 0 for full width */
     /* Removed max-width property */
-}
+    display: flex; /* Em vez de center */
+    flex-direction: column;}
 
 /* Dashboard Header */
 .dashboard-header {
@@ -415,10 +424,6 @@
     background-color: #dcdcdc; /* Slightly darker gray on hover */
 }
 
-/* Ensure button styles are not affected by other global resets if any */
-.modal-footer button {
-    /* Add specific overrides if necessary, e.g., margin: 0; */
-}
 
 /* Chargers Section Header with Filter */
 .chargers-section-header {
