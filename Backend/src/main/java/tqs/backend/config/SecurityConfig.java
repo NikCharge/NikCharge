@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/clients").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/clients/login").permitAll()
                         .requestMatchers(
+                            "/actuator/health",
                                 "/api/clients/**",
                                 "/api/stations/**",
                                 "/api/stations/*/details",
