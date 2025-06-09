@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { MapPin, Zap } from 'lucide-react';
 import '../../css/pages/EmployeeDashboard.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
+
 const AvailableChargersModal = ({ onClose }) => {
     const [availableChargers, setAvailableChargers] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -11,17 +13,13 @@ const AvailableChargersModal = ({ onClose }) => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                setError(null); // Reset error state
-                // Fetch available chargers - this now includes station info
-                const chargersResponse = await fetch('http://localhost:8080/api/chargers/available');
-                if (!chargersResponse.ok) throw new Error('Failed to fetch available chargers');
-                const chargersData = await chargersResponse.json();
+                setError(null);
 
-                // The chargersData should now contain stationId, stationName, stationCity fields
-                setAvailableChargers(chargersData);
+                const response = await axios.get(`${API_BASE_URL}/api/chargers/available`);
+                setAvailableChargers(response.data);
             } catch (err) {
-                setError(err.message || 'Failed to fetch available chargers');
                 console.error('Error fetching available chargers:', err);
+                setError(err.response?.data?.message || err.message || 'Failed to fetch available chargers');
             } finally {
                 setLoading(false);
             }
