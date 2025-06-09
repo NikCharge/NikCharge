@@ -16,7 +16,7 @@ const AvailableChargersModal = ({ onClose }) => {
                 setLoading(true);
                 setError(null);
 
-                const response = await axios.get(`${API_BASE_URL}/api/chargers/available`);
+                const response = await axios.get(`/api/chargers/available`);
                 setAvailableChargers(response.data);
             } catch (err) {
                 console.error('Error fetching available chargers:', err);
