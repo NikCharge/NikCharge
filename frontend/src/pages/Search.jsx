@@ -35,52 +35,68 @@ const Search = () => {
     const [selectedDateTime, setSelectedDateTime] = useState(null);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const baseRes = await fetch("http://localhost:8080/api/stations");
-                const baseStations = await baseRes.json();
+    const fetchData = async () => {
+        try {
+            const [baseRes, discountRes] = await Promise.all([
+                fetch("http://localhost:8080/api/stations"),
+                fetch("http://localhost:8080/api/discounts")
+            ]);
 
-                const detailedStations = await Promise.all(
-                    baseStations.map(async (station) => {
-                        const datetimeParam = selectedDateTime
-                            ? `?datetime=${encodeURIComponent(dayjs(selectedDateTime).format("YYYY-MM-DDTHH:mm"))}`
-                            : "";
+            const baseStations = await baseRes.json();
+            const allDiscounts = await discountRes.json();
 
-                        const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details${datetimeParam}`);
-                        const details = await detailsRes.json();
+            // Filtrar apenas descontos ativos
+            const activeDiscounts = allDiscounts.filter(d => d.active);
 
-                        let distance = "–";
-                        if (userLocation?.lat && userLocation?.lng) {
-                            distance = calculateDistance(
-                                userLocation.lat,
-                                userLocation.lng,
-                                details.latitude,
-                                details.longitude
-                            );
-                        }
+            const detailedStations = await Promise.all(
+                baseStations.map(async (station) => {
+                    const datetimeParam = selectedDateTime
+                        ? `?datetime=${encodeURIComponent(dayjs(selectedDateTime).format("YYYY-MM-DDTHH:mm"))}`
+                        : "";
 
-                        console.log(`📦 Details for ${station.name}:`, details);
+                    const detailsRes = await fetch(`http://localhost:8080/api/stations/${station.id}/details${datetimeParam}`);
+                    const details = await detailsRes.json();
 
-                        return {
-                            ...details,
-                            imageUrl: station.imageUrl || null,
-                            distance,
-                            availableChargers: details.chargers.length
-                        };
-                    })
-                );
+                    // Match com descontos ativos
+                    const stationDiscounts = activeDiscounts.filter(
+                        d => d.station.id === station.id
+                    );
 
-                console.log("📊 Final detailed stations:", detailedStations);
-                setStations(detailedStations);
-            } catch (error) {
-                console.error("Erro ao buscar estações:", error);
-            }
-        };
+                    // Pegar o maior desconto da estação (se houver)
+                    const maxDiscount = stationDiscounts.length > 0
+                        ? Math.max(...stationDiscounts.map(d => d.discountPercent))
+                        : null;
 
-        if (userLocation?.lat && userLocation?.lng) {
-            fetchData();
+                    let distance = "–";
+                    if (userLocation?.lat && userLocation?.lng) {
+                        distance = calculateDistance(
+                            userLocation.lat,
+                            userLocation.lng,
+                            details.latitude,
+                            details.longitude
+                        );
+                    }
+
+                    return {
+                        ...details,
+                        imageUrl: station.imageUrl || null,
+                        distance,
+                        availableChargers: details.chargers.length,
+                        discount: maxDiscount // novo campo
+                    };
+                })
+            );
+
+            setStations(detailedStations);
+        } catch (error) {
+            console.error("Erro ao buscar estações ou descontos:", error);
         }
-    }, [userLocation, selectedDateTime]); // <- Certifica-te que isto inclui `selectedDateTime`
+    };
+
+    if (userLocation?.lat && userLocation?.lng) {
+        fetchData();
+    }
+}, [userLocation, selectedDateTime]);
 
 
     const filteredStations = useMemo(() => {

@@ -27,10 +27,11 @@
     border: 1px solid #d1d5db;
     border-radius: 50px;
     background: white;
-    cursor: pointer;
+    cursor: text;
     transition: all 0.2s ease;
     font-size: 0.875rem;
 }
+
 
 .filter-input:hover {
     border-color: #059669;
@@ -135,12 +136,29 @@
     }
 }
 
-/* not mind the dark mode */
-#location-input{
+#location-input {
+    flex: 1;
     background-color: transparent;
-    border: 1px solid #d1d5db;
-    color: black;
+    border: none;
+    outline: none;
+    color: #111827;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    transition: all 0.2s ease;
+    min-width: 0;
 }
+
+#location-input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+#location-input:focus {
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2);
+}
+
 
 /* not mind the dark mode */
 #search-button, #gps-button{
