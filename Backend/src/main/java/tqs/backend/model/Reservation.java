@@ -33,6 +33,11 @@ public class Reservation {
     private Double estimatedKwh;
     private BigDecimal estimatedCost;
 
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ChargingSession chargingSession;
+
+    private boolean paid;
+
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 }

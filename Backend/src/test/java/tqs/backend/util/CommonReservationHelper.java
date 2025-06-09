@@ -36,8 +36,9 @@ public class CommonReservationHelper {
     }
 
     public Station createStation(String name, String address, String city) {
-        double lat = 40.0 + (name.hashCode() % 1000) / 10000.0;
-        double lon = -8.0 + (name.hashCode() % 1000) / 10000.0;
+        double lat = 39.0 + Math.random();
+        double lon = -8.0 + Math.random();
+
         Station station = Station.builder()
                 .name(name)
                 .address(address)

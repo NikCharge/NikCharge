@@ -8,6 +8,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import tqs.backend.model.Reservation;
 import tqs.backend.repository.ReservationRepository;
 import tqs.backend.util.CommonReservationHelper;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ContextConfiguration(classes = tqs.backend.stepdefs.CucumberSpringConfiguration.class)
 public class CancelReservationStepDefs {
 
     @LocalServerPort
@@ -43,7 +45,11 @@ public class CancelReservationStepDefs {
 
     @When("the client attempts to cancel the reservation again")
     public void the_client_attempts_to_cancel_the_reservation_again() {
-        the_client_cancels_the_reservation();
+        Reservation reservation = ReservationStepDefs.currentReservation;
+        // This step intentionally attempts to cancel the same reservation again
+        CommonResponseStepDefs.latestResponse = RestAssured.given()
+                .port(port)
+                .delete("/api/reservations/" + reservation.getId());
     }
 
     @Then("the reservation should be deleted from the database")

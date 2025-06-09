@@ -62,7 +62,7 @@ public class ClientController {
         }
     }
 
-        @PostMapping("/login")
+    @PostMapping("/login")
     public ResponseEntity<Object> login(@Valid @RequestBody LoginRequest loginRequest, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             Map<String, String> errors = new HashMap<>();

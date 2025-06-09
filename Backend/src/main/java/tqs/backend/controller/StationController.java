@@ -13,12 +13,10 @@ import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerType;
 import tqs.backend.service.StationService;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.time.LocalDateTime;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/stations")
@@ -86,19 +84,14 @@ public class StationController {
     }
 
     @GetMapping("/{id}/details")
-    public ResponseEntity<Object> getStationDetails(
-            @PathVariable Long id,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime datetime
-    ) {
-        StationDetailsDTO dto = stationService.getStationDetails(id, datetime);
+    public ResponseEntity<Object> getStationDetails(@PathVariable Long id) {
+        StationDetailsDTO dto = stationService.getStationDetails(id, LocalDateTime.now());
         if (dto == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of(ERROR_KEY, "Station not found"));
         }
         return ResponseEntity.ok(dto);
     }
-
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteStation(@PathVariable Long id) {

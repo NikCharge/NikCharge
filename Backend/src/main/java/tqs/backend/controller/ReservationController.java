@@ -71,6 +71,24 @@ public class ReservationController {
         }
     }
 
+    @PutMapping("/{reservationId}/complete")
+    public ResponseEntity<?> completeReservation(@PathVariable Long reservationId) {
+        try {
+            Reservation reservation = reservationService.completeReservation(reservationId);
+            return new ResponseEntity<>(reservation, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            logger.error("Error completing reservation: {}", e.getMessage());
+            if (e.getMessage().equals("Reservation not found")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(ERROR_KEY, e.getMessage()));
+            } else if (e.getMessage().startsWith("Invalid reservation status:")) {
+                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(ERROR_KEY, e.getMessage()));
+            }
+            return handleRuntimeException(e);
+        }
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         logger.error("RuntimeException caught by handler: {}", ex.getMessage());
