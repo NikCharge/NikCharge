@@ -51,7 +51,7 @@ services:
         dockerfile: Dockerfile.frontend
         args:
           NODE_ENV: ${NODE_ENV}
-          REACT_APP_API_BASE_URL: http://backend:8080
+          VITE_APP_API_BASE_URL: /api
       environment:
         - NODE_ENV=${NODE_ENV}
       volumes:
