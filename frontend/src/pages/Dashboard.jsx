@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import "../css/pages/Dashboard.css";
 import Header from "../components/global/Header.jsx";
 import Footer from "../components/global/Footer.jsx";
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_APP_API_BASE_URL || "http://localhost:8080";
 
 import { loadStripe } from '@stripe/stripe-js';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
-
-// Replace with your actual Stripe publishable key
 const stripePromise = loadStripe("pk_test_51RWUWBJljDlkjMrml2SZROtF5FDoF8yoPbmMZshM0yXqZmaXH2YuvDTxCydyyF3a3v88cLxXdytguWJ31TxOaFjb003TsNj7A0");
 
 const Dashboard = () => {
