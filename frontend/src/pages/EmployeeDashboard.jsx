@@ -1,13 +1,14 @@
 // pages/EmployeeDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import Header from '../components/global/Header.jsx';
 import DashboardHeader from '../components/employeeDashboard/DashboardHeader.jsx';
 import StationsGrid from '../components/employeeDashboard/StationsGrid';
 import ChargerModal from '../components/employeeDashboard/ChargerModal.jsx';
 import MaintenanceNoteModal from '../components/employeeDashboard/MaintenanceNoteModal.jsx';
 import Footer from '../components/global/Footer.jsx';
+import AvailableChargersModal from '../components/employeeDashboard/AvailableChargersModal.jsx';
 import '../css/pages/EmployeeDashboard.css';
-import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8080";
 
@@ -42,7 +43,6 @@ const EmployeeDashboard = () => {
         try {
             setLoading(true);
             setError(null);
-
             const response = await axios.get(`${API_BASE_URL}/api/stations`);
             setStations(response.data);
         } catch (err) {
@@ -99,21 +99,10 @@ const EmployeeDashboard = () => {
                 await fetchChargers(selectedStation.id);
             }
         } catch (err) {
-            const errorMessage = err.response?.data?.error || err.message || 'Unknown error';
             console.error('Error marking charger under maintenance:', err);
+            const errorMessage = err.response?.data?.error || err.message || 'Unknown error';
             alert(`Failed to mark charger under maintenance: ${errorMessage}`);
         }
-    };
-
-    const handleCloseChargerModal = () => {
-        setShowChargerModal(false);
-        setSelectedStation(null);
-        setChargers([]);
-    };
-
-    const handleCloseMaintenanceNoteModal = () => {
-        setShowMaintenanceNoteModal(false);
-        setChargerIdForMaintenance(null);
     };
 
     const handleMarkAvailable = async (chargerId) => {
@@ -126,10 +115,36 @@ const EmployeeDashboard = () => {
                 await fetchChargers(selectedStation.id);
             }
         } catch (err) {
-            const errorMessage = err.response?.data?.error || err.message || 'Unknown error';
             console.error('Error marking charger as available:', err);
+            const errorMessage = err.response?.data?.error || err.message || 'Unknown error';
             alert(`Failed to mark charger as available: ${errorMessage}`);
         }
+    };
+
+    const handleDeleteCharger = async (chargerId) => {
+        if (window.confirm('Are you sure you want to delete this charger?')) {
+            try {
+                await axios.delete(`${API_BASE_URL}/api/chargers/${chargerId}`);
+                if (selectedStation) {
+                    await fetchChargers(selectedStation.id);
+                }
+                await fetchStatistics();
+            } catch (err) {
+                console.error('Error deleting charger:', err);
+                alert('Failed to delete charger. Please try again.');
+            }
+        }
+    };
+
+    const handleCloseChargerModal = () => {
+        setShowChargerModal(false);
+        setSelectedStation(null);
+        setChargers([]);
+    };
+
+    const handleCloseMaintenanceNoteModal = () => {
+        setShowMaintenanceNoteModal(false);
+        setChargerIdForMaintenance(null);
     };
 
     useEffect(() => {
@@ -152,22 +167,7 @@ const EmployeeDashboard = () => {
         fetchStations();
     };
 
-    const handleDeleteCharger = async (chargerId) => {
-        if (window.confirm('Are you sure you want to delete this charger?')) {
-            try {
-                await axios.delete(`${API_BASE_URL}/api/chargers/${chargerId}`);
-
-                if (selectedStation) {
-                    await fetchChargers(selectedStation.id);
-                }
-
-                await fetchStatistics();
-            } catch (err) {
-                console.error('Error deleting charger:', err);
-                alert('Failed to delete charger. Please try again.');
-            }
-        }
-    };
+    
     return (
         <div className="employee-dashboard-page">
             <Header />
