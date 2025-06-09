@@ -12,4 +12,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     
     @Query("SELECT r FROM Reservation r JOIN FETCH r.charger c JOIN FETCH c.station WHERE r.user.id = :userId")
     List<Reservation> findByUserId(Long userId);
+
+    List<Reservation> findByStartTimeLessThanEqualAndEstimatedEndTimeAfter(LocalDateTime startTime, LocalDateTime endTime);
+
+    boolean existsByChargerIdAndEstimatedEndTimeAfterAndStartTimeLessThanEqual(Long chargerId, LocalDateTime startTime, LocalDateTime endTime);
 }

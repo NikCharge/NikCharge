@@ -13,6 +13,7 @@ import tqs.backend.model.Station;
 import tqs.backend.model.enums.ChargerType;
 import tqs.backend.service.StationService;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,9 +85,8 @@ public class StationController {
 
     @GetMapping("/{id}/details")
     public ResponseEntity<Object> getStationDetails(@PathVariable Long id) {
-        StationDetailsDTO dto = stationService.getStationDetails(id);
+        StationDetailsDTO dto = stationService.getStationDetails(id, LocalDateTime.now());
         if (dto == null) {
-            // Usar ERROR_KEY em vez de literal "error"
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of(ERROR_KEY, "Station not found"));
         }
