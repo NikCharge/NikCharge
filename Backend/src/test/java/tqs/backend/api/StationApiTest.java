@@ -252,9 +252,9 @@ class StationApiTest {
 
 
 
-        @Test
-        @DisplayName("GET /api/stations/{id}/details - Station not found returns 404")
-        void getStationDetails_NonExistingStation_ReturnsNotFound() {
+    @Test
+    @DisplayName("GET /api/stations/{id}/details - Station not found returns 404")
+    void getStationDetails_NonExistingStation_ReturnsNotFound() {
         long nonExistingId = 999999L;
 
         given()
@@ -262,10 +262,11 @@ class StationApiTest {
                 .get("/api/stations/" + nonExistingId + "/details")
                 .then()
                 .statusCode(404)
-                .body("error", equalTo("Station not found")); // cobre Map.of(ERROR_KEY, ...)
-        }
+                .body("error", equalTo("Station not found"));
+    }
 
-        @Test
+
+    @Test
         @DisplayName("GET /api/stations/search - Shows discount tag when active")
         void searchStations_WithActiveDiscount_ShowsDiscountTag() {
         // Criar estação
