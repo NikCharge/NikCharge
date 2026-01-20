@@ -53,5 +53,17 @@ docker-compose up --build
 - User Documentation: See /documentation for requirements and design documentation.
 - Jira SCRUM Boards: https://nikcharge.atlassian.net/jira/software/projects/SCRUM/boards/1
 
-## Post-Presentation Changes
-After the initial project presentation, the latest pushes primarily addressed bug fixes in the payment system to ensure a smoother and more reliable checkout experience. There were multiple merges from the fix-payment-bug branch into the main develop branch to consolidate these improvements. Additional enhancements were made to the dashboard interface and functionality, as well as production fixes, including adjustments to the Nginx configuration for better deployment stability. Updates were also applied to the employee module, further refining operational workflows and system reliability.
+## Authors
+
+- **Ana Rita Silva** – Product Owner  
+  ([GitHub](https://github.com/Rita-Silva04))
+
+- **Ângela Ribeiro** – QA Engineer  
+  ([GitHub](https://github.com/angelammaribeiro))
+
+- **Hugo Castro** – Team Leader  
+  ([GitHub](https://github.com/hujuc))
+
+- **Carolina Silva** – DevOps Engineer  
+  ([GitHub](https://github.com/carolinaspsilva2004))
+
