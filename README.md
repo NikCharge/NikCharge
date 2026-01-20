@@ -55,15 +55,7 @@ docker-compose up --build
 
 ## Authors
 
-- **Ana Rita Silva** – Product Owner  
-  ([GitHub](https://github.com/Rita-Silva04))
-
-- **Ângela Ribeiro** – QA Engineer  
-  ([GitHub](https://github.com/angelammaribeiro))
-
-- **Hugo Castro** – Team Leader  
-  ([GitHub](https://github.com/hujuc))
-
-- **Carolina Silva** – DevOps Engineer  
-  ([GitHub](https://github.com/carolinaspsilva2004))
-
+- **[Ana Rita Silva](https://github.com/Rita-Silva04)** – Product Owner  
+- **[Ângela Ribeiro](https://github.com/angelammaribeiro)** – QA Engineer  
+- **[Hugo Castro](https://github.com/hujuc)** – Team Leader  
+- **[Carolina Silva](https://github.com/carolinaspsilva2004)** – DevOps Engineer  
