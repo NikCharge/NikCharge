@@ -2,6 +2,9 @@
 
 NikCharge is a web platform designed to streamline and optimize the electric vehicle (EV) charging experience for drivers, station employees, and station managers. It unifies station discovery, real-time availability, reservations, payment processing, and operational management into a single, user-friendly solution.
 
+## Evaluation
+- **Final Grade:** **16 / 20**
+
 ## Features
 - Station Search & Real-Time Availability: Find and filter charging stations by location, charger type, and price, with up-to-date availability.
 - Reservation System: Secure charging spots in advance with clear time slots and instant confirmation.
